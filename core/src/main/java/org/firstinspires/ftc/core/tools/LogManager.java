@@ -65,10 +65,12 @@ public class LogManager implements Configurable {
     // Persistence
     Map<Target,StringBuilder>       mErrors;
     Map<Target,StringBuilder>       mWarnings;
+    Map<Target,Map<String,String>>  mMetrics;
+
+    // Temporary
     Map<Target,StringBuilder>       mInfos;
     Map<Target,StringBuilder>       mDebugs;
     Map<Target,StringBuilder>       mTraces;
-    Map<Target,Map<String,String>>  mMetrics;
 
     /**
      * Builds a log manager from parameters
@@ -130,24 +132,24 @@ public class LogManager implements Configurable {
         return mConfigurationValid;
     }
 
-    public String   logConfiguration() {
+    public String  logConfiguration() {
 
         String result = "<li style=\"padding-left:10px;font-size:" +
                 sMetricFontSize +
                 "px\"> " +
                 sDriverStationKey +
-                ((mDriverStation == null) ? "false" : "true") +
+                ((mDriverStation == null) ? " : false" : " : true") +
                 "</li>" +
                 "<li style=\"padding-left:10px;font-size:" +
                 sMetricFontSize +
                 "px\"> " +
                 sDashboardKey +
-                ((mDashboard == null) ? "false" : "true") +
+                ((mDashboard == null) ? " : false" : " : true") +
                 "</li>" +
                 "<li style=\"padding-left:10px;font-size:" +
                 sMetricFontSize +
                 "px\"> " +
-                sFilenameKey +
+                sFilenameKey + " : " +
                 ((mFile == null) ? "" : mFilename) +
                 "</li>";
 
@@ -338,6 +340,9 @@ public class LogManager implements Configurable {
             for (Map.Entry<String, String> metric : Objects.requireNonNull(mMetrics.get(target)).entrySet()) {
                 mDriverStation.addLine(metric.getKey() + " : " + metric.getValue());
             }
+            mDriverStation.addLine("---------- INFOS ----------");
+            mDriverStation.addLine(Objects.requireNonNull(mInfos.get(Target.DRIVER_STATION)).toString());
+
 
         } else if (target == Target.DASHBOARD && mDashboard != null) {
             StringBuilder persistent = new StringBuilder();
@@ -378,15 +383,24 @@ public class LogManager implements Configurable {
             persistent.append("</ul>\n");
             persistent.append("</details>\n");
 
+            persistent.append("<details open>\n");
+            persistent.append("<summary style=\"font-size:");
+            persistent.append(sEntryFontSize);
+            persistent.append("px; font-weight: 500\"> INFOS </summary>\n");
+            persistent.append("<ul>\n");
+            persistent.append(Objects.requireNonNull(mInfos.get(Target.DASHBOARD)));
+            persistent.append("</ul>\n");
+            persistent.append("</details>\n");
+
             mDashboard.getTelemetry().addLine(persistent.toString());
         }
     }
 
     public void raw(Target target, String raw) {
         if (target == Target.DRIVER_STATION && mDriverStation != null) {
-            mDriverStation.addLine(raw);
+            Objects.requireNonNull(mInfos.get(target)).append(raw);
         } else if (target == Target.DASHBOARD && mDashboard != null) {
-            mDashboard.getTelemetry().addLine(raw);
+            Objects.requireNonNull(mInfos.get(target)).append(raw);
         } else if (target == Target.FILE && mFile != null) {
             mFile.info(raw);
         }
@@ -427,6 +441,10 @@ public class LogManager implements Configurable {
         } else if (target == Target.DASHBOARD && mDashboard != null) {
             mDashboard.getTelemetry().clear();
         }
+        mInfos.put(target,new StringBuilder());
+        mDebugs.put(target,new StringBuilder());
+        mTraces.put(target,new StringBuilder());
+
     }
 
     /**
@@ -615,21 +633,26 @@ public class LogManager implements Configurable {
         switch(target) {
             case DASHBOARD:
                 if(mDashboard != null) {
-                    String content = "<p style=\"color: black; margin-left:30px; list-style-type: square; font-size: " +
-                            sInfoFontSize +
-                            "px\">" +
-                            element.getFileName() +
-                            ":" +
-                            element.getLineNumber() +
-                            " - " +
-                            message +
-                            "</p>";
-                    mDashboard.getTelemetry().addLine(content);
+                    Objects.requireNonNull(mInfos.get(target))
+                            .append("<p style=\"color: black; margin-left:30px; list-style-type: square; font-size: " )
+                            .append(sInfoFontSize)
+                            .append("px\">")
+                            .append(element.getFileName())
+                            .append(element.getLineNumber())
+                            .append(" - ")
+                            .append(message)
+                            .append("</p>");
                 }
                 break;
             case DRIVER_STATION:
                 if(mDriverStation != null) {
-                    mDriverStation.addLine(message);
+                    Objects.requireNonNull(mInfos.get(target))
+                            .append(element.getFileName())
+                            .append(":")
+                            .append(element.getLineNumber())
+                            .append(" - info - ")
+                            .append(message)
+                            .append("\n");
                 }
                 break;
             case FILE :

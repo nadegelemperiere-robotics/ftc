@@ -21,6 +21,8 @@ import org.firstinspires.ftc.core.tools.LogManager;
 public class TeleOpMode extends OpMode {
 
     LogManager          mLogger;
+
+    SeasonConfiguration  mConfiguration;
     
     @Override
     public void init(){
@@ -29,6 +31,15 @@ public class TeleOpMode extends OpMode {
 
             // Log initialization
             mLogger = new LogManager(telemetry, FtcDashboard.getInstance(),"teleop");
+            mLogger.clear();
+
+            // Configuration initialization
+            mConfiguration = new SeasonConfiguration(mLogger);
+            mConfiguration.register("logging",mLogger);
+            mConfiguration.read();
+            mConfiguration.log();
+            
+            mLogger.update();
 
         }
         catch(Exception e){
@@ -42,7 +53,6 @@ public class TeleOpMode extends OpMode {
         try {
 
             mLogger.clear();
-            mLogger.error("error");
             mLogger.update();
             
 

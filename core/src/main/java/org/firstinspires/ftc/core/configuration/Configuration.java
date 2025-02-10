@@ -37,7 +37,7 @@ import org.firstinspires.ftc.core.tools.LogManager;
 public class Configuration {
 
     // Default working configuration
-    static public final String  sDefaultConfiguration = "v0";
+    static protected final String  sDefaultConfiguration = "";
 
     // Status
     boolean                     mIsValid;
@@ -48,7 +48,6 @@ public class Configuration {
     // Loggers
     LogManager                  mLogger;
     String                      mFilename;
-
 
     /**
      * Configuration constructor
