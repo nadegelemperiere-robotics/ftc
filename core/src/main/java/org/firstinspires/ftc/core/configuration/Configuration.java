@@ -197,7 +197,7 @@ public class Configuration {
                                 if (!(temp instanceof JSONObject)) {  throw new RuntimeException(); }
                                 data = temp;
                             } else {
-
+                                if (!(temp instanceof JSONArray)) {  throw new RuntimeException(); }
                                 JSONArray array = ((JSONArray) temp);
 
                                 for (int i_index = 0; i_index < (indexes.size() - 1); i_index++) {
@@ -216,7 +216,7 @@ public class Configuration {
                                     }
 
                                     temp = array.get(indexes.get(indexes.size() - 1));
-                                    data = ((JSONObject) temp);
+                                    data = temp;
                                 }
                             }
                         }
@@ -252,13 +252,15 @@ public class Configuration {
         // Loop into configurable to write their configuration
         for (Map.Entry<String, Configurable> configurable : mConfigRegistry.entrySet()) {
 
-            confstring.append("-------------------------\n");
-            confstring.append("<details>\n");
-            confstring.append("<summary style=\"font-size: 12px; font-weight: 500\"> " + configurable.getKey().toUpperCase() + " </summary>\n");
-            confstring.append("<ul>\n");
-            confstring.append(configurable.getValue().logConfiguration());
-            confstring.append("</ul>\n");
-            confstring.append("</details>\n");
+            confstring.append("-------------------------\n")
+                      .append("<details>\n")
+                      .append("<summary style=\"font-size: 12px; font-weight: 500\"> ")
+                      .append(configurable.getKey().toUpperCase())
+                      .append(" </summary>\n")
+                      .append("<ul>\n")
+                      .append(configurable.getValue().logConfiguration())
+                      .append("</ul>\n")
+                      .append("</details>\n");
 
         }
 

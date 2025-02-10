@@ -38,7 +38,8 @@ public class TeleOpMode extends OpMode {
             mConfiguration.register("logging",mLogger);
             mConfiguration.read();
             mConfiguration.log();
-            
+
+            mLogger.error("error");
             mLogger.update();
 
         }
@@ -52,7 +53,7 @@ public class TeleOpMode extends OpMode {
 
         try {
 
-            mLogger.clear();
+            mLogger.info("" + this.time);
             mLogger.update();
             
 

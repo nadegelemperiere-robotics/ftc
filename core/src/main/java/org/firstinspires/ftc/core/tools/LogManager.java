@@ -100,7 +100,7 @@ public class LogManager implements Configurable {
 
         mDriverStation = station;
         if(mDriverStation != null) {
-            mDriverStation.setAutoClear(false);
+            mDriverStation.setAutoClear(true);
         }
 
         mDashboard = dashboard;
@@ -419,6 +419,9 @@ public class LogManager implements Configurable {
             this.write(target);
             mDashboard.getTelemetry().update();
         }
+        mInfos.put(target,new StringBuilder());
+        mDebugs.put(target,new StringBuilder());
+        mTraces.put(target,new StringBuilder());
     }
 
     /**
@@ -441,9 +444,6 @@ public class LogManager implements Configurable {
         } else if (target == Target.DASHBOARD && mDashboard != null) {
             mDashboard.getTelemetry().clear();
         }
-        mInfos.put(target,new StringBuilder());
-        mDebugs.put(target,new StringBuilder());
-        mTraces.put(target,new StringBuilder());
 
     }
 
