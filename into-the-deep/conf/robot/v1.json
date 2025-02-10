@@ -1,0 +1,37 @@
+{
+    "logging"   : { "filename" : "v1", "driver-station" : true, "dashboard" : true },
+    "subsystems" : {
+        "chassis"   : {
+            "wheels" : {
+                "front-left-wheel":  [ { "hwmap": "frontLeft" } ],
+                "front-right-wheel": [ { "hwmap": "frontRight", "direction": "reverse" } ],
+                "back-left-wheel":   [ { "hwmap": "backLeft" } ],
+                "back-right-wheel":  [ { "hwmap": "backRight",  "direction": "reverse" } ]
+            },
+            "odometer" : {
+                "type" : "otos",
+                "hwmap": "sensor_otos",
+                "heading-offset" : 0.03,
+                "x-offset" : 0.4566,
+                "y-offset" : -3.5984,
+                "heading-ratio" : 0.9964,
+                "position-ratio" : 1.0
+            },
+            "follower" : {
+                "type" : "roadrunner",
+                "feedforward": { "kS": 0.637, "kv": 0.202, "ka": 0.05 },
+                "in-per-tick" : 1,
+                "lateral-in-per-tick" : 0.712 ,
+                "track-width-tick" : 15.134752358682695,
+                "max-wheel-velocity" : 50,
+                "min-profile-acceleration" : -30,
+                "max-profile-acceleration" : 50,
+                "max-angular-velocity" : 3.1415927,
+                "max-angular-acceleration" : 3.1415927,
+                "x-gain" : {"position" : 4.0, "velocity" : 0.0},
+                "y-gain" : {"position" : 4.0, "velocity" : 0.0},
+                "heading-gain" : {"position" : 4.0, "velocity" : 0.0}
+            }
+        }
+    }
+}

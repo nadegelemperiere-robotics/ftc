@@ -5,7 +5,7 @@
    Logging manager tests
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core;
+package org.firstinspires.ftc.core.opmodes;
 
 /* Qualcomm includes */
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;

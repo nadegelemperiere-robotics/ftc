@@ -1,0 +1,16 @@
+[
+    { "filename" : "test", "driver-station" : true, "dashboard" : true },
+    { "filename" : "test", "driver-station" : false, "dashboard" : true },
+    { "filename" : "test", "driver-station" : false, "dashboard" : false },
+    { "filename" : "test", "driver-station" : false, "dashboard" : false },
+    { "filename" : "", "driver-station" : true, "dashboard" : true },
+    { "filename" : "", "driver-station" : false, "dashboard" : true },
+    { "filename" : "", "driver-station" : false, "dashboard" : false },
+    { "filename" : "", "driver-station" : false, "dashboard" : false },
+    { "filename" : "test", "driver-station" : true },
+    { "filename" : "test", "dashboard" : true },
+    { "driver-station" : true, "dashboard" : true },
+    { "dashboard" : true, "driver-station" : true },
+    { "driver-station" : true },
+    { "dashboard" : true }
+]
