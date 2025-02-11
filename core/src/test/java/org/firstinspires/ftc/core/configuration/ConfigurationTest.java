@@ -66,7 +66,7 @@ public class ConfigurationTest {
         mConfiguration.register("data1", config3);
         mConfiguration.register("data2.data1[0]", config4);
 
-        mConfiguration.read(getClass().getClassLoader().getResource("data/configuration/valid-test-1.json").getFile());
+        mConfiguration.read(getClass().getClassLoader().getResource("data/" + this.getClass().getSimpleName() + "/valid-test-1.json").getFile());
 
         assertTrue(mConfiguration.isValid(), "Configuration is invalid");
 
@@ -103,7 +103,7 @@ public class ConfigurationTest {
         mConfiguration.register("data2.data2[0]", config5);
         mConfiguration.register("array1[1][1]", config6);
 
-        mConfiguration.read(getClass().getClassLoader().getResource("data/configuration/valid-test-1.json").getFile());
+        mConfiguration.read(getClass().getClassLoader().getResource("data/" + this.getClass().getSimpleName() + "/valid-test-1.json").getFile());
 
         assertFalse(mConfiguration.isValid(), "Configuration valid");
 
@@ -154,7 +154,7 @@ public class ConfigurationTest {
         mConfiguration.register("data2.data2[0]", config9);
         mConfiguration.register("array1[1][1]", config10);
 
-        mConfiguration.read(getClass().getClassLoader().getResource("data/configuration/valid-test-1.json").getFile());
+        mConfiguration.read(getClass().getClassLoader().getResource("data/" + this.getClass().getSimpleName() + "/valid-test-1.json").getFile());
 
         assertFalse(mConfiguration.isValid(), "Configuration is valid");
 
@@ -199,7 +199,7 @@ class ConfigurableTest implements Configurable {
 
     public boolean isConfigured() { return mConfigurationValid; }
 
-    public String logConfiguration() {
+    public String logConfigurationHTML() {
 
         String result = "";
         result += "<li style=\"padding-left:10px;font-size: 13px\"> data1 : " +
@@ -208,6 +208,19 @@ class ConfigurableTest implements Configurable {
         result += "<li style=\"padding-left:10px;font-size: 13px\"> data2 : " +
                 mData2 +
                 "</li>";
+        return result;
+
+    }
+
+    public String logConfigurationText() {
+
+        String result = "";
+        result += "data1 : " +
+                mData1 +
+                "\n";
+        result += "data2 : " +
+                mData2 +
+                "\n";
         return result;
 
     }
