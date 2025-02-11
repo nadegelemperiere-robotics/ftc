@@ -132,7 +132,12 @@ public class LogManager implements Configurable {
         return mConfigurationValid;
     }
 
-    public String  logConfiguration() {
+    /**
+     * Configuration logging into HTML
+     *
+     * @return configuration as html string
+     */
+    public String  logConfigurationHTML() {
 
         String result = "<li style=\"padding-left:10px;font-size:" +
                 sMetricFontSize +
@@ -155,6 +160,25 @@ public class LogManager implements Configurable {
 
         return result;
     }
+    /**
+     * Configuration logging into HTML
+     *
+     * @return configuration as html string
+     */
+    public String  logConfigurationText() {
+
+        String result = sDriverStationKey +
+                ((mDriverStation == null) ? " : false" : " : true") +
+                "\n" +
+                sDashboardKey +
+                ((mDashboard == null) ? " : false" : " : true") +
+                "\n" +
+                sFilenameKey + " : " +
+                ((mFile == null) ? "" : mFilename) +
+                "\n";
+
+        return result;
+    }
 
     /**
      * Reads log manager configuration
@@ -165,22 +189,23 @@ public class LogManager implements Configurable {
 
         mConfigurationValid = true;
 
-        mFile = null;
         if(reader.has(sFilenameKey)) {
             try {
-                mFilename = reader.getString(sFilenameKey);
-                if(!mFilename.isEmpty()) {
-                    mFile = this.initializeFileLogger(mFilename);
+                boolean shallUseFile = reader.getBoolean(sFilenameKey);
+                if(shallUseFile && mFile == null) {
+                    this.warning("File not provided so can't log to file");
+                    mConfigurationValid = false;
                 }
+                if(!shallUseFile) { mFile = null; }
             }
-            catch(JSONException | IOException e) {
+            catch(JSONException  e) {
                 this.error("Error in file logging configuration");
                 mFile = null;
                 mConfigurationValid = false;
             }
         }
+        else { mFile = null; }
 
-        mDriverStation = null;
         if(reader.has(sDriverStationKey)) {
             try {
                 boolean shallUseStation = reader.getBoolean(sDriverStationKey);
@@ -196,8 +221,8 @@ public class LogManager implements Configurable {
                 mConfigurationValid = false;
             }
         }
+        else { mDriverStation = null; }
 
-        mDashboard = null;
         if(reader.has(sDashboardKey)) {
             try {
                 boolean shallUseDashboard = reader.getBoolean(sDashboardKey);
@@ -213,6 +238,7 @@ public class LogManager implements Configurable {
                 mConfigurationValid = false;
             }
         }
+        else { mDashboard = null; }
 
     }
 

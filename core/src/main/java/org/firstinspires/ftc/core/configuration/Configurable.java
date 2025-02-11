@@ -35,10 +35,17 @@ public interface Configurable {
     public boolean isConfigured();
 
     /**
-     * Configuration logging
+     * Configuration logging into HTML
+     *
+     * @return configuration as html string
+     */
+    public String logConfigurationHTML();
+
+    /**
+     * Configuration logging into string
      *
      * @return configuration as string
      */
-    public String logConfiguration();
+    public String logConfigurationText();
 
 }

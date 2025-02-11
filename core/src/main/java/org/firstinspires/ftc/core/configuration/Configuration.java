@@ -37,7 +37,7 @@ import org.firstinspires.ftc.core.tools.LogManager;
 public class Configuration {
 
     // Default working configuration
-    static protected final String  sDefaultConfiguration = "";
+    static protected String     sDefaultConfiguration = "";
 
     // Status
     boolean                     mIsValid;
@@ -110,45 +110,64 @@ public class Configuration {
                 content.append(line);
             }
         }
-        catch(IOException e) { mIsValid = false; }
+        catch(IOException e) {
+            mLogger.error("Configuration file " + filename + " reading failed");
+            mIsValid = false;
+        }
 
         // Parse JSON content
         JSONObject configuration = null;
         try {
             configuration = new JSONObject(content.toString());
         }
-        catch(JSONException e) { mIsValid = false; }
+        catch(JSONException e) {
+            mLogger.error("Configuration file " + filename + " is not json formatted");
+            mIsValid = false;
+        }
 
         if(mIsValid) {
 
             // Loop into configurable to load their configuration
             for (Map.Entry<String, Configurable> configurable : mConfigRegistry.entrySet()) {
 
-                // Split key between keys and indexes
-                String[] keys = configurable.getKey().split("[.\\[\\]]");
-                Object data = configuration;
-                for (String key : keys) {
+                try {
 
-                    try {
-                        if(!key.isEmpty()) {
+                    // Split key between keys and indexes
+                    String[] keys = configurable.getKey().split("[.\\[\\]]");
+                    Object data = configuration;
+                    for (String key : keys) {
 
-                            if (data instanceof JSONObject) { data = ((JSONObject) data).get(key); }
-                            else if (data instanceof JSONArray) {
+                        if (!key.isEmpty()) {
+
+                            if (data instanceof JSONObject) {
+                                data = ((JSONObject) data).get(key);
+                            } else if (data instanceof JSONArray) {
                                 int index = Integer.parseInt(key);
                                 data = ((JSONArray) data).get(index);
                             }
                         }
-                    }
-                    catch(JSONException | NumberFormatException e ) { mIsValid = false; }
-                }
 
-                if (data instanceof JSONObject) { configurable.getValue().read((JSONObject) data); }
-                else { mIsValid = false; }
+                    }
+
+                    if (data instanceof JSONObject) {
+                        configurable.getValue().read((JSONObject) data);
+                    } else {
+                        mLogger.error("Target key " + configurable.getKey() + " does not lead to an object" );
+                        mIsValid = false;
+                    }
+                }
+                catch (JSONException | NumberFormatException e) {
+                    mLogger.error("Configuration " + configurable.getKey() + " can not be read" );
+                    mIsValid = false;
+                }
             }
 
         }
         for (Map.Entry<String, Configurable> configurable : mConfigRegistry.entrySet()) {
-            if(!configurable.getValue().isConfigured()) { mIsValid = false; }
+            if(!configurable.getValue().isConfigured()) {
+                mLogger.error("Configuration " + configurable.getKey() + " is not valid" );
+                mIsValid = false;
+            }
         }
     }
 
@@ -223,7 +242,7 @@ public class Configuration {
                     }
                     configurable.getValue().write((JSONObject) data);
                 } catch (RuntimeException | JSONException e) {
-                    mLogger.error("Error formatting configuration");
+                    mLogger.error("Configuration formatting failed");
                 }
             }
         }
@@ -240,14 +259,27 @@ public class Configuration {
 
     public void log() {
 
-        StringBuilder confstring = new StringBuilder();
+        // Log to driver station
+        if(mIsValid) {
+            mLogger.raw(LogManager.Target.DRIVER_STATION, "CNF " + mFilename + " is valid");
+        }
+        else {
+            mLogger.raw(LogManager.Target.DRIVER_STATION, "CNF " + mFilename + " is not valid");
+        }
 
+        // Log to dashboard
+        StringBuilder confstring = new StringBuilder();
         confstring.append("-------------------------\n");
-        mLogger.raw(LogManager.Target.DRIVER_STATION, "CNF " + mFilename + " is valid");
+        if(mIsValid) {
             confstring.append("<p style=\"color: green; font-size: 14px\"> Conf ")
                     .append(mFilename)
                     .append(" is valid</p>");
-
+        }
+        else {
+            confstring.append("<p style=\"color: red; font-size: 14px\"> Conf ")
+                    .append(mFilename)
+                    .append(" is not valid</p>");
+        }
 
         // Loop into configurable to write their configuration
         for (Map.Entry<String, Configurable> configurable : mConfigRegistry.entrySet()) {
@@ -258,13 +290,37 @@ public class Configuration {
                       .append(configurable.getKey().toUpperCase())
                       .append(" </summary>\n")
                       .append("<ul>\n")
-                      .append(configurable.getValue().logConfiguration())
+                      .append(configurable.getValue().logConfigurationHTML())
                       .append("</ul>\n")
                       .append("</details>\n");
 
         }
 
         mLogger.raw(LogManager.Target.DASHBOARD,confstring.toString());
+
+        // Log to file
+        confstring = new StringBuilder();
+        confstring.append("\n-------------------------\n");
+        if(mIsValid) {
+            confstring.append(mFilename)
+                    .append(" is valid\n");
+        }
+        else {
+            confstring.append(mFilename)
+                    .append(" is not valid\n");
+        }
+        // Loop into configurable to write their configuration
+        for (Map.Entry<String, Configurable> configurable : mConfigRegistry.entrySet()) {
+
+            confstring.append("-------------------------\n")
+                    .append(configurable.getKey().toUpperCase())
+                    .append("\n")
+                    .append(configurable.getValue().logConfigurationText())
+                    .append("\n");
+
+        }
+
+        mLogger.raw(LogManager.Target.FILE,confstring.toString());
     }
 
     private static String getRawFilename(String filename) {

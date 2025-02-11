@@ -16,8 +16,9 @@ import org.firstinspires.ftc.core.configuration.Configuration;
 
 public class SeasonConfiguration extends Configuration {
 
-    // Default working configuration
-    static public final String  sDefaultConfiguration = "v1";
+    static {
+        sDefaultConfiguration = "v1";
+    }
 
     /**
      * Configuration constructor
@@ -26,6 +27,7 @@ public class SeasonConfiguration extends Configuration {
      */
     public SeasonConfiguration(LogManager logger) {
         super(logger);
+        
     }
 
 }
