@@ -37,17 +37,38 @@ import org.firstinspires.ftc.core.tools.LogManager;
 public class Configuration {
 
     // Default working configuration
-    static protected String     sDefaultConfiguration = "";
+    static protected String         sDefaultConfiguration = "";
+    static protected Configuration  sInstance = null;
 
     // Status
-    boolean                     mIsValid;
+    boolean                         mIsValid;
 
     // Registered configurables to read and write configuration
-    Map<String, Configurable>   mConfigRegistry;
+    Map<String, Configurable>       mConfigRegistry;
 
     // Loggers
-    LogManager                  mLogger;
-    String                      mFilename;
+    LogManager                      mLogger;
+    String                          mFilename;
+
+    /**
+     * Configuration singleton access
+     *
+     */
+    public  static  Configuration getInstance() {
+        if(sInstance == null) { sInstance = new Configuration(); }
+        return sInstance;
+    }
+
+    /**
+     * Configuration constructor
+     *
+     */
+    public Configuration() {
+
+        mConfigRegistry = new LinkedHashMap<>();
+        mIsValid        = false;
+
+    }
 
     /**
      * Configuration constructor
@@ -60,6 +81,15 @@ public class Configuration {
         mConfigRegistry = new LinkedHashMap<>();
         mIsValid        = false;
 
+    }
+
+    /**
+     * Configuration logger association
+     *
+     * @param logger logger
+     */
+    public void logger(LogManager logger) {
+        mLogger         = logger;
     }
 
     /**

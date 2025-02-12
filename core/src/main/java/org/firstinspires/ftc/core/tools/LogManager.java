@@ -35,16 +35,55 @@ import org.firstinspires.ftc.core.configuration.Configurable;
 
 public class LogManager implements Configurable {
 
+    static final int  sStackLevel = 3;
+
     public enum Target {
         DRIVER_STATION,
         DASHBOARD,
         FILE
     }
 
+    public enum Severity  {
+        ERROR,
+        WARNING,
+        METRIC,
+        INFO,
+        DEBUG,
+        TRACE
+    }
+
+    private static final Map<String, Severity > sConfToLevel = Map.of(
+            "error",    Severity.ERROR,
+            "warning",  Severity.WARNING,
+            "metric",   Severity.METRIC,
+            "info",     Severity.INFO,
+            "debug",    Severity.DEBUG,
+            "trace",    Severity.TRACE
+    );
+
+    private static final Map<Severity , String > sLevelToConf = Map.of(
+            Severity.ERROR,    "error",
+            Severity.WARNING,  "warning",
+            Severity.METRIC,   "metric",
+            Severity.INFO,     "info",
+            Severity.DEBUG,    "debug",
+            Severity.TRACE,    "trace"
+    );
+
+    private static final Map<Severity , Integer> sLevelToPriority = Map.of(
+            Severity.ERROR,    0,
+            Severity.WARNING,  1,
+            Severity.METRIC,   2,
+            Severity.INFO,     3,
+            Severity.DEBUG,    4,
+            Severity.TRACE,    5
+    );
+
     // Json keys
     static  final   String          sFilenameKey       = "filename";
     static  final   String          sDriverStationKey  = "driver-station";
     static  final   String          sDashboardKey      = "dashboard";
+    static  final   String          sLevelKey          = "level";
 
     // Formatting
     static  final   int             sErrorFontSize   = 14;
@@ -55,6 +94,7 @@ public class LogManager implements Configurable {
 
     // Status
     boolean                         mConfigurationValid;
+    Severity                        mLevel;
     
     // Loggers
     Telemetry                       mDriverStation;
@@ -82,6 +122,7 @@ public class LogManager implements Configurable {
     public LogManager(Telemetry station, FtcDashboard dashboard, String filename) {
         
         mConfigurationValid = true;
+        mLevel = Severity.TRACE;
 
         mErrors   = new LinkedHashMap<>();
         mWarnings = new LinkedHashMap<>();
@@ -124,6 +165,13 @@ public class LogManager implements Configurable {
     }
 
     /**
+     * Minimal level setter
+     *
+     * @param level minimal severity to log
+     */
+    public void level(Severity level) { mLevel = level; }
+
+    /**
      * Configuration checking
      *
      * @return true if object is correctly configured, false otherwise
@@ -156,6 +204,12 @@ public class LogManager implements Configurable {
                 "px\"> " +
                 sFilenameKey + " : " +
                 ((mFile == null) ? "" : mFilename) +
+                "</li>" +
+                "<li style=\"padding-left:10px;font-size:" +
+                sMetricFontSize +
+                "px\"> " +
+                sLevelKey + " : " +
+                sLevelToConf.get(mLevel) +
                 "</li>";
 
         return result;
@@ -175,6 +229,9 @@ public class LogManager implements Configurable {
                 "\n" +
                 sFilenameKey + " : " +
                 ((mFile == null) ? "" : mFilename) +
+                "\n" +
+                sLevelKey + " : " +
+                sLevelToConf.get(mLevel) +
                 "\n";
 
         return result;
@@ -240,6 +297,21 @@ public class LogManager implements Configurable {
         }
         else { mDashboard = null; }
 
+        if(reader.has(sLevelKey)) {
+            try {
+                String level = reader.getString(sLevelKey);
+                if(sConfToLevel.containsKey(level)) {
+                    mLevel = sConfToLevel.get(level);
+                }
+                else { this.warning("Level " + level + " is not managed"); }
+            }
+            catch(JSONException e) {
+                this.error("Error in dashboard logging configuration");
+                mDashboard = null;
+                mConfigurationValid = false;
+            }
+        }
+
     }
 
     /**
@@ -272,7 +344,7 @@ public class LogManager implements Configurable {
      * @param message the error message
      */
     public void error(Target target, String message) {
-        this.error(target,message,4);
+        this.error(target, message, sStackLevel);
     }
 
     /**
@@ -282,7 +354,7 @@ public class LogManager implements Configurable {
      */
     public void error(String message) {
         for(Target target : Target.values()) {
-            this.error(target,message,4);
+            this.error(target, message, sStackLevel);
         }
     }
 
@@ -293,7 +365,7 @@ public class LogManager implements Configurable {
      * @param message the warning message
      */
     public void warning(Target target, String message) {
-        this.warning(target,message,4);
+        this.warning(target, message, sStackLevel);
     }
 
     /**
@@ -303,7 +375,19 @@ public class LogManager implements Configurable {
      */
     public void warning(String message) {
         for(Target target : Target.values()) {
-            this.warning(target,message,4);
+            this.warning(target, message, sStackLevel);
+        }
+    }
+
+    /**
+     * Add a metric to all log sinks
+     *
+     * @param metric the metric topic
+     * @param value the metric value
+     */
+    public void metric(String metric, String value) {
+        for(Target target : Target.values()) {
+            this.metric(target, metric, value, sStackLevel);
         }
     }
 
@@ -315,7 +399,7 @@ public class LogManager implements Configurable {
      * @param value the metric value
      */
     public void metric(Target target, String metric, String value) {
-        this.metric(target, metric, value, 4);
+        this.metric(target, metric, value, sStackLevel);
     }
 
     /**
@@ -325,7 +409,7 @@ public class LogManager implements Configurable {
      */
     public void info(String message) {
         for(Target target : Target.values()) {
-            this.info(target,message,4);
+            this.info(target, message, sStackLevel);
         }
     }
 
@@ -336,19 +420,49 @@ public class LogManager implements Configurable {
      * @param message the info message
      */
     public void info(Target target, String message) {
-        this.info(target, message, 4);
+        this.info(target, message, sStackLevel);
     }
 
     /**
-     * Add a metric to all log sinks
+     * Add a debug to all log sinks
      *
-     * @param metric the metric topic
-     * @param value the metric value
+     * @param message the debug message
      */
-    public void metric(String metric, String value) {
+    public void debug(String message) {
         for(Target target : Target.values()) {
-            this.metric(target,metric,value,4);
+            this.debug(target, message, sStackLevel);
         }
+    }
+
+    /**
+     * Add a debug to a specific log sink
+     *
+     * @param target the log sink
+     * @param message the debug message
+     */
+    public void debug(Target target, String message) {
+        this.debug(target, message, sStackLevel);
+    }
+
+    /**
+     * Add a trace to all log sinks
+     *
+     * @param message the trace message
+     */
+    public void trace(String message) {
+        for(Target target : Target.values()) {
+            this.trace(target, message, sStackLevel);
+        }
+    }
+
+    /**
+     * Add a trace to a specific log sink
+     *
+     * @param target the log sink
+     * @param message the trace message
+     */
+    public void trace(Target target, String message) {
+        this.trace(target, message, sStackLevel);
     }
 
     /**
@@ -362,12 +476,16 @@ public class LogManager implements Configurable {
             mDriverStation.addLine(Objects.requireNonNull(mErrors.get(Target.DRIVER_STATION)).toString());
             mDriverStation.addLine("--------- WARNINGS ---------");
             mDriverStation.addLine(Objects.requireNonNull(mWarnings.get(Target.DRIVER_STATION)).toString());
-            mDriverStation.addLine("--------- METRICS ---------");
+            mDriverStation.addLine("---------- METRICS ---------");
             for (Map.Entry<String, String> metric : Objects.requireNonNull(mMetrics.get(target)).entrySet()) {
                 mDriverStation.addLine(metric.getKey() + " : " + metric.getValue());
             }
             mDriverStation.addLine("---------- INFOS ----------");
             mDriverStation.addLine(Objects.requireNonNull(mInfos.get(Target.DRIVER_STATION)).toString());
+            mDriverStation.addLine("---------- DEBUGS ---------");
+            mDriverStation.addLine(Objects.requireNonNull(mDebugs.get(Target.DRIVER_STATION)).toString());
+            mDriverStation.addLine("---------- TRACES ----------");
+            mDriverStation.addLine(Objects.requireNonNull(mTraces.get(Target.DRIVER_STATION)).toString());
 
 
         } else if (target == Target.DASHBOARD && mDashboard != null) {
@@ -415,6 +533,24 @@ public class LogManager implements Configurable {
             persistent.append("px; font-weight: 500\"> INFOS </summary>\n");
             persistent.append("<ul>\n");
             persistent.append(Objects.requireNonNull(mInfos.get(Target.DASHBOARD)));
+            persistent.append("</ul>\n");
+            persistent.append("</details>\n");
+
+            persistent.append("<details open>\n");
+            persistent.append("<summary style=\"font-size:");
+            persistent.append(sEntryFontSize);
+            persistent.append("px; font-weight: 500\"> DEBUG </summary>\n");
+            persistent.append("<ul>\n");
+            persistent.append(Objects.requireNonNull(mTraces.get(Target.DASHBOARD)));
+            persistent.append("</ul>\n");
+            persistent.append("</details>\n");
+
+            persistent.append("<details open>\n");
+            persistent.append("<summary style=\"font-size:");
+            persistent.append(sEntryFontSize);
+            persistent.append("px; font-weight: 500\"> TRACES </summary>\n");
+            persistent.append("<ul>\n");
+            persistent.append(Objects.requireNonNull(mTraces.get(Target.DASHBOARD)));
             persistent.append("</ul>\n");
             persistent.append("</details>\n");
 
@@ -526,41 +662,47 @@ public class LogManager implements Configurable {
      * @param source the stack level from which the error was issued
      */
     private void error(Target target, String message, int source) {
-        StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
-        switch(target) {
-            case DASHBOARD:
-                Objects.requireNonNull(mErrors.get(target))
-                        .append("<li style=\"color: red; margin-left:30px; list-style-type: square; font-size: ")
-                        .append(sErrorFontSize)
-                        .append("px\">")
-                        .append(element.getFileName())
-                        .append(":")
-                        .append(element.getLineNumber())
-                        .append(" - error - ")
-                        .append(message)
-                        .append("</li>")
-                        .append("\n");
-                break;
-            case DRIVER_STATION:
-                Objects.requireNonNull(mErrors.get(target))
-                        .append(element.getFileName())
-                        .append(":")
-                        .append(element.getLineNumber())
-                        .append(" - error - ")
-                        .append(message)
-                        .append("\n");
-                break;
-            case FILE :
-                if(mFile != null) {
-                    String local = element.getFileName() +
-                            ":" +
-                            element.getLineNumber() +
-                            " - error - " +
-                            message +
-                            "\n";
-                    mFile.log(Level.SEVERE, local);
-                }
-                break;
+
+        Integer errorPriority = sLevelToPriority.get(Severity.ERROR);
+        Integer filterPriority = sLevelToPriority.get(mLevel);
+        if( filterPriority != null && errorPriority != null && filterPriority >= errorPriority) {
+
+            StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
+            switch (target) {
+                case DASHBOARD:
+                    Objects.requireNonNull(mErrors.get(target))
+                            .append("<li style=\"color: red; margin-left:30px; list-style-type: square; font-size: ")
+                            .append(sErrorFontSize)
+                            .append("px\">")
+                            .append(element.getFileName())
+                            .append(":")
+                            .append(element.getLineNumber())
+                            .append(" - error - ")
+                            .append(message)
+                            .append("</li>")
+                            .append("\n");
+                    break;
+                case DRIVER_STATION:
+                    Objects.requireNonNull(mErrors.get(target))
+                            .append(element.getFileName())
+                            .append(":")
+                            .append(element.getLineNumber())
+                            .append(" - error - ")
+                            .append(message)
+                            .append("\n");
+                    break;
+                case FILE:
+                    if (mFile != null) {
+                        String local = element.getFileName() +
+                                ":" +
+                                element.getLineNumber() +
+                                " - error - " +
+                                message +
+                                "\n";
+                        mFile.log(Level.SEVERE, local);
+                    }
+                    break;
+            }
         }
 
     }
@@ -573,41 +715,47 @@ public class LogManager implements Configurable {
      * @param source the stack level from which the warning was issued
      */
     private void warning(Target target, String message, int source) {
-        StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
-        switch(target) {
-            case DASHBOARD:
-                Objects.requireNonNull(mWarnings.get(target))
-                        .append("<li style=\"color: orange; margin-left:30px; list-style-type: square; font-size: ")
-                        .append(sWarningFontSize)
-                        .append("px\">")
-                        .append(element.getFileName())
-                        .append(":")
-                        .append(element.getLineNumber())
-                        .append(" - ")
-                        .append(message)
-                        .append("</li>")
-                        .append("\n");
-                break;
-            case DRIVER_STATION:
-                Objects.requireNonNull(mWarnings.get(target))
-                        .append(element.getFileName())
-                        .append(":")
-                        .append(element.getLineNumber())
-                        .append(" - warn - ")
-                        .append(message)
-                        .append("\n");
-                break;
-            case FILE :
-                if(mFile != null) {
-                    String local = element.getFileName() +
-                            ":" +
-                            element.getLineNumber() +
-                            " - " +
-                            message +
-                            "\n";
-                    mFile.log(Level.WARNING, local);
-                }
-                break;
+
+        Integer warningPriority = sLevelToPriority.get(Severity.WARNING);
+        Integer filterPriority = sLevelToPriority.get(mLevel);
+        if( filterPriority != null && warningPriority != null && filterPriority >= warningPriority) {
+
+            StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
+            switch (target) {
+                case DASHBOARD:
+                    Objects.requireNonNull(mWarnings.get(target))
+                            .append("<li style=\"color: orange; margin-left:30px; list-style-type: square; font-size: ")
+                            .append(sWarningFontSize)
+                            .append("px\">")
+                            .append(element.getFileName())
+                            .append(":")
+                            .append(element.getLineNumber())
+                            .append(" - ")
+                            .append(message)
+                            .append("</li>")
+                            .append("\n");
+                    break;
+                case DRIVER_STATION:
+                    Objects.requireNonNull(mWarnings.get(target))
+                            .append(element.getFileName())
+                            .append(":")
+                            .append(element.getLineNumber())
+                            .append(" - warn - ")
+                            .append(message)
+                            .append("\n");
+                    break;
+                case FILE:
+                    if (mFile != null) {
+                        String local = element.getFileName() +
+                                ":" +
+                                element.getLineNumber() +
+                                " - " +
+                                message +
+                                "\n";
+                        mFile.log(Level.WARNING, local);
+                    }
+                    break;
+            }
         }
 
     }
@@ -621,29 +769,35 @@ public class LogManager implements Configurable {
      * @param source the stack level from which the metric was issued
      */
     private void metric(Target target, String metric, String value, int source) {
-        StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
-        switch(target) {
-            case DASHBOARD:
-                Objects.requireNonNull(mMetrics.get(target)).put(metric,value);
-                if(mDashboard != null) {
-                    Telemetry.Item data = mDashboard.getTelemetry().addData(metric, value);
-                    //mDashboard.getTelemetry().removeItem(data);
-                }
-                break;
-            case DRIVER_STATION:
-                Objects.requireNonNull(mMetrics.get(target)).put(metric,value);
-                break;
-            case FILE :
-                if(mFile != null) {
-                    String local = element.getFileName() +
-                            ":" +
-                            element.getLineNumber() +
-                            " - metric - " +
-                            metric + " : " + value +
-                            "\n";
-                    mFile.log(Level.INFO, local);
-                }
-                break;
+
+        Integer metricPriority = sLevelToPriority.get(Severity.METRIC);
+        Integer filterPriority = sLevelToPriority.get(mLevel);
+        if( filterPriority != null && metricPriority != null && filterPriority >= metricPriority) {
+
+            StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
+            switch (target) {
+                case DASHBOARD:
+                    Objects.requireNonNull(mMetrics.get(target)).put(metric, value);
+                    if (mDashboard != null) {
+                        Telemetry.Item data = mDashboard.getTelemetry().addData(metric, value);
+                        //mDashboard.getTelemetry().removeItem(data);
+                    }
+                    break;
+                case DRIVER_STATION:
+                    Objects.requireNonNull(mMetrics.get(target)).put(metric, value);
+                    break;
+                case FILE:
+                    if (mFile != null) {
+                        String local = element.getFileName() +
+                                ":" +
+                                element.getLineNumber() +
+                                " - metric - " +
+                                metric + " : " + value +
+                                "\n";
+                        mFile.log(Level.INFO, local);
+                    }
+                    break;
+            }
         }
     }
 
@@ -655,43 +809,157 @@ public class LogManager implements Configurable {
      * @param source the stack level from which the metric was issued
      */
     private void info(Target target, String message, int source) {
-        StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
-        switch(target) {
-            case DASHBOARD:
-                if(mDashboard != null) {
-                    Objects.requireNonNull(mInfos.get(target))
-                            .append("<p style=\"color: black; margin-left:30px; list-style-type: square; font-size: " )
-                            .append(sInfoFontSize)
-                            .append("px\">")
-                            .append(element.getFileName())
-                            .append(element.getLineNumber())
-                            .append(" - ")
-                            .append(message)
-                            .append("</p>");
-                }
-                break;
-            case DRIVER_STATION:
-                if(mDriverStation != null) {
-                    Objects.requireNonNull(mInfos.get(target))
-                            .append(element.getFileName())
-                            .append(":")
-                            .append(element.getLineNumber())
-                            .append(" - info - ")
-                            .append(message)
-                            .append("\n");
-                }
-                break;
-            case FILE :
-                if(mFile != null) {
-                    String local = element.getFileName() +
-                            ":" +
-                            element.getLineNumber() +
-                            " - info - " +
-                            message +
-                            "\n";
-                    mFile.log(Level.INFO, local);
-                }
-                break;
+
+        Integer infoPriority = sLevelToPriority.get(Severity.INFO);
+        Integer filterPriority = sLevelToPriority.get(mLevel);
+        if( filterPriority != null && infoPriority != null && filterPriority >= infoPriority) {
+
+            StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
+            switch (target) {
+                case DASHBOARD:
+                    if (mDashboard != null) {
+                        Objects.requireNonNull(mInfos.get(target))
+                                .append("<p style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
+                                .append(sInfoFontSize)
+                                .append("px\">")
+                                .append(element.getFileName())
+                                .append(element.getLineNumber())
+                                .append(" - ")
+                                .append(message)
+                                .append("</p>");
+                    }
+                    break;
+                case DRIVER_STATION:
+                    if (mDriverStation != null) {
+                        Objects.requireNonNull(mInfos.get(target))
+                                .append(element.getFileName())
+                                .append(":")
+                                .append(element.getLineNumber())
+                                .append(" - info - ")
+                                .append(message)
+                                .append("\n");
+                    }
+                    break;
+                case FILE:
+                    if (mFile != null) {
+                        String local = element.getFileName() +
+                                ":" +
+                                element.getLineNumber() +
+                                " - info - " +
+                                message +
+                                "\n";
+                        mFile.log(Level.INFO, local);
+                    }
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Add a debug to a log sink
+     *
+     * @param target the log sink
+     * @param message the info message
+     * @param source the stack level from which the metric was issued
+     */
+    private void debug(Target target, String message, int source) {
+
+        Integer debugPriority = sLevelToPriority.get(Severity.DEBUG);
+        Integer filterPriority = sLevelToPriority.get(mLevel);
+        if( filterPriority != null && debugPriority != null && filterPriority >= debugPriority) {
+
+            StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
+            switch (target) {
+                case DASHBOARD:
+                    if (mDashboard != null) {
+                        Objects.requireNonNull(mDebugs.get(target))
+                                .append("<p style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
+                                .append(sInfoFontSize)
+                                .append("px\">")
+                                .append(element.getFileName())
+                                .append(element.getLineNumber())
+                                .append(" - ")
+                                .append(message)
+                                .append("</p>");
+                    }
+                    break;
+                case DRIVER_STATION:
+                    if (mDriverStation != null) {
+                        Objects.requireNonNull(mDebugs.get(target))
+                                .append(element.getFileName())
+                                .append(":")
+                                .append(element.getLineNumber())
+                                .append(" - debug - ")
+                                .append(message)
+                                .append("\n");
+                    }
+                    break;
+                case FILE:
+                    if (mFile != null) {
+                        String local = element.getFileName() +
+                                ":" +
+                                element.getLineNumber() +
+                                " - debug - " +
+                                message +
+                                "\n";
+                        mFile.log(Level.INFO, local);
+                    }
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Add a trace to a log sink
+     *
+     * @param target the log sink
+     * @param message the info message
+     * @param source the stack level from which the metric was issued
+     */
+    private void trace(Target target, String message, int source) {
+
+        Integer tracePriority = sLevelToPriority.get(Severity.TRACE);
+        Integer filterPriority = sLevelToPriority.get(mLevel);
+        if( filterPriority != null && tracePriority != null && filterPriority >= tracePriority) {
+
+            StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
+            switch (target) {
+                case DASHBOARD:
+                    if (mDashboard != null) {
+                        Objects.requireNonNull(mTraces.get(target))
+                                .append("<p style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
+                                .append(sInfoFontSize)
+                                .append("px\">")
+                                .append(element.getFileName())
+                                .append(element.getLineNumber())
+                                .append(" - ")
+                                .append(message)
+                                .append("</p>");
+                    }
+                    break;
+                case DRIVER_STATION:
+                    if (mDriverStation != null) {
+                        Objects.requireNonNull(mTraces.get(target))
+                                .append(element.getFileName())
+                                .append(":")
+                                .append(element.getLineNumber())
+                                .append(" - trace - ")
+                                .append(message)
+                                .append("\n");
+                    }
+                    break;
+                case FILE:
+                    if (mFile != null) {
+                        String local = element.getFileName() +
+                                ":" +
+                                element.getLineNumber() +
+                                " - trace - " +
+                                message +
+                                "\n";
+                        mFile.log(Level.INFO, local);
+                    }
+                    break;
+            }
         }
     }
 }

@@ -17,6 +17,9 @@ import com.acmerobotics.dashboard.FtcDashboard;
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
+/* Configuration includes */
+import org.firstinspires.ftc.intothedeep.configuration.SeasonConfiguration;
+
 
 @Autonomous
 public class AutonomousSampleOpMode extends LinearOpMode {
@@ -35,7 +38,10 @@ public class AutonomousSampleOpMode extends LinearOpMode {
             mLogger.clear();
 
             // Configuration initialization
-            mConfiguration = new SeasonConfiguration(mLogger);
+            mConfiguration = SeasonConfiguration.getInstance();
+            mConfiguration.logger(mLogger);
+
+            // Register configurables
             mConfiguration.register("logging",mLogger);
             mConfiguration.read();
             mConfiguration.log();

@@ -17,6 +17,9 @@ import com.acmerobotics.dashboard.FtcDashboard;
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
+/* Configuration includes */
+import org.firstinspires.ftc.intothedeep.configuration.SeasonConfiguration;
+
 @Autonomous
 public class AutonomousSpecimenOpMode extends LinearOpMode {
 
@@ -32,7 +35,10 @@ public class AutonomousSpecimenOpMode extends LinearOpMode {
             mLogger = new LogManager(telemetry, FtcDashboard.getInstance(),"auto-specimen");
 
             // Configuration initialization
-            mConfiguration = new SeasonConfiguration(mLogger);
+            mConfiguration = SeasonConfiguration.getInstance();
+            mConfiguration.logger(mLogger);
+
+            // Register configurables
             mConfiguration.register("logging",mLogger);
             mConfiguration.read();
             mConfiguration.log();

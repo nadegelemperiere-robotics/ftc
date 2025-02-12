@@ -1,37 +1,38 @@
 {
-    "logging"   : { "filename" : true, "driver-station" : true, "dashboard" : true },
-    "subsystems" : {
-        "chassis"   : {
-            "wheels" : {
-                "front-left-wheel":  [ { "hwmap": "frontLeft" } ],
-                "front-right-wheel": [ { "hwmap": "frontRight", "direction": "reverse" } ],
-                "back-left-wheel":   [ { "hwmap": "backLeft" } ],
-                "back-right-wheel":  [ { "hwmap": "backRight",  "direction": "reverse" } ]
-            },
-            "odometer" : {
-                "type" : "otos",
-                "hwmap": "sensor_otos",
-                "heading-offset" : 0.03,
-                "x-offset" : 0.4566,
-                "y-offset" : -3.5984,
-                "heading-ratio" : 0.9964,
-                "position-ratio" : 1.0
-            },
-            "follower" : {
-                "type" : "roadrunner",
-                "feedforward": { "kS": 0.637, "kv": 0.202, "ka": 0.05 },
-                "in-per-tick" : 1,
-                "lateral-in-per-tick" : 0.712 ,
-                "track-width-tick" : 15.134752358682695,
-                "max-wheel-velocity" : 50,
-                "min-profile-acceleration" : -30,
-                "max-profile-acceleration" : 50,
-                "max-angular-velocity" : 3.1415927,
-                "max-angular-acceleration" : 3.1415927,
-                "x-gain" : {"position" : 4.0, "velocity" : 0.0},
-                "y-gain" : {"position" : 4.0, "velocity" : 0.0},
-                "heading-gain" : {"position" : 4.0, "velocity" : 0.0}
+    "logging"   : { "filename" : true, "driver-station" : true, "dashboard" : true, "level" : "info" },
+    "robot"     : {
+        "subsystems" : {
+            "outtake-slides" : {
+                "type" : "default-slides",
+                "motors" : [
+                    { "hwmap": "outtakeSlidesLeft", "direction": "reverse" },
+                    { "hwmap": "outtakeSlidesRight" }
+                ],
+                "positions": {
+                    "min": 0,
+                    "retracted": 1300,
+                    "max": 3726,
+                    "transfer": 0,
+                    "autonomous-sample-ascend" : 710,
+                    "autonomous-specimen-submersible-under" : 690,
+                    "autonomous-specimen-submersible-over" : 870
+                },
+                "powers": {
+                    "set-position": 1.0,
+                    "hold-position": 0.3,
+                    "stop": 0
+                }
             }
         }
-    }
+    },
+    "control"   : [
+
+        { "action" :  "powerOuttakeSlides", "power" : 0.9, "condition" :  {"button" : "left_bumper",  "state" :  "pressedOnce"}},
+        { "action" :  "powerOuttakeSlides", "power" : -0.7, "condition" :  {"button" : "right_bumper",  "state" :  "pressedOnce"}},
+        { "action" :  "powerOuttakeSlides", "power" : 0.0, "condition" :  { "and" : [
+            {"button" : "right_bumper",  "state" :  "notPressed"},
+            {"button" : "left_bumper",  "state" :  "notPressed"}
+        ]}
+
+    ]
 }
