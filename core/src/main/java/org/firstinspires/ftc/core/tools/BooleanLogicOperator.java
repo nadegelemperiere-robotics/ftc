@@ -71,6 +71,8 @@ public class BooleanLogicOperator implements Configurable {
         return mConfigurationValid;
     }
 
+    public void     register(String topic) {}
+
     /**
      * Configuration logging into HTML
      *

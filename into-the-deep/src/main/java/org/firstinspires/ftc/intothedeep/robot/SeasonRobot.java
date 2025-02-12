@@ -17,5 +17,8 @@ import org.firstinspires.ftc.core.robot.Robot;
 
 public class SeasonRobot extends Robot {
 
+    public  SeasonRobot(LogManager logger) {
+        super(logger);
+    }
 
 }

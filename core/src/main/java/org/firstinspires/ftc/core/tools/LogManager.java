@@ -181,6 +181,13 @@ public class LogManager implements Configurable {
     }
 
     /**
+     * Manages registration
+     *
+     * @param topic : topic under which the object wa registered
+     */
+    public void register(String topic) {}
+
+    /**
      * Configuration logging into HTML
      *
      * @return configuration as html string

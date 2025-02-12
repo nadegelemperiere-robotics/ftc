@@ -22,10 +22,6 @@ android {
         jniLibs.useLegacyPackaging true
     }
 
-    sourceSets {
-        main.java.srcDirs += file('../core/src/main/java')
-        main.java.srcDirs += file('../core/src/test/java/org/firstinspires/ftc/core/opmodes')
-    }
 }
 
 repositories {
@@ -37,6 +33,7 @@ repositories {
 
 dependencies {
     implementation project(':FtcRobotController')
+    implementation project(':core')
 
     implementation 'org.apache.commons:commons-math3:3.6.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'

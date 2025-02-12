@@ -14,6 +14,13 @@ import org.json.JSONObject;
 public interface Configurable {
 
     /**
+     * Manages registration
+     *
+     * @param topic : topic under which the object wa registered
+     */
+    public void register(String topic);
+
+    /**
      * Reads configuration from a JSON object
      *
      * @param reader : JSON object containing configuration

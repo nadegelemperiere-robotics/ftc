@@ -62,13 +62,14 @@ public class TeleOpMode extends OpMode {
             mRobot = new SeasonRobot(mLogger);
 
             // Control initialization
-            mControllers = new LinkedHashMap<>();
-            mControllers.put("drive", new Controller(gamepad1, mLogger));
-            mControllers.put("mechanisms", new Controller(gamepad2, mLogger));
-            mControl = new ControlMapper(mControllers, mLogger);
-
-            // Register configurables
-            mConfiguration.register("logging",mLogger);
+//            mControllers = new LinkedHashMap<>();
+//            mControllers.put("1", new Controller(gamepad1, mLogger));
+//            mControllers.put("2", new Controller(gamepad2, mLogger));
+//            mControl = new ControlMapper(mControllers, mConfiguration, mLogger);
+//
+//            // Register configurables
+//            mConfiguration.register("control", mControl);
+//            mConfiguration.register("logging",mLogger);
             mConfiguration.read();
             mConfiguration.log();
 

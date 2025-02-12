@@ -13,7 +13,10 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
-public class Controller {
+/* Configuration includes */
+import org.firstinspires.ftc.core.configuration.Configurable;
+
+public class Controller{
 
     public  static  class     Buttons {
         public Button a;
@@ -60,6 +63,8 @@ public class Controller {
     public  Axes        axes;
 
             LogManager  mLogger;
+
+            boolean     mConfigurationValid;
 
     /**
      * Controller constructor

@@ -1,3 +1,5 @@
 include ':FtcRobotController'
 include ':core'
 include ':into-the-deep'
+include ':test:core'
+include ':test:into-the-deep'

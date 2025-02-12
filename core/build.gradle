@@ -1,36 +1,33 @@
-plugins {
-    id 'com.android.library'
-}
+import java.text.SimpleDateFormat
+
+//
+// build.gradle in FtcRobotController
+//
+apply plugin: 'com.android.library'
 
 android {
-    namespace 'org.firstinspires.ftc.core'
-    compileSdk 30
 
     defaultConfig {
-        minSdk 30
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
+        minSdkVersion 24
+        //noinspection ExpiredTargetSdkVersion
+        targetSdkVersion 28
+        buildConfigField "String", "APP_BUILD_TIME", '"' + (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ROOT).format(new Date())) + '"'
     }
 
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
+    buildFeatures {
+        buildConfig = true
     }
+
+    compileSdkVersion 30
+
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    testOptions {
-        unitTests.all {
-            useJUnitPlatform()
-            jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
-        }
-    }
+    namespace = 'org.firstinspires.ftc.core'
 }
+
+apply from: '../build.dependencies.gradle'
 
 repositories {
     maven {
@@ -47,8 +44,6 @@ repositories {
 
 dependencies {
 
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'com.google.android.material:material:1.12.0'
 
     implementation 'org.apache.commons:commons-math3:3.6.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
@@ -58,13 +53,5 @@ dependencies {
     implementation "page.j5155.roadrunner:ftc-otos:0.1.2+0.1.14"
     implementation 'org.json:json:20250107'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'// Mockito Core
-    testImplementation 'org.mockito:mockito-core:5.4.0'
-    testImplementation 'org.mockito:mockito-junit-jupiter:5.4.0'
-
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 
 }

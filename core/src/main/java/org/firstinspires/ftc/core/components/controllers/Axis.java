@@ -30,6 +30,7 @@ public class Axis {
 
     double      mMultiplier;
     double      mDeadZone;
+    double      mMaximum;
 
     /**
      * Axis constructor
@@ -43,6 +44,7 @@ public class Axis {
         mGamepad    = gamepad;
         mName       = name;
         mMultiplier = 1.0;
+        mMaximum    = 1.0;
         mDeadZone   = 0.0;
     }
 
@@ -59,7 +61,26 @@ public class Axis {
         mGamepad    = gamepad;
         mName       = name;
         mMultiplier = multiplier;
+        mMaximum    = 1.0;
         mDeadZone   = 0.0;
+    }
+
+    /**
+     * Deadzone accessor
+     *
+     * @param deadzone : value under which trigger value should be considered null
+     */
+    public  void    deadzone(double deadzone) {
+        if (deadzone >= 0 && deadzone <= 1.0) { mDeadZone = deadzone; }
+    }
+
+    /**
+     * Maximum accessor
+     *
+     * @param maximum : maximum value of the trigger
+     */
+    public  void    maximum(double maximum) {
+        if (maximum >= 0 && maximum <= 1.0) { mMaximum = maximum; }
     }
 
     /**
@@ -85,7 +106,7 @@ public class Axis {
                     }
                 }
 
-                result = Axis.applyDeadzone(result, mDeadZone);
+                result = Axis.applyDeadzone(result, mDeadZone, mMaximum);
             }
             catch(NoSuchFieldException | NullPointerException | IllegalAccessException e ) {
                 mLogger.error(e.getMessage());
@@ -96,12 +117,12 @@ public class Axis {
         return result;
     }
 
-    private static double applyDeadzone(double value, double deadzone) {
+    private static double applyDeadzone(double value, double deadzone, double maximum) {
         if (Math.abs(value) < deadzone) {
             return 0.0; // Inside deadzone
         }
         // Scale the value to account for the deadzone
-        return ((value - Math.signum(value) * deadzone) / (1.0 - deadzone));
+        return ((value - Math.signum(value) * deadzone) / (1.0 - deadzone) * maximum);
     }
 
 }

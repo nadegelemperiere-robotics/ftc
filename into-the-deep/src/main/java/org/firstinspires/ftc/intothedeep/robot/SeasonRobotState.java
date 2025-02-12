@@ -17,6 +17,9 @@ import org.firstinspires.ftc.core.robot.RobotState;
 
 public class SeasonRobotState extends RobotState {
 
+    public  SeasonRobotState(LogManager logger) {
+       super(logger);
+    }
     void extendOuttakeSlides(double power) {}
     void retractOuttakeSlides(double power) {}
 
