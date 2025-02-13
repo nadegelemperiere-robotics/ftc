@@ -8,14 +8,16 @@
 package org.firstinspires.ftc.core.orchestration.controller;
 
 /* System includes */
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Iterator;
+import java.util.Map;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /* Json includes */
 import org.json.JSONArray;
@@ -116,20 +118,41 @@ public class Command implements Configurable {
         if(reader.has(sActionKey)) {
             try {
                 String action = reader.getString(sActionKey);
-                Method method = mRobot.getClass().getMethod(action);
-                mAction = () -> {
-                    try {
-                        method.invoke(mRobot);
+                if(reader.length() <= 2) {
+                    Method method = mRobot.getClass().getMethod(action);
+                    mAction = () -> {
+                        try {
+                            method.invoke(mRobot);
+                        }
+                        catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ignored) { }
+                    };
+                }
+                else {
+                    Method[] methods = mRobot.getClass().getMethods();
+                    Method temp = null;
+                    for (Method value : methods) {
+                        if (value.getName().equals(action)) {
+                            temp = value;
+                        }
                     }
-                    catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ignored) { }
-                };
+                    Method method = temp;
+                    ParamEvaluator evaluator = new ParamEvaluator(reader, mControllers, mLogger);
+
+                    mAction = () -> {
+                        try {
+                            Object[] parameters = evaluator.evaluate();
+                            method.invoke(mRobot, parameters);
+                        } catch (IllegalAccessException | IllegalArgumentException |
+                                 InvocationTargetException | NullPointerException ignored) {
+                        }
+                    };
+                }
 
             } catch(JSONException | NoSuchMethodException e) {
-                mLogger.error("Error in configuration reading");
+                mLogger.error(e.getMessage());
                 mConfigurationValid = false;
             }
         }
-
     }
 
     /**
@@ -192,8 +215,6 @@ public class Command implements Configurable {
         Condition result = null;
 
         try {
-
-            boolean isVariable = true;
 
             if(object.has("and")) {
                 JSONArray array = object.getJSONArray("and");
@@ -277,14 +298,10 @@ public class Command implements Configurable {
                     if(axis == null) throw new InvalidParameterException("Trigger " + object.getString(sTriggerKey) + " not found in controller axes");
 
                     if(operation.equals("lesserThan")) {
-                        result = new Condition(() -> {
-                            return (((Axis) axis).value() < threshold);
-                        });
+                        result = new Condition(() -> (((Axis) axis).value() < threshold));
                     }
                     else if(operation.equals("greaterThan")) {
-                        result = new Condition(() -> {
-                            return (((Axis) axis).value() > threshold);
-                        });
+                        result = new Condition(() -> (((Axis) axis).value() > threshold));
                     }
                     else throw new InvalidParameterException("Unmanged operation " + operation);
                 }
@@ -297,6 +314,93 @@ public class Command implements Configurable {
 
 
         return result;
+    }
+
+}
+
+class ParamEvaluator {
+
+    static  final String        sActionKey       = "action";
+    static  final String        sConditionKey    = "condition";
+    static  final String        sControllerKey   = "controller";
+    static  final String        sInputKey        = "input";
+    static  final String        sScaleKey        = "scale";
+
+    LogManager              mLogger;
+
+    List<Object>            mParameters;
+    List<Runnable>          mProcessors;
+    Map<String,Controller>  mControllers;
+
+    public ParamEvaluator(JSONObject object, Map<String,Controller> controllers, LogManager logger) {
+        mParameters     = new ArrayList<>();
+        mProcessors     = new ArrayList<>();
+        mControllers    = controllers;
+        mLogger         = logger;
+        this.read(object);
+    }
+
+    public void read(JSONObject object) {
+
+        Iterator<String> keys = object.keys();
+        List<String> sortedKeys = new ArrayList<>();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            sortedKeys.add(key);
+        }
+        Collections.sort(sortedKeys);
+
+        keys = sortedKeys.iterator();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            if (!key.equals(sActionKey) && !key.equals(sConditionKey)) {
+                boolean found = false;
+                try {
+                    double parameter = object.getDouble(key);
+
+                    mProcessors.add(() -> mParameters.add(parameter));
+                    found = true;
+                } catch (JSONException ignored) {
+                }
+                if(!found) {
+                    try {
+                        JSONObject parameter = object.getJSONObject(key);
+
+                        if (!parameter.has(sControllerKey))
+                            throw new InvalidParameterException("Missing controller for condition leaf");
+                        Controller controller = mControllers.get(parameter.getString(sControllerKey));
+                        if (controller == null)
+                            throw new InvalidParameterException("Controller not found for condition leaf");
+
+                        if (!parameter.has(sInputKey))
+                            throw new InvalidParameterException("Missing controller for condition leaf");
+
+                        double scale = parameter.has(sScaleKey) ? parameter.getDouble(sScaleKey) : 1.0;
+
+                        Field field = controller.axes.getClass().getField(parameter.getString(sInputKey));
+                        Object axis = field.get(controller.axes);
+                        if (axis == null)
+                            throw new InvalidParameterException("Trigger " + parameter.getString(sInputKey) + " not found in controller axes");
+                        Axis trigger = ((Axis) axis);
+
+                        mProcessors.add(() -> mParameters.add(scale * trigger.value()));
+
+                    } catch (JSONException | NoSuchFieldException | IllegalAccessException e) {
+                        mLogger.error(e.getMessage());
+                    }
+                }
+
+            }
+        }
+    }
+
+    public Object[]    evaluate() {
+
+        mParameters.clear();
+        for (int i_processor = 0; i_processor < mProcessors.size(); i_processor++) {
+            mProcessors.get(i_processor).run();
+        }
+        return mParameters.toArray();
     }
 
 }

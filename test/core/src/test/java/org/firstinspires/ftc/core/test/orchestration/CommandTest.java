@@ -88,6 +88,31 @@ public class CommandTest {
         mGamepad.left_trigger = 0;
         mCommand.execute();
         assertFalse(mRobot.test1Check(), "Command should not have called test1");
+
+    }
+
+    @Test
+    public void condition() {
+
+        mConfiguration  = new Configuration(mLogger);
+        mGamepad        = new Gamepad();
+        mController     = new Controller(mGamepad, mLogger);
+        mRobot          = new RobotTest(mLogger);
+
+        Map<String,Controller> controllers = new LinkedHashMap<>();
+        controllers.put("1",mController);
+
+        mCommand = new Command(controllers,mRobot, mLogger);
+        mConfiguration.register("command", mCommand);
+
+        mConfiguration.read(getClass().getClassLoader().getResource("data/" + this.getClass().getSimpleName() + "/command-1.json").getFile());
+
+        assertTrue(mConfiguration.isValid(), "Configuration is invalid");
+
+        mGamepad.dpad_up = false;
+        mGamepad.left_trigger = 0;
+        mCommand.execute();
+        assertFalse(mRobot.test1Check(), "Command should not have called test1");
         mGamepad.dpad_up = true;
         mGamepad.left_trigger = 0;
         mCommand.execute();
@@ -104,6 +129,33 @@ public class CommandTest {
         mGamepad.left_trigger = 1.0f;
         mCommand.execute();
         assertTrue(mRobot.test1Check(), "Command should have called test1");
+
+    }
+
+    @Test
+    public void action() {
+
+        mConfiguration  = new Configuration(mLogger);
+        mGamepad        = new Gamepad();
+        mController     = new Controller(mGamepad, mLogger);
+        mRobot          = new RobotTest(mLogger);
+
+        Map<String,Controller> controllers = new LinkedHashMap<>();
+        controllers.put("1",mController);
+
+        mCommand = new Command(controllers,mRobot, mLogger);
+        mConfiguration.register("command", mCommand);
+
+        mConfiguration.read(getClass().getClassLoader().getResource("data/" + this.getClass().getSimpleName() + "/command-2.json").getFile());
+
+        assertTrue(mConfiguration.isValid(), "Configuration is invalid");
+
+        mGamepad.dpad_up = true;
+        mGamepad.left_trigger = 0.4f;
+        mGamepad.right_trigger = 0.4f;
+        mCommand.execute();
+        assertEquals(0.9,mRobot.test2Value1(), 0.0000001,"Command should have called test2 with parameter 0.9");
+        assertEquals(0.5*0.4,mRobot.test2Value2(), 0.0000001,"Command should have called test2 with parameter 0.5*0.4");
 
     }
 

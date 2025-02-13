@@ -1,7 +1,7 @@
 {
-	"command" : { "action": "test", "value1" : 0.9, "value2": { "scale": 0.0, "input": "right_trigger" },  "condition" : { "and" : [
-                { "button" : "dpad_up", "state" : "pressedOnce", "controller" : "1" },
-                { "trigger" : "left_trigger",  "threshold" : 0.01, "operation" : "lesserThan", "controller" : "1" }
+	"command" : { "action": "test2", "1" : 0.9, "2": { "scale": 0.5, "input": "right_trigger", "controller": "1" },  "condition" : { "and" : [
+                { "button" : "dpad_up", "state" : "pressed", "controller" : "1" },
+                { "trigger" : "left_trigger",  "threshold" : 0.5, "operation" : "lesserThan", "controller" : "1" }
         ]}}
 }
 		
