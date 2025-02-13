@@ -346,7 +346,7 @@ public class Configuration {
             confstring.append("-------------------------\n")
                     .append(configurable.getKey().toUpperCase())
                     .append("\n")
-                    .append(configurable.getValue().logConfigurationText())
+                    .append(configurable.getValue().logConfigurationText("--"))
                     .append("\n");
 
         }

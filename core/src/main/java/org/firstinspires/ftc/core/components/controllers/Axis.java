@@ -15,22 +15,37 @@ package org.firstinspires.ftc.core.components.controllers;
 /* System includes */
 import java.lang.reflect.Field;
 
+/* JSON includes */
+import org.json.JSONObject;
+import org.json.JSONException;
+
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
-public class Axis {
+/* Configuration includes */
+import org.firstinspires.ftc.core.configuration.Configurable;
 
-    LogManager  mLogger;
+public class Axis implements Configurable {
 
-    Gamepad     mGamepad;
-    String      mName;
+    public  static  final   double      sDefaultMaximum = 1.0;
+    public  static  final   double      sDefaultDeadzone = 0.0;
 
-    double      mMultiplier;
-    double      mDeadZone;
-    double      mMaximum;
+            static  final   String      sDeadzoneKey   = "deadzone";
+            static  final   String      sMaximumKey    = "maximum";
+
+                            LogManager  mLogger;
+
+                            boolean     mConfigurationValid;
+
+                            Gamepad     mGamepad;
+                            String      mName;
+
+                            double      mMultiplier;
+                            double      mDeadZone;
+                            double      mMaximum;
 
     /**
      * Axis constructor
@@ -44,8 +59,8 @@ public class Axis {
         mGamepad    = gamepad;
         mName       = name;
         mMultiplier = 1.0;
-        mMaximum    = 1.0;
-        mDeadZone   = 0.0;
+        mMaximum    = sDefaultMaximum;
+        mDeadZone   = sDefaultDeadzone;
     }
 
     /**
@@ -61,8 +76,8 @@ public class Axis {
         mGamepad    = gamepad;
         mName       = name;
         mMultiplier = multiplier;
-        mMaximum    = 1.0;
-        mDeadZone   = 0.0;
+        mMaximum    = sDefaultMaximum;
+        mDeadZone   = sDefaultDeadzone;
     }
 
     /**
@@ -88,7 +103,7 @@ public class Axis {
      *
      * @return trigger value
      */
-    public double value() {
+    public double   value() {
 
         double result = 0;
 
@@ -117,6 +132,121 @@ public class Axis {
         return result;
     }
 
+
+    /**
+     * Configuration checking
+     *
+     * @return true if object is correctly configured, false otherwise
+     */
+    public boolean  isConfigured() {
+        return mConfigurationValid;
+    }
+
+    /**
+     * Manages registration
+     *
+     * @param topic : topic under which the object wa registered
+     */
+    public void     register(String topic) {}
+
+    /**
+     * Configuration logging into HTML
+     *
+     * @return configuration as html string
+     */
+    public String   logConfigurationHTML() {
+
+        String result = "<li style=\"padding-left:10px;font-size:" +
+                LogManager.sMetricFontSize +
+                "px\"> " +
+                sDeadzoneKey +
+                " : " +
+                mDeadZone +
+                "</li>" +
+                "<li style=\"padding-left:10px;font-size:" +
+                LogManager.sMetricFontSize +
+                "px\"> " +
+                sMaximumKey +
+                " : " +
+                mMaximum +
+                "</li>";
+
+        return result;
+    }
+    /**
+     * Configuration logging into text
+     *
+     * @return configuration as basic string
+     */
+    public String  logConfigurationText(String header) {
+
+        String result = header +
+                sDeadzoneKey +
+                " : " +
+                mDeadZone +
+                ", " +
+                sMaximumKey +
+                " : " +
+                mMaximum;
+
+        return result;
+    }
+
+    /**
+     * Reads log manager configuration
+     *
+     * @param reader : JSON object containing configuration
+     */
+    public void read(JSONObject reader) {
+
+        mConfigurationValid = true;
+
+        if(reader.has(sDeadzoneKey)) {
+            try {
+                double deadzone = reader.getDouble(sDeadzoneKey);
+                this.deadzone(deadzone);
+            }
+            catch(JSONException e) {
+                mLogger.error("Error in controller configuration");
+                mConfigurationValid = false;
+            }
+        }
+
+        if(reader.has(sMaximumKey)) {
+            try {
+                double maximum = reader.getDouble(sMaximumKey);
+                this.maximum(maximum);
+            }
+            catch(JSONException e) {
+                mLogger.error("Error in controller configuration");
+                mConfigurationValid = false;
+            }
+        }
+    }
+
+    /**
+     * Writes log manager configuration
+     *
+     * @param writer : JSON object to store configuration
+     */
+    public void write(JSONObject writer) {
+
+        try {
+            if(mConfigurationValid) {
+                writer.put(sDeadzoneKey,mDeadZone);
+                writer.put(sMaximumKey,mMaximum);
+            }
+        }
+        catch(JSONException e ) { mLogger.error("Error writing configuration"); }
+    }
+
+    /**
+     * Deadzone scaling function
+     *
+     * @param value : raw trigger value
+     * @param deadzone : deadzone value
+     * @param maximum : maximum allowed value
+     */
     private static double applyDeadzone(double value, double deadzone, double maximum) {
         if (Math.abs(value) < deadzone) {
             return 0.0; // Inside deadzone

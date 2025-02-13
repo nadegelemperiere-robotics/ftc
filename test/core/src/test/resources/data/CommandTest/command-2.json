@@ -1,0 +1,7 @@
+{
+	"command" : { "action": "test", "value1" : 0.9, "value2": { "scale": 0.0, "input": "right_trigger" },  "condition" : { "and" : [
+                { "button" : "dpad_up", "state" : "pressedOnce", "controller" : "1" },
+                { "trigger" : "left_trigger",  "threshold" : 0.01, "operation" : "lesserThan", "controller" : "1" }
+        ]}}
+}
+		

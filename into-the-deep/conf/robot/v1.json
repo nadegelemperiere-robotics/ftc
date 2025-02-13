@@ -28,47 +28,49 @@
     "control"   : {
 
         "controllers": {
-            "1": [
-                { "axis": "left_stick_y",  "deadzone": 0.1, "maximum": 1.0 },
-                { "axis": "left_stick_x",  "deadzone": 0.1, "maximum": 1.0 },
-                { "axis": "right_stick_x", "deadzone": 0.1, "maximum": 1.0 }
-            ]
+            "drive": {
+                "axes" : {
+                    "left_stick_x"  : { "deadzone": 0.1 },
+                    "left_stick_y"  : { "deadzone": 0.1 },
+                    "right_stick_x" : { "deadzone": 0.1 }
+                }
+            }
         },
         "commands": [
 
             {  "action": "drive",
-                "x": { "scale": 1.1, "input": "left_stick_x", "controller" : 1 },
-                "y": { "scale": -1.0, "input": "left_stick_y", "controller" : 1 },
-                "rotation": { "scale": 1.0, "input": "right_stick_x", "controller" : 1 }
+                "x": { "scale": 1.1, "input": "left_stick_x", "controller" : "drive" },
+                "y": { "scale": -1.0, "input": "left_stick_y", "controller" : "drive" },
+                "rotation": { "scale": 1.0, "input": "right_stick_x", "controller" : "drive" }
             },
-            { "action": "tuneDriveSpeed", "multiplier": 0.45, "condition": { "button": "left_bumper", "state": "pressed", "controller" : 1 } },
-            { "action": "tuneDriveSpeed", "multiplier": 1.0, "condition": { "button": "left_bumper", "state": "notPressed", "controller" : 1 } },
+            { "action": "tuneDriveSpeed", "multiplier": 0.45, "condition": { "button": "left_bumper", "state": "pressed", "controller" : "drive" } },
+            { "action": "tuneDriveSpeed", "multiplier": 1.0, "condition": { "button": "left_bumper", "state": "notPressed", "controller" : "drive" } },
 
-            { "action": "powerOuttakeSlides", "power": 0.9,  "condition": { "button": "left_bumper", "state": "pressedOnce", "controller" : 2} },
-            { "action": "powerOuttakeSlides", "power": -0.7, "condition": { "button": "right_bumper", "state": "pressedOnce", "controller" : 2}},
+            { "action": "powerOuttakeSlides", "power": 0.9,  "condition": { "button": "left_bumper", "state": "pressedOnce", "controller" : "mechanisms"} },
+            { "action": "powerOuttakeSlides", "power": -0.7, "condition": { "button": "right_bumper", "state": "pressedOnce", "controller" : "mechanisms"}},
             { "action": "powerOuttakeSlides", "power": 0.0,  "condition": { "and": [
-                { "button": "right_bumper","state": "notPressed"},
-                { "button": "left_bumper", "state": "notPressed"}
+                { "button": "right_bumper","state": "notPressed", "controller" : "mechanisms"},
+                { "button": "left_bumper", "state": "notPressed", "controller" : "mechanisms"}
             ]}},
-            { "action": "positionOuttakeSlides", "position": "transfer", "condition": { "button": "right_stick_button", "state": "pressedOnce", "controller" : 2 }},
+            { "action": "positionOuttakeSlides", "position": "transfer", "condition": { "button": "right_stick_button", "state": "pressedOnce", "controller" : "mechanisms" }},
 
-            { "action": "powerIntakeSlides", "power": { "scale": 0.9, "input": "left_trigger" },   "condition" : { "trigger" : "left_trigger", "threshold" : 0.01, "operation" : "greaterThan", "controller" : 2 }},
-            { "action": "powerIntakeSlides", "power": { "scale": -0.7, "input": "right_trigger" }, "condition" : { "trigger" : "right_trigger", "threshold" : 0.01, "operation" : "greaterThan", "controller" : 2 }},
+            { "action": "powerIntakeSlides", "power": { "scale": 0.9, "input": "left_trigger" },   "condition" : { "trigger" : "left_trigger", "threshold" : 0.01, "operation" : "greaterThan", "controller" : "mechanisms" }},
+            { "action": "powerIntakeSlides", "power": { "scale": -0.7, "input": "right_trigger" }, "condition" : { "trigger" : "right_trigger", "threshold" : 0.01, "operation" : "greaterThan", "controller" : "mechanisms" }},
             { "action": "powerIntakeSlides", "power": { "scale": 0.0, "input": "right_trigger" },  "condition" : { "and" : [
-                { "trigger" : "right_trigger", "threshold" : 0.01, "operation" : "lesserThan", "controller" : 2 },
-                { "trigger" : "left_trigger",  "threshold" : 0.01, "operation" : "lesserThan", "controller" : 2 }
+                { "trigger" : "right_trigger", "threshold" : 0.01, "operation" : "lesserThan", "controller" : "mechanisms" },
+                { "trigger" : "left_trigger",  "threshold" : 0.01, "operation" : "lesserThan", "controller" : "mechanisms" }
             ]}},
 
-            { "action": "toggleOuttakeClaw",                    "condition": { "button": "x", "state": "pressedOnce", "controller" : 2 } },
-            { "action": "moveOuttakeArm",  "direction": "down", "condition": { "button": "a", "state": "pressedOnce", "controller" : 2 }},
-            { "action": "moveOuttakeArmw", "direction": "up",   "condition": { "button": "y", "state": "pressedOnce", "controller" : 2 }},
+            { "action": "toggleOuttakeClaw",                    "condition": { "button": "x", "state": "pressedOnce", "controller" : "mechanisms" } },
+            { "action": "moveOuttakeArm",  "direction": "down", "condition": { "button": "a", "state": "pressedOnce", "controller" : "mechanisms" }},
+            { "action": "moveOuttakeArm",  "direction": "up",   "condition": { "button": "y", "state": "pressedOnce", "controller" : "mechanisms" }},
 
-            { "action": "toggleIntakeClaw",                     "condition": { "button": "dpad_left",  "state": "pressedOnce", "controller" : 2 } },
-            { "action": "moveIntakeArm",  "direction": "down",  "condition": { "button": "dpad_down",  "state": "pressedOnce", "controller" : 2 }},
-            { "action": "moveIntakeArmw", "direction": "up",    "condition": { "button": "dpad_up",    "state": "pressedOnce", "controller" : 2 }},
-            { "action": "toggleIntakeWrist",                    "condition": { "button": "dpad_right", "state": "pressedOnce", "controller" : 2 }},
+            { "action": "toggleIntakeClaw",                     "condition": { "button": "dpad_left",  "state": "pressedOnce", "controller" : "mechanisms" } },
+            { "action": "moveIntakeArm",  "direction": "down",  "condition": { "button": "dpad_down",  "state": "pressedOnce", "controller" : "mechanisms" }},
+            { "action": "moveIntakeArm",  "direction": "up",    "condition": { "button": "dpad_up",    "state": "pressedOnce", "controller" : "mechanisms" }},
+            { "action": "toggleIntakeWrist",                    "condition": { "button": "dpad_right", "state": "pressedOnce", "controller" : "mechanisms" }},
 
-            { "action": "transfer", "condition": { "button": "b", "state": "pressedOnce", "controller" : 2 }}
+            { "action": "transfer", "condition": { "button": "b", "state": "pressedOnce", "controller" : "mechanisms" }}
 
         ]
     }

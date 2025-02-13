@@ -11,11 +11,14 @@ package org.firstinspires.ftc.core.tools;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Objects;
+import java.util.Date;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 
 /* Android includes */
 import android.os.Environment;
@@ -88,7 +91,7 @@ public class LogManager implements Configurable {
     // Formatting
     static  final   int             sErrorFontSize   = 14;
     static  final   int             sWarningFontSize = 14;
-    static  final   int             sMetricFontSize  = 13;
+    public static  final   int      sMetricFontSize  = 13;
     static  final   int             sInfoFontSize    = 13;
     static  final   int             sEntryFontSize   = 15;
 
@@ -185,7 +188,7 @@ public class LogManager implements Configurable {
      *
      * @param topic : topic under which the object wa registered
      */
-    public void register(String topic) {}
+    public void register(String topic) {  }
 
     /**
      * Configuration logging into HTML
@@ -222,21 +225,29 @@ public class LogManager implements Configurable {
         return result;
     }
     /**
-     * Configuration logging into HTML
+     * Configuration logging into text
      *
-     * @return configuration as html string
+     * @return configuration as basic string
      */
-    public String  logConfigurationText() {
+    public String  logConfigurationText(String header) {
 
-        String result = sDriverStationKey +
+        String result = header +
+                "> " +
+                sDriverStationKey +
                 ((mDriverStation == null) ? " : false" : " : true") +
                 "\n" +
+                header +
+                "> " +
                 sDashboardKey +
                 ((mDashboard == null) ? " : false" : " : true") +
                 "\n" +
+                header +
+                "> " +
                 sFilenameKey + " : " +
                 ((mFile == null) ? "" : mFilename) +
                 "\n" +
+                header +
+                "> " +
                 sLevelKey + " : " +
                 sLevelToConf.get(mLevel) +
                 "\n";
@@ -651,7 +662,19 @@ public class LogManager implements Configurable {
 
             result = Logger.getLogger("log-manager");
             FileHandler fileHandler = new FileHandler(filepath,100000,2, true); // Append mode
-            fileHandler.setFormatter(new SimpleFormatter());
+            SimpleFormatter formatter = new SimpleFormatter() {
+                private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+                @Override
+                public synchronized String format(LogRecord record) {
+                    return String.format("[%s] [%s] %s - %s%n",
+                            dateFormat.format(new Date(record.getMillis())),  // Timestamp with milliseconds
+                            record.getLevel(),  // Log level (INFO, WARNING, SEVERE, etc.)
+                            record.getLoggerName(),  // Logger name
+                            record.getMessage());  // Log message
+                }
+            };
+            fileHandler.setFormatter(formatter);
             result.setLevel(Level.ALL);
             result.addHandler(fileHandler);
             result.setUseParentHandlers(false);

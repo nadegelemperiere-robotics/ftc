@@ -5,7 +5,7 @@
    Configuration management test class
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.configuration;
+package org.firstinspires.ftc.core.test.configuration;
 
 /* System includes */
 import java.io.File;
@@ -33,7 +33,7 @@ import org.json.JSONException;
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
-/* Component Under Test includes */
+/* Configuration includes */
 import org.firstinspires.ftc.core.configuration.Configuration;
 import org.firstinspires.ftc.core.configuration.Configurable;
 
@@ -158,6 +158,8 @@ public class ConfigurationTest {
 
         assertFalse(mConfiguration.isValid(), "Configuration is valid");
 
+        mConfiguration.log();
+
         mConfiguration.write(getClass().getClassLoader().getResource("results").getFile() + "/write.json");
 
 
@@ -214,13 +216,15 @@ class ConfigurableTest implements Configurable {
 
     }
 
-    public String logConfigurationText() {
+    public String logConfigurationText(String header) {
 
         String result = "";
-        result += "data1 : " +
+        result += header +
+                "> data1 : " +
                 mData1 +
                 "\n";
-        result += "data2 : " +
+        result += header +
+                "> data2 : " +
                 mData2 +
                 "\n";
         return result;

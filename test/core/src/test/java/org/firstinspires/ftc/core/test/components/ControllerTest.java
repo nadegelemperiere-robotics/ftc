@@ -5,7 +5,7 @@
    Controller test class
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.configuration;
+package org.firstinspires.ftc.core.test.configuration;
 
 /* System includes */
 import java.io.File;
@@ -19,9 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 /* Mockito includes */
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,14 +32,19 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
+/* Configuration includes */
+import org.firstinspires.ftc.core.configuration.Configuration;
+
 /* Component Under Test includes */
 import org.firstinspires.ftc.core.components.controllers.Controller;
 
+@ExtendWith(MockitoExtension.class)
 public class ControllerTest {
 
-    private LogManager mLogger;
-    private Controller mController;
-    private Gamepad    mGamepad;
+    private LogManager      mLogger;
+    private Controller      mController;
+    private Gamepad         mGamepad;
+    private Configuration   mConfiguration;
 
     @BeforeEach
     public void setUp() {
@@ -109,9 +114,9 @@ public class ControllerTest {
         mGamepad.right_stick_y = 0.2f;
         assertEquals(-0.2, mController.axes.right_stick_y.value(), 0.0000001, "Y axis should be inverted");
         mGamepad.right_stick_x = 0.2f;
-        assertEquals(0.2, mController.axes.right_stick_x.value(),  0.0000001, "Y axis should not be inverted");
+        assertEquals(0.2, mController.axes.right_stick_x.value(),  0.0000001, "X axis should not be inverted");
         mGamepad.right_stick_x = -0.2f;
-        assertEquals(-0.2, mController.axes.right_stick_x.value(), 0.0000001, "Y axis should not be inverted");
+        assertEquals(-0.2, mController.axes.right_stick_x.value(), 0.0000001, "X axis should not be inverted");
 
         // Test left stick
         mGamepad.left_stick_y = -0.2f;
@@ -119,9 +124,71 @@ public class ControllerTest {
         mGamepad.left_stick_y = 0.2f;
         assertEquals(-0.2, mController.axes.left_stick_y.value(), 0.0000001, "Y axis should be inverted");
         mGamepad.left_stick_x = 0.2f;
-        assertEquals(0.2, mController.axes.left_stick_x.value(),  0.0000001, "Y axis should not be inverted");
+        assertEquals(0.2, mController.axes.left_stick_x.value(),  0.0000001, "X axis should not be inverted");
         mGamepad.left_stick_x = -0.2f;
-        assertEquals(-0.2, mController.axes.left_stick_x.value(), 0.0000001, "Y axis should not be inverted");
+        assertEquals(-0.2, mController.axes.left_stick_x.value(), 0.0000001, "X axis should not be inverted");
+    }
+
+    @Test
+    public void read() {
+
+        mConfiguration = new Configuration(mLogger);
+        mGamepad = new Gamepad();
+        mController = new Controller(mGamepad, mLogger);
+        mConfiguration.register("controller", mController);
+        mConfiguration.read(getClass().getClassLoader().getResource("data/" + this.getClass().getSimpleName() + "/controller-1.json").getFile());
+
+        assertTrue(mConfiguration.isValid(), "Configuration is valid");
+
+        mGamepad.left_stick_x = -0.1f;
+        assertEquals(0, mController.axes.left_stick_x.value(), 0.0000001, "X axis deadzone should be applied");
+        mGamepad.left_stick_x = 0.1f;
+        assertEquals(0, mController.axes.left_stick_x.value(), 0.0000001, "X axis deadzone should be applied");
+
+        mGamepad.left_stick_x = -0.25f;
+        assertEquals(-0.05, mController.axes.left_stick_x.value(), 0.0000001, "X axis deadzone scaling should be applied");
+        mGamepad.left_stick_x = 0.25f;
+        assertEquals(0.05, mController.axes.left_stick_x.value(), 0.0000001, "X axis deadzone scaling should be applied");
+
+        mGamepad.left_stick_x = -1.0f;
+        assertEquals(-0.8, mController.axes.left_stick_x.value(), 0.0000001, "X axis deadzone scaling should be applied");
+        mGamepad.left_stick_x = 1.0f;
+        assertEquals(0.8, mController.axes.left_stick_x.value(), 0.0000001, "X axis deadzone scaling should be applied");
+
+        mGamepad.left_stick_y = -0.05f;
+        assertEquals(0, mController.axes.left_stick_y.value(), 0.0000001, "Y axis deadzone should be applied");
+        mGamepad.left_stick_y = 0.05f;
+        assertEquals(0, mController.axes.left_stick_y.value(), 0.0000001, "Y axis deadzone should be applied");
+
+        mGamepad.left_stick_y = -0.25f;
+        assertEquals(0.15, mController.axes.left_stick_y.value(), 0.0000001, "Y axis deadzone scaling should be applied");
+        mGamepad.left_stick_y = 0.25f;
+        assertEquals(-0.15, mController.axes.left_stick_y.value(), 0.0000001, "Y axis deadzone scaling should be applied");
+
+        mGamepad.left_stick_y = -1.0f;
+        assertEquals(0.9, mController.axes.left_stick_y.value(), 0.0000001, "Y axis deadzone scaling should be applied");
+        mGamepad.left_stick_y = 1.0f;
+        assertEquals(-0.9, mController.axes.left_stick_y.value(), 0.0000001, "Y axis deadzone scaling should be applied");
+
+
+    }
+
+    @Test
+    public void write() {
+
+        mConfiguration = new Configuration(mLogger);
+        mGamepad = new Gamepad();
+        mController = new Controller(mGamepad, mLogger);
+        mConfiguration.register("controller", mController);
+        mConfiguration.read(getClass().getClassLoader().getResource("data/" + this.getClass().getSimpleName() + "/controller-1.json").getFile());
+
+        assertTrue(mConfiguration.isValid(), "Configuration is valid");
+
+        mConfiguration.log();
+        mLogger.update();
+
+        mConfiguration.write(getClass().getClassLoader().getResource("results").getFile() + "/controller-write.json");
+
     }
 
 

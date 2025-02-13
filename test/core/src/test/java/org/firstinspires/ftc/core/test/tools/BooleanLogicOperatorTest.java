@@ -5,7 +5,7 @@
    Boolean logic operator test
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.tools;
+package org.firstinspires.ftc.core.test.tools;
 
 /* System includes */
 import java.util.LinkedHashMap;
@@ -41,6 +41,7 @@ import org.firstinspires.ftc.core.configuration.Configuration;
 /* Component Under Test includes */
 import org.firstinspires.ftc.core.tools.BooleanLogicOperator;
 
+@ExtendWith(MockitoExtension.class)
 public class BooleanLogicOperatorTest {
 
     private LogManager              mLogger;
@@ -99,6 +100,8 @@ public class BooleanLogicOperatorTest {
         mConfiguration.read(getClass().getClassLoader().getResource("data/" + this.getClass().getSimpleName() + "/logic-1.json").getFile());
 
         assertTrue(mConfiguration.isValid(), "Configuration is valid");
+
+        mConfiguration.log();
 
         mConfiguration.write(getClass().getClassLoader().getResource("results").getFile() + "/boolean-logic-test-write.json");
 

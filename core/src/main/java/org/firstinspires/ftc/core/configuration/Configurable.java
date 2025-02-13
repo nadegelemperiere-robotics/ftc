@@ -53,6 +53,6 @@ public interface Configurable {
      *
      * @return configuration as string
      */
-    public String logConfigurationText();
+    public String logConfigurationText(String header);
 
 }

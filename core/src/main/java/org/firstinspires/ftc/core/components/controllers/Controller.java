@@ -7,6 +7,13 @@
 
 package org.firstinspires.ftc.core.components.controllers;
 
+/* System includes */
+import java.util.Map;
+
+/* JSON includes */
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.Gamepad;
 
@@ -16,7 +23,12 @@ import org.firstinspires.ftc.core.tools.LogManager;
 /* Configuration includes */
 import org.firstinspires.ftc.core.configuration.Configurable;
 
-public class Controller{
+
+public class Controller implements Configurable {
+
+    // Json keys
+    static  final   String  sAxesKey       = "axes";
+
 
     public  static  class     Buttons {
         public Button a;
@@ -75,6 +87,7 @@ public class Controller{
     public              Controller(Gamepad gamepad, LogManager logger) {
 
         mLogger = logger;
+        mConfigurationValid = true;
 
         buttons = new Buttons();
         buttons.a = new Button(gamepad, "a", logger);
@@ -112,6 +125,217 @@ public class Controller{
         axes.right_trigger = new Axis(gamepad, "right_trigger", logger);
 
     }
+
+    /**
+     * Configuration checking
+     *
+     * @return true if object is correctly configured, false otherwise
+     */
+    public boolean isConfigured() {
+        return mConfigurationValid;
+    }
+
+    /**
+     * Manages registration
+     *
+     * @param topic : topic under which the object wa registered
+     */
+    public void register(String topic) {}
+
+    /**
+     * Configuration logging into HTML
+     *
+     * @return configuration as html string
+     */
+    public String  logConfigurationHTML() {
+
+        StringBuilder result = new StringBuilder();
+
+        result.append("<details>\n")
+                .append("<summary style=\"font-size: 12px; font-weight: 500\"> AXES </summary>\n")
+                .append("<ul>\n");
+
+        result.append("<li>\n")
+                .append("<summary style=\"font-size: 12px; font-weight: 500\"> LEFT STICK X </summary>\n")
+                .append("<ul>\n")
+                .append(this.axes.left_stick_x.logConfigurationHTML())
+                .append("</ul>\n")
+                .append("</details>\n")
+                .append("</li>\n");
+
+        result.append("<li>\n")
+                .append("<summary style=\"font-size: 12px; font-weight: 500\"> LEFT STICK Y </summary>\n")
+                .append("<ul>\n")
+                .append(this.axes.left_stick_y.logConfigurationHTML())
+                .append("</ul>\n")
+                .append("</details>\n")
+                .append("</li>\n");
+
+        result.append("<li>\n")
+                .append("<summary style=\"font-size: 12px; font-weight: 500\"> LEFT TRIGGER </summary>\n")
+                .append("<ul>\n")
+                .append(this.axes.left_trigger.logConfigurationHTML())
+                .append("</ul>\n")
+                .append("</details>\n")
+                .append("</li>\n");
+
+        result.append("<li>\n")
+                .append("<summary style=\"font-size: 12px; font-weight: 500\"> RIGHT STICK X </summary>\n")
+                .append("<ul>\n")
+                .append(this.axes.right_stick_x.logConfigurationHTML())
+                .append("</ul>\n")
+                .append("</details>\n")
+                .append("</li>\n");
+
+        result.append("<li>\n")
+                .append("<summary style=\"font-size: 12px; font-weight: 500\"> RIGHT STICK Y </summary>\n")
+                .append("<ul>\n")
+                .append(this.axes.right_stick_y.logConfigurationHTML())
+                .append("</ul>\n")
+                .append("</details>\n")
+                .append("</li>\n");
+
+        result.append("<li>\n")
+                .append("<summary style=\"font-size: 12px; font-weight: 500\"> RIGHT TRIGGER </summary>\n")
+                .append("<ul>\n")
+                .append(this.axes.right_trigger.logConfigurationHTML())
+                .append("</ul>\n")
+                .append("</details>\n")
+                .append("</li>\n");
+
+        result.append("</ul>\n")
+                .append("</details>\n");
+
+        return result.toString();
+    }
+    /**
+     * Configuration logging into HTML
+     *
+     * @return configuration as html string
+     */
+    public String  logConfigurationText(String header) {
+
+        String result = header +
+                "> axes :\n" +
+                header +
+                "--> left_stick_x : " +
+                this.axes.left_stick_x.logConfigurationText("") +
+                "\n" +
+                header +
+                "--> left_stick_y : " +
+                this.axes.left_stick_y.logConfigurationText("") +
+                "\n" +
+                header +
+                "--> left_trigger : " +
+                this.axes.left_trigger.logConfigurationText("") +
+                "\n" +
+                header +
+                "--> right_stick_x : " +
+                this.axes.right_stick_x.logConfigurationText("") +
+                "\n" +
+                header +
+                "--> right_stick_y : " +
+                this.axes.right_stick_y.logConfigurationText("") +
+                "\n" +
+                header +
+                "--> right_trigger : " +
+                this.axes.right_trigger.logConfigurationText("") +
+                "\n";
+
+            return result;
+
+    }
+
+    /**
+     * Reads boolean logic configuration
+     *
+     * @param reader : JSON object containing configuration
+     */
+    public void read(JSONObject reader) {
+
+        mConfigurationValid = true;
+
+        if( reader.has(sAxesKey)) {
+            try {
+                JSONObject axes = reader.getJSONObject(sAxesKey);
+                if (axes.has("left_stick_x")) {
+                    JSONObject axis = axes.getJSONObject("left_stick_x");
+                    this.axes.left_stick_x.read(axis);
+                    if(!this.axes.left_stick_x.isConfigured()) { mConfigurationValid = false; }
+                }
+                if (axes.has("left_stick_y")) {
+                    JSONObject axis = axes.getJSONObject("left_stick_y");
+                    this.axes.left_stick_y.read(axis);
+                    if(!this.axes.left_stick_y.isConfigured()) { mConfigurationValid = false; }
+                }
+                if (axes.has("left_trigger")) {
+                    JSONObject axis = axes.getJSONObject("left_trigger");
+                    this.axes.left_trigger.read(axis);
+                    if(!this.axes.left_trigger.isConfigured()) { mConfigurationValid = false; }
+                }
+                if (axes.has("right_stick_x")) {
+                    JSONObject axis = axes.getJSONObject("right_stick_x");
+                    this.axes.right_stick_x.read(axis);
+                    if(!this.axes.right_stick_x.isConfigured()) { mConfigurationValid = false; }
+                }
+                if (axes.has("right_stick_y")) {
+                    JSONObject axis = axes.getJSONObject("right_stick_y");
+                    this.axes.right_stick_y.read(axis);
+                    if(!this.axes.right_stick_y.isConfigured()) { mConfigurationValid = false; }
+                }
+                if (axes.has("right_trigger")) {
+                    JSONObject axis = axes.getJSONObject("right_trigger");
+                    this.axes.right_trigger.read(axis);
+                    if(!this.axes.right_trigger.isConfigured()) { mConfigurationValid = false; }
+                }
+            }
+            catch(JSONException e ) { mLogger.error("Error reading configuration"); }
+        }
+
+    }
+
+    /**
+     * Writes log manager configuration
+     *
+     * @param writer : JSON object to store configuration
+     */
+    public void write(JSONObject writer) {
+
+        if(mConfigurationValid) {
+            JSONObject axes = new JSONObject();
+
+            try {
+
+                JSONObject leftStickX = new JSONObject();
+                this.axes.left_stick_x.write(leftStickX);
+                axes.put("left_stick_x", leftStickX);
+
+                JSONObject leftStickY = new JSONObject();
+                this.axes.left_stick_y.write(leftStickY);
+                axes.put("left_stick_y", leftStickY);
+
+                JSONObject leftTrigger = new JSONObject();
+                this.axes.left_trigger.write(leftTrigger);
+                axes.put("left_trigger", leftTrigger);
+
+                JSONObject rightStickX = new JSONObject();
+                this.axes.right_stick_x.write(rightStickX);
+                axes.put("right_stick_x", rightStickX);
+
+                JSONObject rightStickY = new JSONObject();
+                this.axes.right_stick_y.write(rightStickY);
+                axes.put("right_stick_y", rightStickY);
+
+                JSONObject rightTrigger = new JSONObject();
+                this.axes.right_trigger.write(rightTrigger);
+                axes.put("right_trigger", rightTrigger);
+
+                writer.put(sAxesKey, axes);
+            }
+            catch(JSONException e ) { mLogger.error("Error writing configuration"); }
+        }
+    }
+
 
 }
 

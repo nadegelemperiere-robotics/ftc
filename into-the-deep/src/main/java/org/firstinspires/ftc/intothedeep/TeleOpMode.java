@@ -63,8 +63,8 @@ public class TeleOpMode extends OpMode {
 
             // Control initialization
 //            mControllers = new LinkedHashMap<>();
-//            mControllers.put("1", new Controller(gamepad1, mLogger));
-//            mControllers.put("2", new Controller(gamepad2, mLogger));
+//            mControllers.put("drive", new Controller(gamepad1, mLogger));
+//            mControllers.put("mechanisms", new Controller(gamepad2, mLogger));
 //            mControl = new ControlMapper(mControllers, mConfiguration, mLogger);
 //
 //            // Register configurables

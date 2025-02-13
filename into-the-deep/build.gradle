@@ -22,6 +22,9 @@ android {
         jniLibs.useLegacyPackaging true
     }
 
+    sourceSets {
+        main.java.srcDirs += file('../core/src/test/java/org/firstinspires/ftc/core/opmodes')
+    }
 }
 
 repositories {

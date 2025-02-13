@@ -1,0 +1,9 @@
+{
+	"controller" : {
+		"axes" : {
+			"left_stick_y"  : { "deadzone": 0.1, "maximum": 0.9 },
+                	"left_stick_x"  : { "deadzone": 0.2, "maximum": 0.8 },
+                	"right_stick_x" : { "deadzone": 0.3 }
+		}
+        }
+}

@@ -63,53 +63,6 @@ public class BooleanLogicOperator implements Configurable {
     }
 
     /**
-     * Configuration checking
-     *
-     * @return true if object is correctly configured, false otherwise
-     */
-    public boolean isConfigured() {
-        return mConfigurationValid;
-    }
-
-    public void     register(String topic) {}
-
-    /**
-     * Configuration logging into HTML
-     *
-     * @return configuration as html string
-     */
-    public String  logConfigurationHTML() {
-
-        JSONObject object = new JSONObject();
-        this.writeBooleanLogic(mTree,object);
-        return object.toString();
-    }
-    /**
-     * Configuration logging into HTML
-     *
-     * @return configuration as html string
-     */
-    public String  logConfigurationText() {
-
-        JSONObject object = new JSONObject();
-        this.writeBooleanLogic(mTree,object);
-        return object.toString();
-    }
-
-    /**
-     * Reads boolean logic configuration
-     *
-     * @param reader : JSON object containing configuration
-     */
-    public void read(JSONObject reader) {
-
-        mConfigurationValid = true;
-        mCurrentIndex = 0;
-        mTree = this.parseBooleanLogic(reader);
-
-    }
-
-    /**
      * Returns values needed by the logic operator to process
      *
      * @return map between value index and the JSON object detailed information on variable
@@ -121,10 +74,59 @@ public class BooleanLogicOperator implements Configurable {
      *
      * @param values : Values for operator variables
      */
-    public Boolean evaluate(Map<Integer,Boolean> values) {
-
+    public Boolean  evaluate(Map<Integer,Boolean> values) {
         return this.evaluateBooleanLogic(mTree, values);
+    }
 
+    /**
+     * Configuration checking
+     *
+     * @return true if object is correctly configured, false otherwise
+     */
+    public boolean  isConfigured() {
+        return mConfigurationValid;
+    }
+
+    /**
+     * Manages registration
+     *
+     * @param topic : topic under which the object wa registered
+     */
+    public void     register(String topic) {}
+
+    /**
+     * Configuration logging into HTML
+     *
+     * @return configuration as html string
+     */
+    public String   logConfigurationHTML() {
+
+        JSONObject object = new JSONObject();
+        this.writeBooleanLogic(mTree,object);
+        return object.toString();
+    }
+    /**
+     * Configuration logging into text
+     *
+     * @return configuration as basic string
+     */
+    public String   logConfigurationText(String header) {
+
+        JSONObject object = new JSONObject();
+        this.writeBooleanLogic(mTree,object);
+        return header + object.toString();
+    }
+
+    /**
+     * Reads boolean logic configuration
+     *
+     * @param reader : JSON object containing configuration
+     */
+    public void     read(JSONObject reader) {
+
+        mConfigurationValid = true;
+        mCurrentIndex = 0;
+        mTree = this.parseBooleanLogic(reader);
     }
 
     /**
@@ -132,10 +134,16 @@ public class BooleanLogicOperator implements Configurable {
      *
      * @param writer : JSON object to store configuration
      */
-    public void write(JSONObject writer) {
+    public void     write(JSONObject writer) {
         this.writeBooleanLogic(mTree,writer);
     }
 
+    /**
+     * Logic evaluation recursive function
+     *
+     * @param node : node to evaluate
+     * @param values : leaf values to use for evaluation
+     */
     private Boolean evaluateBooleanLogic(BooleanNode node, Map<Integer, Boolean> values) {
 
         Boolean result;
@@ -195,6 +203,11 @@ public class BooleanLogicOperator implements Configurable {
         return result;
     }
 
+    /**
+     * Logic parsing recursive function
+     *
+     * @param object : JSON object to parse
+     */
     private BooleanNode parseBooleanLogic(JSONObject object) {
 
         BooleanNode result = null;
@@ -245,6 +258,12 @@ public class BooleanLogicOperator implements Configurable {
         return result;
     }
 
+    /**
+     * Logic writing recursive function
+     *
+     * @param node : node to write
+     * @param object : JSON object to write
+     */
     private void writeBooleanLogic(BooleanNode node, JSONObject object) {
 
         try {

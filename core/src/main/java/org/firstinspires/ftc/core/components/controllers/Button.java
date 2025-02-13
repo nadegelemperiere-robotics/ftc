@@ -110,7 +110,10 @@ public class Button {
      * @return true if button is not being pressed
      */
     public boolean notPressed() {
-        return !this.pressed();
+
+        boolean result = !(this.pressed());
+        if(result) { mLogger.trace("Button " + mName + " is not pressed"); }
+        return result;
     }
 
     /**
