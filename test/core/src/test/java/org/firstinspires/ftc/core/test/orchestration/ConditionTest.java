@@ -18,9 +18,6 @@ import android.os.Environment;
 /* Junit 5 includes */
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-
-import com.qualcomm.robotcore.hardware.Gamepad;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +27,9 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/* Qualcomm includes */
+import com.qualcomm.robotcore.hardware.Gamepad;
+
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
@@ -37,7 +37,7 @@ import org.firstinspires.ftc.core.tools.LogManager;
 import org.firstinspires.ftc.core.components.controllers.Controller;
 
 /* Component Under Test includes */
-import org.firstinspires.ftc.core.orchestration.controller.Condition;
+import org.firstinspires.ftc.core.orchestration.scheduler.Condition;
 
 @ExtendWith(MockitoExtension.class)
 public class ConditionTest {

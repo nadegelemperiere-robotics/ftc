@@ -20,12 +20,16 @@ public class RobotTest extends Robot {
 
     private double      mValue1;
     private double      mValue2;
+    private double      mValue3;
+    private double      mValue4;
+
+    private double      mX;
+    private double      mY;
+    private double      mHeading;
 
     public RobotTest(LogManager logger) {
         super(logger);
-        mHasTest1BeenCalled = false;
-        mValue1 = -1.0f;
-        mValue2 = -1.0f;
+        reset();
     }
 
     public void test1() {
@@ -37,10 +41,40 @@ public class RobotTest extends Robot {
         mValue2 = value2;
     }
 
+    public void drive(double x, double y, double heading) {
+        mX = x;
+        mY = y;
+        mHeading = heading;
+    }
+
+    public void command(double value3, double value4){
+        mValue3 = value3;
+        mValue4 = value4;
+    }
+
     public boolean test1Check() { return mHasTest1BeenCalled;}
 
     public double  test2Value1() { return mValue1; }
     public double  test2Value2() { return mValue2; }
+
+    public double  x()           { return mX; }
+    public double  y()           { return mY; }
+    public double  heading()     { return mHeading; }
+
+    public double  commandValue3() { return mValue3; }
+    public double  commandValue4() { return mValue4; }
+
+    public void    reset() {
+        mHasTest1BeenCalled = false;
+        mValue1     = -10000.0f;
+        mValue2     = -10000.0f;
+        mValue3     = -10000.0f;
+        mValue4     = -10000.0f;
+        mX          = -10000.0f;
+        mY          = -10000.0f;
+        mHeading    = -10000.0f;
+    }
+
 
 }
 

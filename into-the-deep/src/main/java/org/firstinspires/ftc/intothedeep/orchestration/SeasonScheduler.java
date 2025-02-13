@@ -13,8 +13,8 @@ package org.firstinspires.ftc.intothedeep.orchestration;
 import org.firstinspires.ftc.core.tools.LogManager;
 
 /* Controller includes */
-import org.firstinspires.ftc.core.orchestration.controller.Scheduler;
-import org.firstinspires.ftc.core.orchestration.controller.Condition;
+import org.firstinspires.ftc.core.orchestration.scheduler.Scheduler;
+import org.firstinspires.ftc.core.orchestration.scheduler.Condition;
 
 
 public class SeasonScheduler extends Scheduler {
@@ -24,13 +24,11 @@ public class SeasonScheduler extends Scheduler {
     }
 
     @Override
-    private     commands() {
+    private     void commands() {
 
         registerCommand(
                 new Condition(() -> mControllers.get("mechanisms").buttons.left_bumper.pressedOnce(), mLogger),
                 () -> mRobot.powerOuttakeSlides(0.9));
-
-
 
     }
 

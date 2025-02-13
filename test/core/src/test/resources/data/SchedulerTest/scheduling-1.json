@@ -1,0 +1,26 @@
+{
+	"scheduler" : {
+		"controllers": {
+				"1": {
+					"axes" : {
+							"left_stick_x"  : { "deadzone": 0.1 },
+							"left_stick_y"  : { "deadzone": 0.2 },
+							"right_stick_x" : { "deadzone": 0.3, "maximum" : 0.8 }
+					}
+				}
+        	},	
+        	"commands": [
+
+				{  "action": "drive",
+					"1": { "scale": 1.1,  "input": "left_stick_x", "controller" : "1" },
+					"2": { "scale": -1.0, "input": "left_stick_y", "controller" : "1" },
+					"3": { "scale": 1.0,  "input": "right_stick_x", "controller" : "1" }
+				},
+
+				{ "action" : "test1", "condition": { "button": "right_bumper", "state": "pressed", "controller" : "1" } },
+
+				{ "action" : "command", "1" : 0.7, "2" : 0.5, "condition": { "button": "a", "state": "pressedOnce", "controller" : "1" } }
+
+        	]
+    	}
+}

@@ -5,7 +5,7 @@
    Class mapping controller inputs to robot behavior
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.orchestration.controller;
+package org.firstinspires.ftc.core.orchestration.scheduler;
 
 /* System includes */
 import java.util.function.BooleanSupplier;

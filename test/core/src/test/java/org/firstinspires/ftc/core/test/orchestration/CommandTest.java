@@ -19,9 +19,6 @@ import android.os.Environment;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.qualcomm.robotcore.hardware.Gamepad;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +27,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+/* Qualcomm includes */
+import com.qualcomm.robotcore.hardware.Gamepad;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -41,7 +41,7 @@ import org.firstinspires.ftc.core.configuration.Configuration;
 import org.firstinspires.ftc.core.components.controllers.Controller;
 
 /* Controller includes */
-import org.firstinspires.ftc.core.orchestration.controller.Command;
+import org.firstinspires.ftc.core.orchestration.scheduler.Command;
 
 /* Tests includes */
 import org.firstinspires.ftc.core.orchestration.test.RobotTest;
@@ -113,22 +113,27 @@ public class CommandTest {
         mGamepad.left_trigger = 0;
         mCommand.execute();
         assertFalse(mRobot.test1Check(), "Command should not have called test1");
+        mRobot.reset();
         mGamepad.dpad_up = true;
         mGamepad.left_trigger = 0;
         mCommand.execute();
         assertFalse(mRobot.test1Check(), "Command should not have called test1");
+        mRobot.reset();
         mGamepad.dpad_up = true;
         mGamepad.left_trigger = 1.0f;
         mCommand.execute();
         assertFalse(mRobot.test1Check(), "Command should not have called test1");
+        mRobot.reset();
         mGamepad.dpad_up = false;
         mGamepad.left_trigger = 1.0f;
         mCommand.execute();
         assertFalse(mRobot.test1Check(), "Command should not have called test1");
+        mRobot.reset();
         mGamepad.dpad_up = true;
         mGamepad.left_trigger = 1.0f;
         mCommand.execute();
         assertTrue(mRobot.test1Check(), "Command should have called test1");
+        mRobot.reset();
 
     }
 
@@ -156,7 +161,7 @@ public class CommandTest {
         mCommand.execute();
         assertEquals(0.9,mRobot.test2Value1(), 0.0000001,"Command should have called test2 with parameter 0.9");
         assertEquals(0.5*0.4,mRobot.test2Value2(), 0.0000001,"Command should have called test2 with parameter 0.5*0.4");
-
+        mRobot.reset();
     }
 
 }

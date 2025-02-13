@@ -90,6 +90,7 @@ public class Controller implements Configurable {
         mConfigurationValid = true;
 
         buttons = new Buttons();
+
         buttons.a = new Button(gamepad, "a", logger);
         buttons.b = new Button(gamepad, "b", logger);
         buttons.x = new Button(gamepad, "x", logger);
@@ -117,6 +118,7 @@ public class Controller implements Configurable {
         buttons.right_stick_button  = new Button(gamepad, "right_stick_button", logger);
 
         axes = new Axes();
+
         axes.left_stick_x  = new Axis(gamepad, "left_stick_x", logger);
         axes.left_stick_y  = new Axis(gamepad, "left_stick_y", -1.0, logger);
         axes.left_trigger  = new Axis(gamepad, "left_trigger", logger);

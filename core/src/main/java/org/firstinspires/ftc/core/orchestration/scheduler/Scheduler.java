@@ -5,7 +5,7 @@
    Class mapping controller inputs to robot behavior
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.orchestration.controller;
+package org.firstinspires.ftc.core.orchestration.scheduler;
 
 /* System includes */
 import java.util.Map;
@@ -47,6 +47,8 @@ public class Scheduler implements Configurable {
     /**
      * ControlMapper constructor
      *
+     * @param controllers dynamic controllers for commands
+     * @param robot robot to command
      * @param logger logger
      */
     public Scheduler(Map<String,Controller> controllers, Robot robot, LogManager logger) {
@@ -55,8 +57,14 @@ public class Scheduler implements Configurable {
         mRobot       = robot;
         mConfigurationValid = true;
         mCommands = new ArrayList<>();
+        this.commands();
     }
 
+    /**
+     * Manages registration
+     *
+     * @param topic : topic under which the object was registered
+     */
     public void register(String topic) {}
     
     /**
@@ -84,18 +92,19 @@ public class Scheduler implements Configurable {
             }
         }
 
-//        if(reader.has(sCommandsKey)) {
-//            try {
-//                JSONArray commands = reader.getJSONArray(sCommandsKey);
-//                for (int i_command = 0; i_command < commands.length(); i_command ++) {
-//                    Command command = new Command(mControllers, mRobot, mLogger);
-//                    command.read((JSONObject) commands.get(i_command));
-//                }
-//            } catch(JSONException e) {
-//                mLogger.error("Error in configuration reading");
-//                mConfigurationValid = false;
-//            }
-//        }
+        if(reader.has(sCommandsKey)) {
+            try {
+                JSONArray commands = reader.getJSONArray(sCommandsKey);
+                for (int i_command = 0; i_command < commands.length(); i_command ++) {
+                    Command command = new Command(mControllers, mRobot, mLogger);
+                    command.read((JSONObject) commands.get(i_command));
+                    mCommands.add(command);
+                }
+            } catch(JSONException e) {
+                mLogger.error("Error in configuration reading");
+                mConfigurationValid = false;
+            }
+        }
 
     }
 
@@ -190,13 +199,32 @@ public class Scheduler implements Configurable {
         return result.toString();
     }
 
+    /**
+     * Function to loop into commands
+     */
     public void loop() {
+
+        for(int i_command = 0; i_command < mCommands.size(); i_command ++) {
+            mCommands.get(i_command).execute();
+        }
 
     }
 
-    public void registerCommand(Condition condition, Runnable action) {
+    /**
+     * Add command through code
+     *
+     * @param condition command condition
+     * @param action command action
+     */
+    protected void registerCommand(Condition condition, Runnable action) {
         mCommands.add(new Command(condition, action, mLogger));
     }
 
+    /**
+     * Function to overload to add command in scheduler
+     *
+     */
+    protected void commands() {
 
+    }
 }

@@ -2,10 +2,10 @@
    Copyright (c) [2025] Nadege LEMPERIERE
    All rights reserved
    -------------------------------------------------------
-   Class mapping controller inputs to robot behavior
+   Class managing a command
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.orchestration.controller;
+package org.firstinspires.ftc.core.orchestration.scheduler;
 
 /* System includes */
 import java.util.ArrayList;
@@ -94,6 +94,11 @@ public class Command implements Configurable {
         mConfigurationValid = true;
     }
 
+    /**
+     * Manages registration
+     *
+     * @param topic : topic under which the object was registered
+     */
     public void register(String topic) {}
 
     /**
@@ -104,6 +109,7 @@ public class Command implements Configurable {
     public void read(JSONObject reader) {
 
         mConfigurationValid = true;
+        int nbParams = reader.length();
 
         if(reader.has(sConditionKey)) {
             try {
@@ -113,12 +119,14 @@ public class Command implements Configurable {
                 mLogger.error("Error in configuration reading");
                 mConfigurationValid = false;
             }
+            nbParams --;
         }
 
         if(reader.has(sActionKey)) {
             try {
+                nbParams --;
                 String action = reader.getString(sActionKey);
-                if(reader.length() <= 2) {
+                if(nbParams == 0) {
                     Method method = mRobot.getClass().getMethod(action);
                     mAction = () -> {
                         try {
@@ -162,7 +170,7 @@ public class Command implements Configurable {
      */
     public void write(JSONObject writer) {
 
-
+        mLogger.error("Unable to write commands");
 
     }
 
@@ -208,8 +216,11 @@ public class Command implements Configurable {
 
     }
 
-
-
+    /**
+     * Reads JSON object and create condition recursively
+     *
+     * @param object : JSON object to read condition from
+     */
     private Condition readCondition(JSONObject object)
     {
         Condition result = null;
@@ -332,6 +343,13 @@ class ParamEvaluator {
     List<Runnable>          mProcessors;
     Map<String,Controller>  mControllers;
 
+    /**
+     * Parameter evaluator constructor
+     *
+     * @param object : JSON object to read parameters from
+     * @param controllers : controller objects to read dynamically
+     * @param logger : logger
+     */
     public ParamEvaluator(JSONObject object, Map<String,Controller> controllers, LogManager logger) {
         mParameters     = new ArrayList<>();
         mProcessors     = new ArrayList<>();
@@ -340,6 +358,11 @@ class ParamEvaluator {
         this.read(object);
     }
 
+    /**
+     * Reads JSON object and create parameters from it
+     *
+     * @param object : JSON object to read parameters from
+     */
     public void read(JSONObject object) {
 
         Iterator<String> keys = object.keys();
@@ -394,6 +417,9 @@ class ParamEvaluator {
         }
     }
 
+    /**
+     * Evaluate parameters current values
+     */
     public Object[]    evaluate() {
 
         mParameters.clear();
