@@ -33,9 +33,9 @@ import org.firstinspires.ftc.core.configuration.Configurable;
 
 public interface MotorComponent extends Configurable {
 
-    static final String sHwMapKey          = "hwmap";
-    static final String sDirectionKey      = "direction";
-    static final String sEncoderReverseKey = "encoder-reverse";
+    String sHwMapKey          = "hwmap";
+    String sDirectionKey      = "direction";
+    String sEncoderReverseKey = "encoder-reverse";
 
     Map<String, DcMotor.Direction> sString2Direction = Map.of(
             "reverse", DcMotor.Direction.REVERSE,
@@ -75,10 +75,10 @@ public interface MotorComponent extends Configurable {
 
     /* --------------------- Custom functions ---------------------- */
 
-    String                      getName();
+    String                      name();
     String                      logPositions();
-    boolean                     getEncoderCorrection();
-    void                        setEncoderCorrection(boolean value);
+    boolean                     encoderCorrection();
+    void                        encoderCorrection(boolean value);
 
     /* ------------------ Configurable functions ------------------- */
 
@@ -92,26 +92,26 @@ public interface MotorComponent extends Configurable {
 
     boolean	                    isBusy();
 
-    int	                        getCurrentPosition();
-    DcMotor.RunMode	            getMode();
-    int	                        getTargetPosition();
-    DcMotorSimple.Direction     getDirection();
-    DcMotor.ZeroPowerBehavior	getZeroPowerBehavior();
-    double                      getPower();
+    int	                        currentPosition();
+    DcMotor.RunMode	            mode();
+    int	                        targetPosition();
+    DcMotorSimple.Direction     direction();
+    DcMotor.ZeroPowerBehavior	zeroPowerBehavior();
+    double                      power();
 
-    void	                    setMode(DcMotor.RunMode mode);
-    void	                    setDirection(DcMotorSimple.Direction direction);
-    void	                    setTargetPosition(int position);
-    void	                    setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior);
-    void                        setPower(double power);
+    void	                    mode(DcMotor.RunMode mode);
+    void	                    direction(DcMotorSimple.Direction direction);
+    void	                    targetPosition(int position);
+    void	                    zeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior);
+    void                        power(double power);
 
     /* -------------------- DcMotorEx functions -------------------- */
 
-    void                        setPIDFCoefficients(DcMotor.RunMode mode, PIDFCoefficients pidfCoefficients);
-    PIDFCoefficients            getPIDFCoefficients(DcMotor.RunMode mode);
-    void                        setTargetPositionTolerance(int tolerance);
-    int                         getTargetPositionTolerance();
-    double                      getVelocity();
+    void                        PIDFCoefficients(DcMotor.RunMode mode, PIDFCoefficients pidfCoefficients);
+    PIDFCoefficients            PIDFCoefficients(DcMotor.RunMode mode);
+    void                        targetPositionTolerance(int tolerance);
+    int                         targetPositionTolerance();
+    double                      velocity();
 
 
 }

@@ -18,7 +18,7 @@ public class ServoControllerCoupled implements ServoControllerComponent {
 
     LogManager              mLogger;
 
-    boolean                 mReady;
+    boolean                 mConfigurationValid;
 
     String                  mName;
 
@@ -28,7 +28,7 @@ public class ServoControllerCoupled implements ServoControllerComponent {
     /* -------------- Constructors --------------- */
     public ServoControllerCoupled(ServoController first, ServoController second, String name, LogManager logger)
     {
-        mReady  = true;
+        mConfigurationValid  = true;
 
         mLogger = logger;
 
@@ -37,10 +37,10 @@ public class ServoControllerCoupled implements ServoControllerComponent {
         mFirst  = first;
         mSecond = second;
 
-        if(mFirst  == null) { mReady = false; }
-        if(mSecond == null) { mReady = false; }
+        if(mFirst  == null) { mConfigurationValid = false; }
+        if(mSecond == null) { mConfigurationValid = false; }
 
-        if(mReady && mFirst.equals(mSecond)) {
+        if(mConfigurationValid && mFirst.equals(mSecond)) {
             // If coupled servos have the same controller, it won't be possible to power one
             // without powering the other. It won't be possible to pilot them separately and
             // check if coupling won't destroy them.
@@ -50,15 +50,20 @@ public class ServoControllerCoupled implements ServoControllerComponent {
 
     /* --------------------- Custom functions ---------------------- */
 
+    /**
+     * Determines if the coupled servo controller component is configured correctly.
+     *
+     * @return True if the component is configured, false otherwise.
+     */
     @Override
-    public boolean                      isReady() { return mReady;}
+    public boolean                      isConfigured() { return mConfigurationValid;}
 
 
     /* ----------------- ServoController functions ----------------- */
 
     @Override
     public void	                        pwmEnable(){
-        if(mReady) {
+        if(mConfigurationValid) {
             mFirst.pwmEnable();
             mSecond.pwmDisable();
         }
@@ -66,15 +71,16 @@ public class ServoControllerCoupled implements ServoControllerComponent {
 
     @Override
     public void	                        pwmDisable(){
-        if(mReady) {
+        if(mConfigurationValid) {
             mFirst.pwmDisable();
             mSecond.pwmDisable();
         }
     }
+    
     @Override
-    public ServoController.PwmStatus	getPwmStatus(){
+    public ServoController.PwmStatus	pwmStatus(){
         ServoController.PwmStatus result = ServoController.PwmStatus.DISABLED;
-        if(mReady) {
+        if(mConfigurationValid) {
             result = mFirst.getPwmStatus();
         }
         return result;

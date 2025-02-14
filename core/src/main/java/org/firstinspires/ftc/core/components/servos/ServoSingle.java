@@ -7,14 +7,16 @@
 
 package org.firstinspires.ftc.core.components.servos;
 
+/* JSON includes */
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class ServoSingle implements ServoComponent {
 
@@ -50,15 +52,29 @@ public class ServoSingle implements ServoComponent {
     }
     /* --------------------- Custom functions ---------------------- */
 
+    /**
+     * Returns the servo reference name.
+     *
+     * @return the servo name
+     */
     @Override
-    public String                       getName() { return mName; }
+    public String                       name() { return mName; }
 
 
     /* ------------------ Configurable functions ------------------- */
-
+    /**
+     * Determines if the coupled servo component is configured correctly.
+     *
+     * @return True if the component is configured, false otherwise.
+     */
     @Override
     public boolean                      isConfigured() { return mConfigurationValid;}
 
+    /**
+     * Reads and applies the servo configuration from a JSON object.
+     *
+     * @param reader The JSON object containing configuration settings.
+     */
     @Override
     public void                         read(JSONObject reader) {
 
@@ -88,47 +104,70 @@ public class ServoSingle implements ServoComponent {
 
     }
 
+    /**
+     * Writes the current servo configuration to a JSON object.
+     *
+     * @param writer The JSON object to store the configuration settings.
+     */
     @Override
     public void                         write(JSONObject writer) {
 
-        try {
-            writer.put(sHwMapKey,mHwName);
-            writer.put(sReverseKey,mServo.getDirection() == Servo.Direction.REVERSE);
+        if(mConfigurationValid) {
 
+            try {
+                writer.put(sHwMapKey, mHwName);
+                writer.put(sReverseKey, mServo.getDirection() == Servo.Direction.REVERSE);
+
+            } catch (JSONException e) { mLogger.error(e.getMessage()); }
         }
-        catch(JSONException e) { mLogger.error(e.getMessage()); }
 
     }
 
+    /**
+     * Generates an HTML representation of the servo configuration for logging purposes.
+     *
+     * @return A string containing the HTML-formatted servo configuration.
+     */
     @Override
     public String                       logConfigurationHTML() {
 
         StringBuilder result = new StringBuilder();
 
-        if (mServo != null) {
-            result.append("<li style=\"padding-left:10px; font-size: 11px\">")
-                    .append("HW : ")
-                    .append(mHwName)
-                    .append(" - REV : ")
-                    .append(mServo.getDirection() == Servo.Direction.REVERSE)
-                    .append("</li>\n");
-        }
+        if(mConfigurationValid) {
 
+            if (mServo != null) {
+                result.append("<li style=\"padding-left:10px; font-size: 11px\">")
+                        .append("HW : ")
+                        .append(mHwName)
+                        .append(" - REV : ")
+                        .append(mServo.getDirection() == Servo.Direction.REVERSE)
+                        .append("</li>\n");
+            }
+        }
         return result.toString();
 
     }
+
+    /**
+     * Generates a text-based representation of the servo configuration for logging.
+     *
+     * @param header A string to prepend to the configuration log.
+     * @return A string containing the formatted servo configuration details.
+     */
     @Override
     public String                       logConfigurationText(String header) {
 
         StringBuilder result = new StringBuilder();
+        if(mConfigurationValid) {
 
-        if (mServo != null) {
-            result.append(header)
-                    .append("> HW :")
-                    .append(mHwName)
-                    .append(" - REV : ")
-                    .append(mServo.getDirection() == Servo.Direction.REVERSE)
-                    .append("\n");
+            if (mServo != null) {
+                result.append(header)
+                        .append("> HW :")
+                        .append(mHwName)
+                        .append(" - REV : ")
+                        .append(mServo.getDirection() == Servo.Direction.REVERSE)
+                        .append("\n");
+            }
         }
 
         return result.toString();
@@ -137,13 +176,23 @@ public class ServoSingle implements ServoComponent {
 
     /* ---------------------- Servo functions ---------------------- */
 
+    /**
+     * Retrieves the servo controller managing this component.
+     *
+     * @return The associated ServoControllerComponent.
+     */
     @Override
-    public ServoControllerComponent     getController() {
+    public ServoControllerComponent     controller() {
         return mController;
     }
 
+    /**
+     * Retrieves the current direction of the servo.
+     *
+     * @return The direction of the servo (FORWARD or REVERSE).
+     */
     @Override
-    public Servo.Direction	            getDirection()
+    public Servo.Direction	            direction()
     {
         Servo.Direction result = Servo.Direction.FORWARD;
         if(mConfigurationValid) {
@@ -152,8 +201,13 @@ public class ServoSingle implements ServoComponent {
         return result;
     }
 
+    /**
+     * Retrieves the position of the servo.
+     *
+     * @return The servo position in the range [0,1], or -1 if not configured.
+     */
     @Override
-    public double	                    getPosition()
+    public double	                    position()
     {
         double result = -1;
         if(mConfigurationValid) {
@@ -162,6 +216,12 @@ public class ServoSingle implements ServoComponent {
         return result;
     }
 
+    /**
+     * Scales the range of motion for the servos.
+     *
+     * @param min The new minimum position (0.0 to 1.0).
+     * @param max The new maximum position (0.0 to 1.0).
+     */
     @Override
     public void	                        scaleRange(double min, double max)
     {
@@ -170,16 +230,26 @@ public class ServoSingle implements ServoComponent {
         }
     }
 
+    /**
+     * Sets the direction of the servos.
+     *
+     * @param direction The new direction (FORWARD or REVERSE).
+     */
     @Override
-    public void	                        setDirection(Servo.Direction direction)
+    public void	                        direction(Servo.Direction direction)
     {
         if(mConfigurationValid) {
             mServo.setDirection(direction);
         }
     }
 
+    /**
+     * Sets the position of the servos.
+     *
+     * @param position The new position to reach
+     */
     @Override
-    public void	                        setPosition(double position)
+    public void	                        position(double position)
     {
         if(mConfigurationValid) {
             mServo.setPosition(position);

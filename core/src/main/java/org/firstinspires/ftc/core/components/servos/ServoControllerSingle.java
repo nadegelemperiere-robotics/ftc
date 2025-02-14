@@ -17,7 +17,7 @@ public class ServoControllerSingle implements ServoControllerComponent {
 
     LogManager              mLogger;
 
-    boolean                 mReady;
+    boolean                 mConfigurationValid;
 
     String                  mName;
 
@@ -26,7 +26,7 @@ public class ServoControllerSingle implements ServoControllerComponent {
     /* -------------- Constructors --------------- */
     public ServoControllerSingle(ServoController controller, String name, LogManager logger)
     {
-        mReady      = true;
+        mConfigurationValid      = true;
 
         mLogger     = logger;
 
@@ -34,34 +34,39 @@ public class ServoControllerSingle implements ServoControllerComponent {
 
         mController = controller;
 
-        if(mController == null) { mReady = false; }
+        if(mController == null) { mConfigurationValid = false; }
     }
 
     /* --------------------- Custom functions ---------------------- */
 
+    /**
+     * Determines if the servo controller component is configured correctly.
+     *
+     * @return True if the component is configured, false otherwise.
+     */
     @Override
-    public boolean                      isReady() { return mReady;}
+    public boolean                      isConfigured() { return mConfigurationValid;}
 
 
     /* ----------------- ServoController functions ----------------- */
 
     @Override
     public void	                        pwmEnable(){
-        if(mReady) {
+        if(mConfigurationValid) {
             mController.pwmEnable();
         }
     }
 
     @Override
     public void	                        pwmDisable(){
-        if(mReady) {
+        if(mConfigurationValid) {
             mController.pwmDisable();
         }
     }
     @Override
-    public ServoController.PwmStatus	getPwmStatus(){
+    public ServoController.PwmStatus	pwmStatus(){
         ServoController.PwmStatus result = ServoController.PwmStatus.DISABLED;
-        if(mReady) {
+        if(mConfigurationValid) {
             result = mController.getPwmStatus();
         }
         return result;

@@ -276,14 +276,14 @@ public class MotorTuning extends LinearOpMode{
 
                 if (i_motor == 0) {
                     if (mMode.get() == Mode.FIRST || mMode.get() == Mode.BOTH) {
-                        hwMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        hwMotor.setPower(Value);
+                        hwMotor.mode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        hwMotor.power(Value);
                     }
                 }
                 if (i_motor == 1) {
                     if (mMode.get() == Mode.SECOND || mMode.get() == Mode.BOTH) {
-                        hwMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        hwMotor.setPower(Value);
+                        hwMotor.mode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        hwMotor.power(Value);
                     }
                 }
 
@@ -300,16 +300,16 @@ public class MotorTuning extends LinearOpMode{
 
                 if (i_motor == 0) {
                     if (mMode.get() == Mode.FIRST || mMode.get() == Mode.BOTH) {
-                        hwMotor.setTargetPosition(mTargetPosition);
-                        hwMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        hwMotor.setPower(1.0);
+                        hwMotor.targetPosition(mTargetPosition);
+                        hwMotor.mode(DcMotor.RunMode.RUN_TO_POSITION);
+                        hwMotor.power(1.0);
                     }
                 }
                 if (i_motor == 1) {
                     if (mMode.get() == Mode.SECOND || mMode.get() == Mode.BOTH) {
-                        hwMotor.setTargetPosition(mTargetPosition);
-                        hwMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        hwMotor.setPower(1.0);
+                        hwMotor.targetPosition(mTargetPosition);
+                        hwMotor.mode(DcMotor.RunMode.RUN_TO_POSITION);
+                        hwMotor.power(1.0);
                     }
                 }
 
@@ -328,12 +328,12 @@ public class MotorTuning extends LinearOpMode{
 
                 // Log motor state
                 logger.info("--> Motor " + i_motor);
-                logger.info("-----> HwMap : " + hwMotor.getName());
-                logger.info("-----> Direction : " + hwMotor.getDirection());
-                logger.info("-----> Position : " + hwMotor.getCurrentPosition());
-                logger.info("-----> Target : " + hwMotor.getTargetPosition());
-                logger.info("-----> Power : " + hwMotor.getPower());
-                logger.info("-----> Mode : " + hwMotor.getMode());
+                logger.info("-----> HwMap : " + hwMotor.name());
+                logger.info("-----> Direction : " + hwMotor.direction());
+                logger.info("-----> Position : " + hwMotor.currentPosition());
+                logger.info("-----> Target : " + hwMotor.targetPosition());
+                logger.info("-----> Power : " + hwMotor.power());
+                logger.info("-----> Mode : " + hwMotor.mode());
                 logger.info("-----> Busy : " + hwMotor.isBusy());
             }
         }
@@ -383,9 +383,9 @@ public class MotorTuning extends LinearOpMode{
             mMotor = motor;
         }
         @Override
-        public Boolean get()           { return mMotor.getEncoderCorrection(); }
+        public Boolean get()           { return mMotor.encoderCorrection(); }
         @Override
-        public void set(Boolean Value) { mMotor.setEncoderCorrection(Value);   }
+        public void set(Boolean Value) { mMotor.encoderCorrection(Value);   }
     }
 
     // DirectionProvider updates the controller reverse configuration
@@ -401,15 +401,15 @@ public class MotorTuning extends LinearOpMode{
         public Direction get()           {
             Direction result = Direction.FORWARD;
 
-            DcMotor.Direction direction = mMotor.getDirection();
+            DcMotor.Direction direction = mMotor.direction();
             if(direction == DcMotor.Direction.REVERSE) { result = Direction.REVERSE; }
 
             return result;
         }
         @Override
         public void set(Direction Value) {
-            if (Value == Direction.REVERSE) { mMotor.setDirection(DcMotor.Direction.REVERSE); }
-            if (Value == Direction.FORWARD) { mMotor.setDirection(DcMotor.Direction.FORWARD); }
+            if (Value == Direction.REVERSE) { mMotor.direction(DcMotor.Direction.REVERSE); }
+            if (Value == Direction.FORWARD) { mMotor.direction(DcMotor.Direction.FORWARD); }
         }
     }
 

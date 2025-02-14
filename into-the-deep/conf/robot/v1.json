@@ -34,10 +34,10 @@
             "odometers": {
                 "otos": {
                     "hwmap": "sensor_otos",
-                    "heading-offset" : 0.0,
-                    "x-offset" : 0.0,
-                    "y-offset" : 0.0,
-                    "heading-ratio" : 1.0,
+                    "heading-offset" : 0.03,
+                    "x-offset" : 0.4566,
+                    "y-offset" : -3.5984,
+                    "heading-ratio" : 0.9964,
                     "position-ratio" : 1.0
                 }
             },

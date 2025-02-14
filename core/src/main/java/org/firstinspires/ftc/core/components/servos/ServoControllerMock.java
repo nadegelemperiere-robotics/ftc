@@ -18,7 +18,7 @@ public class ServoControllerMock implements ServoControllerComponent {
 
     LogManager                  mLogger;
 
-    boolean                     mReady;
+    boolean                     mConfigurationValid;
 
     ServoController.PwmStatus   mStatus;
 
@@ -26,15 +26,20 @@ public class ServoControllerMock implements ServoControllerComponent {
     /* -------------- Constructors --------------- */
     public ServoControllerMock( LogManager logger)
     {
-        mReady  = true;
-        mLogger = logger;
-        mStatus = ServoController.PwmStatus.DISABLED;
+        mConfigurationValid = true;
+        mLogger             = logger;
+        mStatus             = ServoController.PwmStatus.DISABLED;
     }
 
     /* --------------------- Custom functions ---------------------- */
 
+    /**
+     * Determines if the mock servo controller component is configured correctly.
+     *
+     * @return True if the component is configured, false otherwise.
+     */
     @Override
-    public boolean                      isReady() { return mReady;}
+    public boolean                      isConfigured() { return mConfigurationValid;}
 
     /* ----------------- ServoController functions ----------------- */
 
@@ -49,6 +54,6 @@ public class ServoControllerMock implements ServoControllerComponent {
     }
 
     @Override
-    public ServoController.PwmStatus	getPwmStatus() { return mStatus; }
+    public ServoController.PwmStatus	pwmStatus() { return mStatus; }
 
 }

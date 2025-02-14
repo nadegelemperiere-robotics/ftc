@@ -1,14 +1,55 @@
-/* -------------------------------------------------------
-   Copyright (c) [2025] Nadege LEMPERIERE
-   All rights reserved
-   -------------------------------------------------------
-   CoupledMotor class overloads the FTC motor class to manage
-   A couple of motors both turning the same hardware.
-
-   Note that this is a dangerous situation which can result in
-   motor destruction if not correctly tuned. The coupled motors
-   shall be the same model
-   ------------------------------------------------------- */
+/**
+ * -------------------------------------------------------
+ * Copyright (c) 2025 Nadege LEMPERIERE
+ * All rights reserved
+ * -------------------------------------------------------
+ * MotorCoupled class extends the FTC motor functionality
+ * to manage a pair of motors that control the same hardware.
+ * <p>
+ * WARNING: This configuration can be dangerous and may
+ * result in motor damage if not properly tuned. The coupled
+ * motors must be identical models.
+ * -------------------------------------------------------
+ * <p>
+ * This class ensures synchronized control of two motors,
+ * allowing them to operate as a single unit. It provides
+ * features for reading and writing configurations, setting
+ * encoder corrections, and logging motor statuses.
+ * <p>
+ * Features:
+ * - Couples two motors to function as one.
+ * - Manages motor configurations using JSON input.
+ * - Provides encoder correction for reversed directions.
+ * - Supports logging of motor positions, power, and velocity.
+ * - Implements standard FTC DcMotor and DcMotorEx behaviors.
+ * <p>
+ * Dependencies:
+ * - Qualcomm Robotics SDK
+ * - FTC SDK
+ * - JSON Processing (org.json)
+ * - Custom LogManager for logging
+ * <p>
+ * Usage:
+ * 1. Create an instance of MotorCoupled with the robot's
+ *    hardware map and logger.
+ * 2. Configure the motors by reading a JSON configuration.
+ * 3. Control the motors using standard FTC motor functions.
+ * <p>
+ * Example:
+ * {@code
+ *      JSONObject config = new JSONObject();
+ *      JSONObject firstMotor = new JSONObject();
+ *      JSONObject secondMotor = new JSONObject();
+ *      firstMotor.put("hwmap", "left_motor");
+ *      secondMotor.put("hwmap", "right_motor");
+ *      config.put("first", firstMotor);
+ *      config.put("second", secondMotor);
+ * <p>
+ *      MotorCoupled coupledMotor = new MotorCoupled("drive", hardwareMap, logger);
+ *      coupledMotor.read(config);
+ *      coupledMotor.setPower(0.5);
+ * }
+ */
 
 package org.firstinspires.ftc.core.components.motors;
 
@@ -49,7 +90,13 @@ public class MotorCoupled implements MotorComponent {
 
 
     /* ----------------------- Constructors ------------------------ */
-
+    /**
+     * Constructs a MotorCoupled instance.
+     *
+     * @param name   The name of the coupled motor component.
+     * @param hwMap  The FTC HardwareMap to retrieve motor hardware.
+     * @param logger The logging manager for error reporting and debugging.
+     */
     public MotorCoupled(String name, HardwareMap hwMap, LogManager logger)
     {
         mLogger                 = logger;
@@ -70,16 +117,31 @@ public class MotorCoupled implements MotorComponent {
 
     /* --------------------- Custom functions ---------------------- */
 
+    /**
+            * Retrieves the name of the coupled motor component.
+            *
+            * @return The name of the component.
+     */
     @Override
-    public String                       getName() { return mName; }
+    public String                       name() { return mName; }
 
+    /**
+     * Determines if encoder correction is required.
+     *
+     * @return True if at least one motor has inverted encoder behavior, false otherwise.
+     */
     @Override
-    public boolean                      getEncoderCorrection() { return ((mFirstInvertPosition == -1) || (mSecondInvertPosition == -1)); }
+    public boolean                      encoderCorrection() { return ((mFirstInvertPosition == -1) || (mSecondInvertPosition == -1)); }
 
+    /**
+     * Enables or disables encoder correction.
+     *
+     * @param shallCorrect True to enable encoder correction, false to disable.
+     */
     @Override
-    public void                         setEncoderCorrection( boolean ShallCorrect) {
+    public void                         encoderCorrection(boolean shallCorrect) {
         if (mConfigurationValid) {
-            if (ShallCorrect) {
+            if (shallCorrect) {
                 mFirstInvertPosition = -1;
                 mSecondInvertPosition = -1;
             } else {
@@ -89,11 +151,15 @@ public class MotorCoupled implements MotorComponent {
         }
     }
 
+    /**
+     * Logs the current motor positions, velocities, and power levels.
+     *
+     * @return A formatted string containing motor telemetry data.
+     */
     @Override
-    public String                       logPositions()
-    {
+    public String                       logPositions() {
         String result = "";
-        if(mConfigurationValid) {
+        if (mConfigurationValid) {
             result += "\n  First : P : " + mFirst.getCurrentPosition() + " V : " + mFirst.getVelocity() + " P : " + mFirst.getPower();
             result += "\n  Second : P : " + mSecond.getCurrentPosition() + " V : " + mSecond.getVelocity() + " P : " + mSecond.getPower();
         }
@@ -102,9 +168,19 @@ public class MotorCoupled implements MotorComponent {
 
     /* ------------------ Configurable functions ------------------- */
 
+    /**
+     * Determines if the coupled motor component is configured correctly.
+     *
+     * @return True if the component is configured, false otherwise.
+     */
     @Override
     public boolean                      isConfigured() { return mConfigurationValid;}
 
+    /**
+     * Reads and applies the motor configuration from a JSON object.
+     *
+     * @param reader The JSON object containing configuration settings.
+     */
     @Override
     public void                         read(JSONObject reader) {
 
@@ -168,94 +244,118 @@ public class MotorCoupled implements MotorComponent {
 
     }
 
+    /**
+     * Writes the current motor configuration to a JSON object.
+     *
+     * @param writer The JSON object to store the configuration settings.
+     */
     @Override
     public void                         write(JSONObject writer) {
 
-        JSONObject first = new JSONObject();
-        JSONObject second = new JSONObject();
+        if(mConfigurationValid) {
 
-        try {
-            if(mFirst != null) {
-                String direction = sDirection2String.get(mFirst.getDirection());
-                first.put(sHwMapKey,mFirstHwName);
-                first.put(sDirectionKey,direction);
-                first.put(sEncoderReverseKey, mFirstInvertPosition==-1);
-            }
-            if(mSecond != null) {
-                String direction = sDirection2String.get(mSecond.getDirection());
-                second.put(sHwMapKey,mSecondHwName);
-                second.put(sDirectionKey,direction);
-                second.put(sEncoderReverseKey, mSecondInvertPosition==-1);
-            }
+            JSONObject first = new JSONObject();
+            JSONObject second = new JSONObject();
 
-            writer.put(sFirstKey,first);
-            writer.put(sSecondKey,second);
+            try {
+                if (mFirst != null) {
+                    String direction = sDirection2String.get(mFirst.getDirection());
+                    first.put(sHwMapKey, mFirstHwName);
+                    first.put(sDirectionKey, direction);
+                    first.put(sEncoderReverseKey, mFirstInvertPosition == -1);
+                }
+                if (mSecond != null) {
+                    String direction = sDirection2String.get(mSecond.getDirection());
+                    second.put(sHwMapKey, mSecondHwName);
+                    second.put(sDirectionKey, direction);
+                    second.put(sEncoderReverseKey, mSecondInvertPosition == -1);
+                }
+
+                writer.put(sFirstKey, first);
+                writer.put(sSecondKey, second);
+            } catch (JSONException e) { mLogger.error(e.getMessage()); }
         }
-        catch(JSONException e) { mLogger.error(e.getMessage()); }
 
     }
 
+    /**
+     * Generates an HTML representation of the motor configuration for logging purposes.
+     *
+     * @return A string containing the HTML-formatted motor configuration.
+     */
     @Override
     public String                       logConfigurationHTML() {
 
         StringBuilder result = new StringBuilder();
 
-        if (mFirst != null) {
-            result.append("<li style=\"padding-left:10px; font-size: 11px\">")
-                    .append("ID : ")
-                    .append(sFirstKey)
-                    .append(" - HW : ")
-                    .append(mFirstHwName)
-                    .append(" - DIR : ")
-                    .append(sDirection2String.get(mFirst.getDirection()))
-                    .append(" - ENC : ")
-                    .append(mFirstInvertPosition==-1)
-                    .append("</li>\n");
-        }
-        if (mSecond != null) {
-            result.append("<li style=\"padding-left:10px; font-size: 11px\">")
-                    .append("ID : ")
-                    .append(sSecondKey)
-                    .append(" - HW : ")
-                    .append(mSecondHwName)
-                    .append(" - DIR : ")
-                    .append(sDirection2String.get(mSecond.getDirection()))
-                    .append(" - ENC : ")
-                    .append(mSecondInvertPosition==-1)
-                    .append("</li>\n");
+        if(mConfigurationValid) {
+
+            if (mFirst != null) {
+                result.append("<li style=\"padding-left:10px; font-size: 11px\">")
+                        .append("ID : ")
+                        .append(sFirstKey)
+                        .append(" - HW : ")
+                        .append(mFirstHwName)
+                        .append(" - DIR : ")
+                        .append(sDirection2String.get(mFirst.getDirection()))
+                        .append(" - ENC : ")
+                        .append(mFirstInvertPosition == -1)
+                        .append("</li>\n");
+            }
+            if (mSecond != null) {
+                result.append("<li style=\"padding-left:10px; font-size: 11px\">")
+                        .append("ID : ")
+                        .append(sSecondKey)
+                        .append(" - HW : ")
+                        .append(mSecondHwName)
+                        .append(" - DIR : ")
+                        .append(sDirection2String.get(mSecond.getDirection()))
+                        .append(" - ENC : ")
+                        .append(mSecondInvertPosition == -1)
+                        .append("</li>\n");
+            }
         }
 
         return result.toString();
 
     }
+
+    /**
+     * Generates a text-based representation of the motor configuration for logging.
+     *
+     * @param header A string to prepend to the configuration log.
+     * @return A string containing the formatted motor configuration details.
+     */
     @Override
     public String                       logConfigurationText(String header) {
 
         StringBuilder result = new StringBuilder();
 
-        if (mFirst != null) {
-            result.append(header)
-                    .append("> ")
-                    .append(sFirstKey)
-                    .append(" HW :")
-                    .append(mFirstHwName)
-                    .append(" - DIR : ")
-                    .append(sDirection2String.get(mFirst.getDirection()))
-                    .append(" - ENC : ")
-                    .append(mFirstInvertPosition==-1)
-                    .append("\n");
-        }
-        if (mSecond != null) {
-            result.append(header)
-                    .append("> ")
-                    .append(sSecondKey)
-                    .append(" HW : ")
-                    .append(mSecondHwName)
-                    .append(" - DIR : ")
-                    .append(sDirection2String.get(mSecond.getDirection()))
-                    .append(" - ENC : ")
-                    .append(mSecondInvertPosition==-1)
-                    .append("\n");
+        if(mConfigurationValid) {
+            if (mFirst != null) {
+                result.append(header)
+                        .append("> ")
+                        .append(sFirstKey)
+                        .append(" HW :")
+                        .append(mFirstHwName)
+                        .append(" - DIR : ")
+                        .append(sDirection2String.get(mFirst.getDirection()))
+                        .append(" - ENC : ")
+                        .append(mFirstInvertPosition == -1)
+                        .append("\n");
+            }
+            if (mSecond != null) {
+                result.append(header)
+                        .append("> ")
+                        .append(sSecondKey)
+                        .append(" HW : ")
+                        .append(mSecondHwName)
+                        .append(" - DIR : ")
+                        .append(sDirection2String.get(mSecond.getDirection()))
+                        .append(" - ENC : ")
+                        .append(mSecondInvertPosition == -1)
+                        .append("\n");
+            }
         }
 
         return result.toString();
@@ -265,7 +365,7 @@ public class MotorCoupled implements MotorComponent {
     /* --------------------- DcMotor functions --------------------- */
 
     @Override
-    public int	                        getCurrentPosition()
+    public int	                        currentPosition()
     {
         int result = -1;
         if(mConfigurationValid) {
@@ -276,14 +376,14 @@ public class MotorCoupled implements MotorComponent {
     }
 
     @Override
-    public DcMotorSimple.Direction      getDirection()
+    public DcMotorSimple.Direction      direction()
     {
         return mDirection;
     }
 
 
     @Override
-    public DcMotor.RunMode	            getMode()
+    public DcMotor.RunMode	            mode()
     {
         DcMotor.RunMode result =  DcMotor.RunMode.RUN_WITHOUT_ENCODER;
         if (mConfigurationValid) { result = mFirst.getMode(); }
@@ -291,7 +391,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     @Override
-    public int	                        getTargetPosition()
+    public int	                        targetPosition()
     {
         int result = -1;
         if(mConfigurationValid) {
@@ -302,7 +402,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     @Override
-    public double	                    getPower()
+    public double	                    power()
     {
         double result = -1;
         if(mConfigurationValid) {
@@ -312,7 +412,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     @Override
-    public DcMotor.ZeroPowerBehavior	getZeroPowerBehavior()
+    public DcMotor.ZeroPowerBehavior	zeroPowerBehavior()
     {
         DcMotor.ZeroPowerBehavior result = DcMotor.ZeroPowerBehavior.UNKNOWN;
         if(mConfigurationValid) { result = mFirst.getZeroPowerBehavior(); }
@@ -328,7 +428,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     @Override
-    public void	                        setMode(DcMotor.RunMode mode)
+    public void	                        mode(DcMotor.RunMode mode)
     {
         if(mConfigurationValid) {
             mFirst.setMode(mode);
@@ -337,7 +437,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     @Override
-    public void	                        setDirection(DcMotorSimple.Direction direction)
+    public void	                        direction(DcMotorSimple.Direction direction)
     {
         if(direction != mDirection && mConfigurationValid) {
 
@@ -353,7 +453,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     @Override
-    public void	                        setTargetPosition(int position)
+    public void	                        targetPosition(int position)
     {
         if(mConfigurationValid) {
             mFirst.setTargetPosition(mFirstInvertPosition * position);
@@ -362,7 +462,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     @Override
-    public void	                        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior)
+    public void	                        zeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior)
     {
         if(mConfigurationValid) {
             mFirst.setZeroPowerBehavior(zeroPowerBehavior);
@@ -371,7 +471,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     @Override
-    public void	                        setPower(double power)
+    public void	                        power(double power)
     {
         if(mConfigurationValid) {
             mFirst.setPower(power);
@@ -382,7 +482,7 @@ public class MotorCoupled implements MotorComponent {
     /* -------------------- DcMotorEx functions -------------------- */
 
     @Override
-    public PIDFCoefficients             getPIDFCoefficients(DcMotor.RunMode mode){
+    public PIDFCoefficients             PIDFCoefficients(DcMotor.RunMode mode){
         PIDFCoefficients result = null;
         if(mConfigurationValid) {
             result = mSecond.getPIDFCoefficients(mode);
@@ -391,7 +491,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     @Override
-    public void                        setPIDFCoefficients(DcMotor.RunMode mode, PIDFCoefficients pidfCoefficients){
+    public void                        PIDFCoefficients(DcMotor.RunMode mode, PIDFCoefficients pidfCoefficients){
         if(mConfigurationValid) {
             mFirst.setPIDFCoefficients(mode, pidfCoefficients);
             mSecond.setPIDFCoefficients(mode, pidfCoefficients);
@@ -399,7 +499,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     @Override
-    public void                        setTargetPositionTolerance(int tolerance)
+    public void                        targetPositionTolerance(int tolerance)
     {
         if(mConfigurationValid) {
             mFirst.setTargetPositionTolerance(tolerance);
@@ -408,7 +508,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     @Override
-    public int                         getTargetPositionTolerance()
+    public int                         targetPositionTolerance()
     {
         int result = -1;
         if(mConfigurationValid) {
@@ -419,7 +519,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     @Override
-    public double                       getVelocity()
+    public double                       velocity()
     {
         double result = 0;
         if(mConfigurationValid) {

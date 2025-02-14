@@ -18,13 +18,13 @@ public interface ServoControllerComponent {
 
     /* --------------------- Custom functions ---------------------- */
 
-    boolean                     isReady();
+    boolean                     isConfigured();
 
     /* -------------- ServoController methods override ------------- */
 
     void	                    pwmEnable()	;
     void	                    pwmDisable();
-    ServoController.PwmStatus	getPwmStatus();
+    ServoController.PwmStatus	pwmStatus();
 
 
 }

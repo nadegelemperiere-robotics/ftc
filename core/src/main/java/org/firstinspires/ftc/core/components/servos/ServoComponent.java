@@ -27,8 +27,8 @@ import org.firstinspires.ftc.core.configuration.Configurable;
 
 public interface ServoComponent extends Configurable {
 
-    static  final String sHwMapKey      = "hwmap";
-    static  final String sReverseKey    = "reverse";
+    String sHwMapKey      = "hwmap";
+    String sReverseKey    = "reverse";
 
     static ServoComponent factory(String name, JSONArray reader, HardwareMap map, LogManager logger) {
 
@@ -59,7 +59,7 @@ public interface ServoComponent extends Configurable {
 
     /* --------------------- Custom functions ---------------------- */
 
-    String                      getName();
+    String                      name();
 
     /* ------------------ Configurable functions ------------------- */
 
@@ -71,13 +71,13 @@ public interface ServoComponent extends Configurable {
 
     /* ---------- Servo methods override --------- */
 
-    ServoControllerComponent    getController();
+    ServoControllerComponent    controller();
 
-    Servo.Direction             getDirection();
-    double	                    getPosition();
+    Servo.Direction             direction();
+    double	                    position();
     void	                    scaleRange(double min, double max);
 
-    void	                    setDirection(Servo.Direction direction);
-    void	                    setPosition(double position);
+    void	                    direction(Servo.Direction direction);
+    void	                    position(double position);
 
 }

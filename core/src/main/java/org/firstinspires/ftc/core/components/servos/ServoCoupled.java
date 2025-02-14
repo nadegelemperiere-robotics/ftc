@@ -71,14 +71,29 @@ public class ServoCoupled implements ServoComponent {
 
     /* --------------------- Custom functions ---------------------- */
 
+    /**
+     * Returns the servo reference name.
+     *
+     * @return the servo name
+     */
     @Override
-    public String                       getName() { return mName; }
+    public String                       name() { return mName; }
 
     /* ------------------ Configurable functions ------------------- */
 
+    /**
+     * Determines if the coupled servo component is configured correctly.
+     *
+     * @return True if the component is configured, false otherwise.
+     */
     @Override
     public boolean                      isConfigured() { return mConfigurationValid;}
 
+    /**
+     * Reads and applies the servo configuration from a JSON object.
+     *
+     * @param reader The JSON object containing configuration settings.
+     */
     @Override
     public void                         read(JSONObject reader) {
 
@@ -130,82 +145,109 @@ public class ServoCoupled implements ServoComponent {
 
     }
 
+    /**
+     * Writes the current servo configuration to a JSON object.
+     *
+     * @param writer The JSON object to store the configuration settings.
+     */
     @Override
     public void                         write(JSONObject writer) {
 
-        JSONObject first = new JSONObject();
-        JSONObject second = new JSONObject();
+        if(mConfigurationValid) {
 
-        try {
-            if(mFirst != null) {
-                first.put(sHwMapKey,mFirstHwName);
-                first.put(sReverseKey,mFirst.getDirection() == Servo.Direction.REVERSE);
-            }
-            if(mSecond != null) {
-                second.put(sHwMapKey,mSecondHwName);
-                second.put(sReverseKey,mSecond.getDirection() == Servo.Direction.REVERSE);
-            }
+            JSONObject first = new JSONObject();
+            JSONObject second = new JSONObject();
 
-            writer.put(sFirstKey,first);
-            writer.put(sSecondKey,second);
+            try {
+                if (mFirst != null) {
+                    first.put(sHwMapKey, mFirstHwName);
+                    first.put(sReverseKey, mFirst.getDirection() == Servo.Direction.REVERSE);
+                }
+                if (mSecond != null) {
+                    second.put(sHwMapKey, mSecondHwName);
+                    second.put(sReverseKey, mSecond.getDirection() == Servo.Direction.REVERSE);
+                }
+
+                writer.put(sFirstKey, first);
+                writer.put(sSecondKey, second);
+            } catch (JSONException e) {
+                mLogger.error(e.getMessage());
+            }
         }
-        catch(JSONException e) { mLogger.error(e.getMessage()); }
 
     }
 
+    /**
+     * Generates an HTML representation of the servo configuration for logging purposes.
+     *
+     * @return A string containing the HTML-formatted servo configuration.
+     */
     @Override
     public String                       logConfigurationHTML() {
 
         StringBuilder result = new StringBuilder();
 
-        if (mFirst != null) {
-            result.append("<li style=\"padding-left:10px; font-size: 11px\">")
-                    .append("ID : ")
-                    .append(sFirstKey)
-                    .append(" - HW : ")
-                    .append(mFirstHwName)
-                    .append(" - REV : ")
-                    .append(mFirst.getDirection() == Servo.Direction.REVERSE)
-                    .append("</li>\n");
-        }
-        if (mSecond != null) {
-            result.append("<li style=\"padding-left:10px; font-size: 11px\">")
-                    .append("ID : ")
-                    .append(sSecondKey)
-                    .append(" - HW : ")
-                    .append(mSecondHwName)
-                    .append(" - REV : ")
-                    .append(mSecond.getDirection() == Servo.Direction.REVERSE)
-                    .append("</li>\n");
+        if(mConfigurationValid) {
+
+            if (mFirst != null) {
+                result.append("<li style=\"padding-left:10px; font-size: 11px\">")
+                        .append("ID : ")
+                        .append(sFirstKey)
+                        .append(" - HW : ")
+                        .append(mFirstHwName)
+                        .append(" - REV : ")
+                        .append(mFirst.getDirection() == Servo.Direction.REVERSE)
+                        .append("</li>\n");
+            }
+            if (mSecond != null) {
+                result.append("<li style=\"padding-left:10px; font-size: 11px\">")
+                        .append("ID : ")
+                        .append(sSecondKey)
+                        .append(" - HW : ")
+                        .append(mSecondHwName)
+                        .append(" - REV : ")
+                        .append(mSecond.getDirection() == Servo.Direction.REVERSE)
+                        .append("</li>\n");
+            }
         }
 
         return result.toString();
 
     }
+
+    /**
+     * Generates a text-based representation of the servo configuration for logging.
+     *
+     * @param header A string to prepend to the configuration log.
+     * @return A string containing the formatted servo configuration details.
+     */
     @Override
     public String                       logConfigurationText(String header) {
 
         StringBuilder result = new StringBuilder();
 
-        if (mFirst != null) {
-            result.append(header)
-                    .append("> ")
-                    .append(sFirstKey)
-                    .append(" HW :")
-                    .append(mSecondHwName)
-                    .append(" - REV : ")
-                    .append(mFirst.getDirection() == Servo.Direction.REVERSE)
-                    .append("\n");
-        }
-        if (mSecond != null) {
-            result.append(header)
-                    .append("> ")
-                    .append(sSecondKey)
-                    .append(" HW : ")
-                    .append(mSecondHwName)
-                    .append(" - REV : ")
-                    .append(mSecond.getDirection() == Servo.Direction.REVERSE)
-                    .append("\n");
+        if(mConfigurationValid) {
+
+            if (mFirst != null) {
+                result.append(header)
+                        .append("> ")
+                        .append(sFirstKey)
+                        .append(" HW :")
+                        .append(mSecondHwName)
+                        .append(" - REV : ")
+                        .append(mFirst.getDirection() == Servo.Direction.REVERSE)
+                        .append("\n");
+            }
+            if (mSecond != null) {
+                result.append(header)
+                        .append("> ")
+                        .append(sSecondKey)
+                        .append(" HW : ")
+                        .append(mSecondHwName)
+                        .append(" - REV : ")
+                        .append(mSecond.getDirection() == Servo.Direction.REVERSE)
+                        .append("\n");
+            }
         }
 
         return result.toString();
@@ -215,19 +257,34 @@ public class ServoCoupled implements ServoComponent {
 
     /* ---------------------- Servo functions ---------------------- */
 
+    /**
+     * Retrieves the servo controller managing this component.
+     *
+     * @return The associated ServoControllerComponent.
+     */
     @Override
-    public ServoControllerComponent     getController() {
+    public ServoControllerComponent     controller() {
         return mController;
     }
 
+    /**
+     * Retrieves the current direction of the servo.
+     *
+     * @return The direction of the servo (FORWARD or REVERSE).
+     */
     @Override
-    public Servo.Direction	            getDirection()
+    public Servo.Direction	            direction()
     {
         return mDirection;
     }
 
+    /**
+     * Retrieves the average position of the coupled servos.
+     *
+     * @return The servo position in the range [0,1], or -1 if not configured.
+     */
     @Override
-    public double	                    getPosition()
+    public double	                    position()
     {
         double result = -1;
         if(mConfigurationValid) {
@@ -236,6 +293,12 @@ public class ServoCoupled implements ServoComponent {
         return result;
     }
 
+    /**
+     * Scales the range of motion for the servos.
+     *
+     * @param min The new minimum position (0.0 to 1.0).
+     * @param max The new maximum position (0.0 to 1.0).
+     */
     @Override
     public void	                        scaleRange(double min, double max)
     {
@@ -245,8 +308,13 @@ public class ServoCoupled implements ServoComponent {
         }
     }
 
+    /**
+     * Sets the direction of the servos.
+     *
+     * @param direction The new direction (FORWARD or REVERSE).
+     */
     @Override
-    public void	                        setDirection(Servo.Direction direction)
+    public void	                        direction(Servo.Direction direction)
     {
         if(direction != mDirection && mConfigurationValid) {
 
@@ -261,8 +329,13 @@ public class ServoCoupled implements ServoComponent {
         }
     }
 
+    /**
+     * Sets the position of the servos.
+     *
+     * @param position The new position to reach
+     */
     @Override
-    public void	                        setPosition(double position)
+    public void	                        position(double position)
     {
         if(mConfigurationValid) {
             mFirst.setPosition(position);

@@ -18,7 +18,11 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 
 /* Qualcomm includes */
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+/* ACME robotics includes */
+import com.acmerobotics.roadrunner.ftc.LynxFirmware;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -31,23 +35,27 @@ import org.firstinspires.ftc.core.components.motors.MotorComponent;
 import org.firstinspires.ftc.core.components.motors.MotorCoupled;
 import org.firstinspires.ftc.core.components.servos.ServoComponent;
 import org.firstinspires.ftc.core.components.servos.ServoCoupled;
+import org.firstinspires.ftc.core.components.imus.ImuComponent;
+import org.firstinspires.ftc.core.components.odometers.OdometerComponent;
 
 public class Hardware implements Configurable {
 
-    static final String         sMotorsKey      = "motors";
-    static final String         sImusKey        = "imus";
-    static final String         sServosKey      = "servos";
-    static final String         sOdometersKey   = "odometers";
+    static final String             sMotorsKey      = "motors";
+    static final String             sImusKey        = "imus";
+    static final String             sServosKey      = "servos";
+    static final String             sOdometersKey   = "odometers";
 
 
-    LogManager                  mLogger;
+    LogManager                      mLogger;
 
-    boolean                     mConfigurationValid;
+    boolean                         mConfigurationValid;
 
-    HardwareMap                 mMap;
+    HardwareMap                     mMap;
 
-    Map<String, MotorComponent> mMotors;
-    Map<String, ServoComponent> mServos;
+    Map<String, MotorComponent>     mMotors;
+    Map<String, ServoComponent>     mServos;
+    Map<String, ImuComponent>       mImus;
+    Map<String, OdometerComponent>  mOdometers;
 
     public Hardware(HardwareMap map, LogManager logger) {
 
@@ -56,18 +64,27 @@ public class Hardware implements Configurable {
         mConfigurationValid = true;
 
         mMap = map;
+        LynxFirmware.throwIfModulesAreOutdated(mMap);
 
-        mMotors = new LinkedHashMap<>();
-        mServos = new LinkedHashMap<>();
+        for (LynxModule module : mMap.getAll(LynxModule.class)) {
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
+        mMotors     = new LinkedHashMap<>();
+        mServos     = new LinkedHashMap<>();
+        mImus       = new LinkedHashMap<>();
+        mOdometers  = new LinkedHashMap<>();
 
     }
 
-    public Map<String,MotorComponent>   motors() { return mMotors; }
-    public Map<String,ServoComponent>   servos() { return mServos; }
+    public Map<String,MotorComponent>       motors() { return mMotors; }
+    public Map<String,ServoComponent>       servos() { return mServos; }
+    public Map<String,ImuComponent>         imus() { return mImus; }
+    public Map<String,OdometerComponent>    odometers() { return mOdometers; }
 
-    public boolean                      isConfigured() { return mConfigurationValid;}
+    public boolean                          isConfigured() { return mConfigurationValid;}
 
-    public void                         read(JSONObject reader) {
+    public void                             read(JSONObject reader) {
 
         mConfigurationValid = true;
         try {
@@ -107,6 +124,46 @@ public class Hardware implements Configurable {
                         mConfigurationValid = false;
                     } else {
                         mServos.put(key, servo);
+                    }
+
+                }
+            }
+
+            // Read Imus
+            if (reader.has(sImusKey)) {
+
+                JSONObject imus = reader.getJSONObject(sImusKey);
+                Iterator<String> keys = imus.keys();
+                while (keys.hasNext()) {
+
+                    String key = keys.next();
+
+                    ImuComponent imu = ImuComponent.factory(key, imus.getJSONObject(key), mMap, mLogger);
+                    if (!imu.isConfigured()) {
+                        mLogger.warning("Imu " + key + " configuration is invalid");
+                        mConfigurationValid = false;
+                    } else {
+                        mImus.put(key, imu);
+                    }
+
+                }
+            }
+
+            // Read Odometers
+            if (reader.has(sOdometersKey)) {
+
+                JSONObject odometers = reader.getJSONObject(sOdometersKey);
+                Iterator<String> keys = odometers.keys();
+                while (keys.hasNext()) {
+
+                    String key = keys.next();
+
+                    OdometerComponent odometer = OdometerComponent.factory(key, odometers.getJSONObject(key), mMap, mLogger);
+                    if (!odometer.isConfigured()) {
+                        mLogger.warning("Odometer " + key + " configuration is invalid");
+                        mConfigurationValid = false;
+                    } else {
+                        mOdometers.put(key, odometer);
                     }
 
                 }
@@ -158,6 +215,24 @@ public class Hardware implements Configurable {
             }
             writer.put(sServosKey, servos);
 
+            // Write imus
+            JSONObject imus = new JSONObject();
+            for (Map.Entry<String, ImuComponent> imu : mImus.entrySet()) {
+                JSONObject temp = new JSONObject();
+                imu.getValue().write(temp);
+                imus.put(imu.getKey(), temp);
+            }
+            writer.put(sImusKey, imus);
+
+            // Write odometers
+            JSONObject odometers = new JSONObject();
+            for (Map.Entry<String, OdometerComponent> odometer : mOdometers.entrySet()) {
+                JSONObject temp = new JSONObject();
+                odometer.getValue().write(temp);
+                odometers.put(odometer.getKey(), temp);
+            }
+            writer.put(sOdometersKey, odometers);
+
         } catch (JSONException e) { mLogger.error(e.getMessage()); }
     }
 
@@ -199,6 +274,42 @@ public class Hardware implements Configurable {
         result.append("</ul>\n");
         result.append("</details>\n");
 
+
+        // Log imus
+        result.append("<details style=\"margin-left:10px\">\n");
+        result.append("<summary style=\"font-size: 12px; font-weight: 500\"> IMUS </summary>\n");
+        result.append("<ul>\n");
+        mImus.forEach((key, value) -> {
+            result.append("<details style=\"margin-left:10px\">\n")
+                    .append("<summary style=\"font-size: 11px; font-weight: 500\"> ")
+                    .append(key.toUpperCase())
+                    .append(" </summary>\n")
+                    .append("<ul>\n")
+                    .append(value.logConfigurationHTML())
+                    .append("</ul>\n")
+                    .append("</details>\n");
+        });
+        result.append("</ul>\n");
+        result.append("</details>\n");
+
+
+        // Log odometers
+        result.append("<details style=\"margin-left:10px\">\n");
+        result.append("<summary style=\"font-size: 12px; font-weight: 500\"> ODOMETERS </summary>\n");
+        result.append("<ul>\n");
+        mOdometers.forEach((key, value) -> {
+            result.append("<details style=\"margin-left:10px\">\n")
+                    .append("<summary style=\"font-size: 11px; font-weight: 500\"> ")
+                    .append(key.toUpperCase())
+                    .append(" </summary>\n")
+                    .append("<ul>\n")
+                    .append(value.logConfigurationHTML())
+                    .append("</ul>\n")
+                    .append("</details>\n");
+        });
+        result.append("</ul>\n");
+        result.append("</details>\n");
+
         return result.toString();
 
     }
@@ -224,6 +335,30 @@ public class Hardware implements Configurable {
                 .append("> SERVOS\n");
 
         mServos.forEach((key, value) -> {
+            result.append(header)
+                    .append("--> ")
+                    .append(key)
+                    .append("\n")
+                    .append(value.logConfigurationText(header + "----"));
+        });
+
+        // Log imus
+        result.append(header)
+                .append("> IMUS\n");
+
+        mImus.forEach((key, value) -> {
+            result.append(header)
+                    .append("--> ")
+                    .append(key)
+                    .append("\n")
+                    .append(value.logConfigurationText(header + "----"));
+        });
+
+        // Log odometers
+        result.append(header)
+                .append("> ODOMETERS\n");
+
+        mOdometers.forEach((key, value) -> {
             result.append(header)
                     .append("--> ")
                     .append(key)

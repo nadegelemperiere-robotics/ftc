@@ -40,7 +40,13 @@ public class MotorSingle implements MotorComponent {
     int                 mInvertPosition;
 
     /* ----------------------- Constructors ------------------------ */
-
+    /**
+     * Constructs a MotorSingle instance.
+     *
+     * @param name   The name of the single motor component.
+     * @param hwMap  The FTC HardwareMap to retrieve motor hardware.
+     * @param logger The logging manager for error reporting and debugging.
+     */
     public MotorSingle(String name, HardwareMap hwMap, LogManager logger)
     {
         mLogger             = logger;
@@ -57,18 +63,38 @@ public class MotorSingle implements MotorComponent {
 
     /* --------------------- Custom functions ---------------------- */
 
+    /**
+     * Retrieves the name of the single motor component.
+     *
+     * @return The name of the component.
+     */
     @Override
-    public String                       getName() { return mName; }
+    public String                       name() { return mName; }
 
+    /**
+     * Determines if encoder correction is required.
+     *
+     * @return True if at least one motor has inverted encoder behavior, false otherwise.
+     */
     @Override
-    public boolean                      getEncoderCorrection() { return (mInvertPosition == -1);}
+    public boolean                      encoderCorrection() { return (mInvertPosition == -1);}
 
+    /**
+     * Enables or disables encoder correction.
+     *
+     * @param shallCorrect True to enable encoder correction, false to disable.
+     */
     @Override
-    public void                         setEncoderCorrection( boolean ShallCorrect) {
-        if (ShallCorrect) { mInvertPosition = -1; }
+    public void                         encoderCorrection( boolean shallCorrect) {
+        if (shallCorrect) { mInvertPosition = -1; }
         else {              mInvertPosition = 1;  }
     }
 
+    /**
+     * Logs the current motor positions, velocities, and power levels.
+     *
+     * @return A formatted string containing motor telemetry data.
+     */
     @Override
     public String                       logPositions()
     {
@@ -81,9 +107,19 @@ public class MotorSingle implements MotorComponent {
 
     /* ------------------ Configurable functions ------------------- */
 
+    /**
+     * Determines if the coupled motor component is configured correctly.
+     *
+     * @return True if the component is configured, false otherwise.
+     */
     @Override
     public boolean                      isConfigured() { return mConfigurationValid;}
 
+    /**
+     * Reads and applies the motor configuration from a JSON object.
+     *
+     * @param reader The JSON object containing configuration settings.
+     */
     @Override
     public void                         read(JSONObject reader) {
 
@@ -120,52 +156,74 @@ public class MotorSingle implements MotorComponent {
 
     }
 
+    /**
+     * Writes the current motor configuration to a JSON object.
+     *
+     * @param writer The JSON object to store the configuration settings.
+     */
     @Override
     public void                         write(JSONObject writer) {
 
-        try {
-            String direction = sDirection2String.get(mMotor.getDirection());
-            writer.put(sHwMapKey,mHwName);
-            writer.put(sDirectionKey,direction);
-            writer.put(sEncoderReverseKey, mInvertPosition==-1);
-        }
-        catch(JSONException e) { mLogger.error(e.getMessage()); }
+        if(mConfigurationValid) {
 
+            try {
+                String direction = sDirection2String.get(mMotor.getDirection());
+                writer.put(sHwMapKey, mHwName);
+                writer.put(sDirectionKey, direction);
+                writer.put(sEncoderReverseKey, mInvertPosition == -1);
+            } catch (JSONException e) { mLogger.error(e.getMessage()); }
+        }
     }
 
+    /**
+     * Generates an HTML representation of the motor configuration for logging purposes.
+     *
+     * @return A string containing the HTML-formatted motor configuration.
+     */
     @Override
     public String                       logConfigurationHTML() {
 
         StringBuilder result = new StringBuilder();
+        if(mConfigurationValid) {
 
-        if (mMotor != null) {
-            result.append("<li style=\"padding-left:10px; font-size: 11px\">")
-                    .append("HW : ")
-                    .append(mHwName)
-                    .append(" - DIR : ")
-                    .append(sDirection2String.get(mMotor.getDirection()))
-                    .append(" - ENC : ")
-                    .append(mInvertPosition==-1)
-                    .append("</li>\n");
+            if (mMotor != null) {
+                result.append("<li style=\"padding-left:10px; font-size: 11px\">")
+                        .append("HW : ")
+                        .append(mHwName)
+                        .append(" - DIR : ")
+                        .append(sDirection2String.get(mMotor.getDirection()))
+                        .append(" - ENC : ")
+                        .append(mInvertPosition == -1)
+                        .append("</li>\n");
+            }
         }
 
         return result.toString();
 
     }
+
+    /**
+     * Generates a text-based representation of the motor configuration for logging.
+     *
+     * @param header A string to prepend to the configuration log.
+     * @return A string containing the formatted motor configuration details.
+     */
     @Override
     public String                       logConfigurationText(String header) {
 
         StringBuilder result = new StringBuilder();
+        if(mConfigurationValid) {
 
-        if (mMotor != null) {
-            result.append(header)
-                    .append("> HW :")
-                    .append(mHwName)
-                    .append(" - DIR : ")
-                    .append(sDirection2String.get(mMotor.getDirection()))
-                    .append(" - ENC : ")
-                    .append(mInvertPosition==-1)
-                    .append("\n");
+            if (mMotor != null) {
+                result.append(header)
+                        .append("> HW :")
+                        .append(mHwName)
+                        .append(" - DIR : ")
+                        .append(sDirection2String.get(mMotor.getDirection()))
+                        .append(" - ENC : ")
+                        .append(mInvertPosition == -1)
+                        .append("\n");
+            }
         }
 
         return result.toString();
@@ -175,7 +233,7 @@ public class MotorSingle implements MotorComponent {
     /* --------------------- DcMotor functions --------------------- */
 
     @Override
-    public int	                        getCurrentPosition()
+    public int	                        currentPosition()
     {
         int result = -1;
         if(mConfigurationValid) {
@@ -185,7 +243,7 @@ public class MotorSingle implements MotorComponent {
     }
 
     @Override
-    public DcMotorSimple.Direction      getDirection()
+    public DcMotorSimple.Direction      direction()
     {
         DcMotorSimple.Direction result = DcMotorSimple.Direction.FORWARD;
         if(mConfigurationValid) { result = mMotor.getDirection(); }
@@ -193,7 +251,7 @@ public class MotorSingle implements MotorComponent {
     }
 
     @Override
-    public DcMotor.RunMode	            getMode()
+    public DcMotor.RunMode	            mode()
     {
         DcMotor.RunMode result =  DcMotor.RunMode.RUN_WITHOUT_ENCODER;
         if (mConfigurationValid) { result = mMotor.getMode(); }
@@ -201,7 +259,7 @@ public class MotorSingle implements MotorComponent {
     }
 
     @Override
-    public int	                        getTargetPosition()
+    public int	                        targetPosition()
     {
         int result = -1;
         if(mConfigurationValid) {
@@ -211,7 +269,7 @@ public class MotorSingle implements MotorComponent {
     }
 
     @Override
-    public DcMotor.ZeroPowerBehavior	getZeroPowerBehavior()
+    public DcMotor.ZeroPowerBehavior	zeroPowerBehavior()
     {
         DcMotor.ZeroPowerBehavior result = DcMotor.ZeroPowerBehavior.UNKNOWN;
         if(mConfigurationValid) { result = mMotor.getZeroPowerBehavior(); }
@@ -219,7 +277,7 @@ public class MotorSingle implements MotorComponent {
     }
 
     @Override
-    public double	                    getPower()
+    public double	                    power()
     {
         double result = -1;
         if(mConfigurationValid) { result = mMotor.getPower(); }
@@ -235,7 +293,7 @@ public class MotorSingle implements MotorComponent {
     }
 
     @Override
-    public void	                        setMode(DcMotor.RunMode mode)
+    public void	                        mode(DcMotor.RunMode mode)
     {
         if(mConfigurationValid) {
             mMotor.setMode(mode);
@@ -243,7 +301,7 @@ public class MotorSingle implements MotorComponent {
     }
 
     @Override
-    public void	                        setDirection(DcMotorSimple.Direction direction)
+    public void	                        direction(DcMotorSimple.Direction direction)
     {
         if(mConfigurationValid) {
             mMotor.setDirection(direction);
@@ -251,7 +309,7 @@ public class MotorSingle implements MotorComponent {
     }
 
     @Override
-    public void	                        setTargetPosition(int position)
+    public void	                        targetPosition(int position)
     {
         if(mConfigurationValid) {
             mMotor.setTargetPosition(mInvertPosition * position);
@@ -259,7 +317,7 @@ public class MotorSingle implements MotorComponent {
     }
 
     @Override
-    public void	                        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior)
+    public void	                        zeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior)
     {
         if(mConfigurationValid) {
             mMotor.setZeroPowerBehavior(zeroPowerBehavior);
@@ -267,7 +325,7 @@ public class MotorSingle implements MotorComponent {
     }
 
     @Override
-    public void	                        setPower(double power)
+    public void	                        power(double power)
     {
         if(mConfigurationValid) {
             mMotor.setPower(power);
@@ -278,7 +336,7 @@ public class MotorSingle implements MotorComponent {
 
 
     @Override
-    public PIDFCoefficients            getPIDFCoefficients(DcMotor.RunMode mode){
+    public PIDFCoefficients            PIDFCoefficients(DcMotor.RunMode mode){
         PIDFCoefficients result = null;
         if(mConfigurationValid) {
             result = mMotor.getPIDFCoefficients(mode);
@@ -287,14 +345,14 @@ public class MotorSingle implements MotorComponent {
     }
 
     @Override
-    public void                        setPIDFCoefficients(DcMotor.RunMode mode, PIDFCoefficients pidfCoefficients){
+    public void                        PIDFCoefficients(DcMotor.RunMode mode, PIDFCoefficients pidfCoefficients){
         if(mConfigurationValid) {
             mMotor.setPIDFCoefficients(mode, pidfCoefficients);
         }
     }
 
     @Override
-    public void                        setTargetPositionTolerance(int tolerance)
+    public void                        targetPositionTolerance(int tolerance)
     {
         if(mConfigurationValid) {
             mMotor.setTargetPositionTolerance(tolerance);
@@ -302,7 +360,7 @@ public class MotorSingle implements MotorComponent {
     }
 
     @Override
-    public int                         getTargetPositionTolerance()
+    public int                         targetPositionTolerance()
     {
         int result = -1;
         if(mConfigurationValid) {
@@ -312,7 +370,7 @@ public class MotorSingle implements MotorComponent {
     }
 
     @Override
-    public double                      getVelocity()
+    public double                       velocity()
     {
         double result = 0;
         if(mConfigurationValid) {

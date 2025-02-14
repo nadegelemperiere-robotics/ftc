@@ -260,7 +260,7 @@ public class ServoTuning extends LinearOpMode {
         for (int i_servo = 0; i_servo < mCurrentServoHw.size(); i_servo++) {
             ServoComponent hwServo = mCurrentServoHw.get(i_servo);
             if (hwServo != null) {
-                hwServo.getController().pwmDisable();
+                hwServo.controller().pwmDisable();
             }
         }
     }
@@ -270,7 +270,7 @@ public class ServoTuning extends LinearOpMode {
         for (int i_servo = 0; i_servo < mCurrentServoHw.size(); i_servo++) {
             ServoComponent hwServo = mCurrentServoHw.get(i_servo);
             if (hwServo != null) {
-                hwServo.getController().pwmEnable();
+                hwServo.controller().pwmEnable();
             }
         }
     }
@@ -284,18 +284,18 @@ public class ServoTuning extends LinearOpMode {
                 // Depending on the coupled servo management mode, pilot the required servos
                 if(i_servo == 0) {
                     if (mMode.get() == Mode.FIRST || mMode.get() == Mode.BOTH){
-                        hwServo.setPosition(position);
+                        hwServo.position(position);
                     }
                     else{
-                        hwServo.getController().pwmDisable();
+                        hwServo.controller().pwmDisable();
                     }
                 }
                 if(i_servo == 1) {
                     if (mMode.get() == Mode.SECOND || mMode.get() == Mode.BOTH){
-                        hwServo.setPosition(position);
+                        hwServo.position(position);
                     }
                     else{
-                        hwServo.getController().pwmDisable();
+                        hwServo.controller().pwmDisable();
                     }
                 }
             }
@@ -313,12 +313,12 @@ public class ServoTuning extends LinearOpMode {
                 // Depending on the coupled servo management mode, pilot the required servos
                 if (i_servo == 0) {
                     if (mMode.get() == Mode.FIRST || mMode.get() == Mode.BOTH) {
-                        result = hwServo.getPosition();
+                        result = hwServo.position();
                     }
                 }
                 if (i_servo == 1) {
                     if (mMode.get() == Mode.SECOND || mMode.get() == Mode.BOTH) {
-                        result = hwServo.getPosition();
+                        result = hwServo.position();
                     }
                 }
             }
@@ -336,10 +336,10 @@ public class ServoTuning extends LinearOpMode {
 
                 // Log servo state
                 logger.info("--> Servo " + i_servo);
-                logger.info("-----> HwMap : " + hwServo.getName());
-                logger.info("-----> Direction : " + hwServo.getDirection());
-                logger.info("-----> Position : " + hwServo.getPosition());
-                logger.info("-----> Power : " + hwServo.getController().getPwmStatus());
+                logger.info("-----> HwMap : " + hwServo.name());
+                logger.info("-----> Direction : " + hwServo.direction());
+                logger.info("-----> Position : " + hwServo.position());
+                logger.info("-----> Power : " + hwServo.controller().pwmStatus());
             }
         }
     }
@@ -389,11 +389,11 @@ public class ServoTuning extends LinearOpMode {
             mServo = servo;
         }
         @Override
-        public Boolean get()           { return mServo.getDirection() == Servo.Direction.REVERSE; }
+        public Boolean get()           { return mServo.direction() == Servo.Direction.REVERSE; }
         @Override
         public void set(Boolean Value) {
-            if (Value) { mServo.setDirection(Servo.Direction.REVERSE); }
-            else { mServo.setDirection(Servo.Direction.FORWARD);       }
+            if (Value) { mServo.direction(Servo.Direction.REVERSE); }
+            else { mServo.direction(Servo.Direction.FORWARD);       }
         }
     }
 

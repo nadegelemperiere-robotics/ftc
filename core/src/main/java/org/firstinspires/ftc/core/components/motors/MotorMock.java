@@ -60,13 +60,13 @@ public class MotorMock implements MotorComponent {
     /* --------------------- Custom functions ---------------------- */
 
     @Override
-    public String                       getName() { return mName; }
+    public String                       name() { return mName; }
 
     @Override
-    public boolean                      getEncoderCorrection() { return false; }
+    public boolean                      encoderCorrection() { return false; }
 
     @Override
-    public void                         setEncoderCorrection(boolean ShallCorrect) {  }
+    public void                         encoderCorrection(boolean ShallCorrect) {  }
 
     @Override
     public String                       logPositions()
@@ -94,57 +94,57 @@ public class MotorMock implements MotorComponent {
     /* --------------------- DcMotor functions --------------------- */
 
     @Override
-    public int	                        getCurrentPosition() { return mPosition; }
+    public int	                        currentPosition() { return mPosition; }
 
     @Override
-    public DcMotorSimple.Direction      getDirection() { return mDirection; }
+    public DcMotorSimple.Direction      direction() { return mDirection; }
 
     @Override
-    public DcMotor.RunMode	            getMode() { return mMode; }
+    public DcMotor.RunMode	            mode() { return mMode; }
 
     @Override
-    public int	                        getTargetPosition() { return mPosition; }
+    public int	                        targetPosition() { return mPosition; }
 
     @Override
-    public DcMotor.ZeroPowerBehavior	getZeroPowerBehavior() { return mBehavior; }
+    public DcMotor.ZeroPowerBehavior	zeroPowerBehavior() { return mBehavior; }
 
     @Override
-    public double                   	getPower() { return mPower; }
+    public double                   	power() { return mPower; }
 
     @Override
     public boolean	                    isBusy() { return false; }
 
     @Override
-    public void	                        setMode(DcMotor.RunMode mode) { mMode = mode; }
+    public void	                        mode(DcMotor.RunMode mode) { mMode = mode; }
 
     @Override
-    public void	                        setDirection(DcMotorSimple.Direction direction) { mDirection = direction; }
+    public void	                        direction(DcMotorSimple.Direction direction) { mDirection = direction; }
 
     @Override
-    public void	                        setTargetPosition(int position) { mPosition = position;}
+    public void	                        targetPosition(int position) { mPosition = position;}
 
     @Override
-    public void	                        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior) { mBehavior = zeroPowerBehavior; }
+    public void	                        zeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior) { mBehavior = zeroPowerBehavior; }
 
     @Override
-    public void	                        setPower(double power) { mPower = power; }
+    public void	                        power(double power) { mPower = power; }
 
     /* -------------------- DcMotorEx functions -------------------- */
 
     @Override
-    public PIDFCoefficients             getPIDFCoefficients(DcMotor.RunMode mode) { return null; }
+    public PIDFCoefficients             PIDFCoefficients(DcMotor.RunMode mode) { return null; }
 
     @Override
-    public void                         setPIDFCoefficients(DcMotor.RunMode mode, PIDFCoefficients pidfCoefficients){
+    public void                         PIDFCoefficients(DcMotor.RunMode mode, PIDFCoefficients pidfCoefficients){
     }
 
     @Override
-    public void                         setTargetPositionTolerance(int tolerance) { mTolerance = tolerance; }
+    public void                         targetPositionTolerance(int tolerance) { mTolerance = tolerance; }
 
     @Override
-    public int                          getTargetPositionTolerance()  { return mTolerance; }
+    public int                          targetPositionTolerance()  { return mTolerance; }
 
     @Override
-    public double                       getVelocity()  { return 0.0; }
+    public double                       velocity()  { return 0.0; }
 
 }
