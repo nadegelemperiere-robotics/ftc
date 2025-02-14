@@ -4,16 +4,16 @@
         "hardware" : {
             "motors": {
                 "front-left-wheel":  [ { "hwmap": "frontLeft" } ],
-                "front-right-wheel": [ { "hwmap": "frontRight", "direction": "reverse" } ],
-                "back-left-wheel":   [ { "hwmap": "backLeft" } ],
+                "front-right-wheel": [ { "hwmap": "frontRight" } ],
+                "back-left-wheel":   [ { "hwmap": "backLeft", "direction": "reverse" } ],
                 "back-right-wheel":  [ { "hwmap": "backRight",  "direction": "reverse" } ],
                 "intake-slides": [
-                    { "hwmap": "intakeSlidesLeft" },
-                    { "hwmap": "intakeSlidesRight", "direction": "reverse"}
+                    { "hwmap": "frontLeft" },
+                    { "hwmap": "frontRight"}
                 ],
                 "outtake-slides": [
-                    { "hwmap": "outtakeSlidesLeft", "direction": "reverse" },
-                    { "hwmap": "outtakeSlidesRight" }
+                    { "hwmap": "backLeft", "direction": "reverse" },
+                    { "hwmap": "backRight", "direction": "reverse" }
                 ]
             },
             "servos" : {

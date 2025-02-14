@@ -95,13 +95,6 @@ public class Command implements Configurable {
     }
 
     /**
-     * Manages registration
-     *
-     * @param topic : topic under which the object was registered
-     */
-    public void register(String topic) {}
-
-    /**
      * Reads control configuration
      *
      * @param reader : JSON object containing configuration
@@ -208,11 +201,7 @@ public class Command implements Configurable {
      */
     public void execute() {
 
-        mLogger.info(LogManager.Target.FILE,"start");
-
         if(mCondition.evaluate()) { mAction.run(); }
-
-        mLogger.info(LogManager.Target.FILE,"stop");
 
     }
 

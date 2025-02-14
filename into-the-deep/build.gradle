@@ -23,7 +23,8 @@ android {
     }
 
     sourceSets {
-        main.java.srcDirs += file('../core/src/test/java/org/firstinspires/ftc/core/opmodes')
+        main.java.srcDirs += file('../core/src/test/java/org/firstinspires/ftc/core/')
+        main.java.srcDirs += file('../core/src/tuning/java/org/firstinspires/ftc/core/')
     }
 }
 

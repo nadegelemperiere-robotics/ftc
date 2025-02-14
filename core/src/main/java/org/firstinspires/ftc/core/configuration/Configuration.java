@@ -100,7 +100,6 @@ public class Configuration {
      */
     public void register(String key, Configurable configurable) {
         mConfigRegistry.put(key, configurable);
-        configurable.register(key);
     }
 
     /**

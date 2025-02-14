@@ -27,11 +27,6 @@ import org.firstinspires.ftc.intothedeep.configuration.SeasonConfiguration;
 /* Components includes */
 import org.firstinspires.ftc.core.components.controllers.Controller;
 
-/* Robot includes */
-import org.firstinspires.ftc.intothedeep.robot.SeasonRobot;
-
-/* Orchestration includes */
-import org.firstinspires.ftc.core.orchestration.controller.ControlMapper;
 
 
 @TeleOp
@@ -40,9 +35,7 @@ public class TeleOpMode extends OpMode {
     LogManager              mLogger;
 
     SeasonConfiguration     mConfiguration;
-    SeasonRobot             mRobot;
 
-    ControlMapper           mControl;
     Map<String, Controller> mControllers;
     
     @Override
@@ -59,7 +52,7 @@ public class TeleOpMode extends OpMode {
             mConfiguration.logger(mLogger);
 
             // Robot initialization
-            mRobot = new SeasonRobot(mLogger);
+            //mRobot = new SeasonRobot(mLogger);
 
             // Control initialization
 //            mControllers = new LinkedHashMap<>();

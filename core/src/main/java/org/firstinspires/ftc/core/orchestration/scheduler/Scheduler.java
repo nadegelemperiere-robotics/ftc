@@ -61,13 +61,6 @@ public class Scheduler implements Configurable {
     }
 
     /**
-     * Manages registration
-     *
-     * @param topic : topic under which the object was registered
-     */
-    public void register(String topic) {}
-    
-    /**
      * Reads control configuration
      *
      * @param reader : JSON object containing configuration
@@ -204,9 +197,13 @@ public class Scheduler implements Configurable {
      */
     public void loop() {
 
+        mLogger.info(LogManager.Target.FILE,"start");
+
         for(int i_command = 0; i_command < mCommands.size(); i_command ++) {
             mCommands.get(i_command).execute();
         }
+
+        mLogger.info(LogManager.Target.FILE,"stop");
 
     }
 

@@ -38,7 +38,7 @@ import org.firstinspires.ftc.core.configuration.Configurable;
 
 public class LogManager implements Configurable {
 
-    static final int  sStackLevel = 3;
+    static final int  sStackLevel = 4;
 
     public enum Target {
         DRIVER_STATION,
@@ -182,13 +182,6 @@ public class LogManager implements Configurable {
     public boolean isConfigured() {
         return mConfigurationValid;
     }
-
-    /**
-     * Manages registration
-     *
-     * @param topic : topic under which the object wa registered
-     */
-    public void register(String topic) {  }
 
     /**
      * Configuration logging into HTML
@@ -559,7 +552,7 @@ public class LogManager implements Configurable {
             persistent.append(sEntryFontSize);
             persistent.append("px; font-weight: 500\"> DEBUG </summary>\n");
             persistent.append("<ul>\n");
-            persistent.append(Objects.requireNonNull(mTraces.get(Target.DASHBOARD)));
+            persistent.append(Objects.requireNonNull(mDebugs.get(Target.DASHBOARD)));
             persistent.append("</ul>\n");
             persistent.append("</details>\n");
 
@@ -727,8 +720,7 @@ public class LogManager implements Configurable {
                                 ":" +
                                 element.getLineNumber() +
                                 " - error - " +
-                                message +
-                                "\n";
+                                message;
                         mFile.log(Level.SEVERE, local);
                     }
                     break;
@@ -780,8 +772,7 @@ public class LogManager implements Configurable {
                                 ":" +
                                 element.getLineNumber() +
                                 " - " +
-                                message +
-                                "\n";
+                                message;
                         mFile.log(Level.WARNING, local);
                     }
                     break;
@@ -822,8 +813,7 @@ public class LogManager implements Configurable {
                                 ":" +
                                 element.getLineNumber() +
                                 " - metric - " +
-                                metric + " : " + value +
-                                "\n";
+                                metric + " : " + value;
                         mFile.log(Level.INFO, local);
                     }
                     break;
@@ -853,6 +843,7 @@ public class LogManager implements Configurable {
                                 .append(sInfoFontSize)
                                 .append("px\">")
                                 .append(element.getFileName())
+                                .append(":")
                                 .append(element.getLineNumber())
                                 .append(" - ")
                                 .append(message)
@@ -876,8 +867,7 @@ public class LogManager implements Configurable {
                                 ":" +
                                 element.getLineNumber() +
                                 " - info - " +
-                                message +
-                                "\n";
+                                message;
                         mFile.log(Level.INFO, local);
                     }
                     break;
@@ -907,6 +897,7 @@ public class LogManager implements Configurable {
                                 .append(sInfoFontSize)
                                 .append("px\">")
                                 .append(element.getFileName())
+                                .append(":")
                                 .append(element.getLineNumber())
                                 .append(" - ")
                                 .append(message)
@@ -930,8 +921,7 @@ public class LogManager implements Configurable {
                                 ":" +
                                 element.getLineNumber() +
                                 " - debug - " +
-                                message +
-                                "\n";
+                                message;
                         mFile.log(Level.INFO, local);
                     }
                     break;
@@ -961,6 +951,7 @@ public class LogManager implements Configurable {
                                 .append(sInfoFontSize)
                                 .append("px\">")
                                 .append(element.getFileName())
+                                .append(":")
                                 .append(element.getLineNumber())
                                 .append(" - ")
                                 .append(message)
@@ -984,8 +975,7 @@ public class LogManager implements Configurable {
                                 ":" +
                                 element.getLineNumber() +
                                 " - trace - " +
-                                message +
-                                "\n";
+                                message;
                         mFile.log(Level.INFO, local);
                     }
                     break;

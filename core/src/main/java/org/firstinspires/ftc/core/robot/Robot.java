@@ -16,13 +16,14 @@ import org.firstinspires.ftc.core.tools.LogManager;
 /* Configuration includes */
 import org.firstinspires.ftc.core.configuration.Configurable;
 
-
 /* Sequencer includes */
 import org.firstinspires.ftc.core.orchestration.sequencer.Context;
 
-public class Robot { //} extends Context implements Configurable {
+public class Robot { //extends Context implements Configurable {
 
-    LogManager  mLogger;
+                LogManager  mLogger;
+
+    protected   RobotState  mState;
 
     public  Robot(LogManager logger) {
         mLogger = logger;
