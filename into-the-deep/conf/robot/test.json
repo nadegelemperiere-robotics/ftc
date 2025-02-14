@@ -17,18 +17,18 @@
                 ]
             },
             "servos" : {
-                "intake-elbow-pitch": [ { "hwmap": "intakeElbowPitch" } ],
-                "intake-wrist-roll":  [ { "hwmap": "intakeWristRoll" } ],
-                "intake-claw":        [ { "hwmap": "intakeClaw" } ],
-                "outtake-wrist-roll": [ { "hwmap": "outtakeWristRoll" } ],
-                "outtake-claw":       [ { "hwmap": "outtakeClaw" } ],
+                "intake-elbow-pitch": [ { "hwmap": "left" } ],
+                "intake-wrist-roll":  [ { "hwmap": "left" } ],
+                "intake-claw":        [ { "hwmap": "left" } ],
+                "outtake-wrist-roll": [ { "hwmap": "right" } ],
+                "outtake-claw":       [ { "hwmap": "right" } ],
                 "intake-arm-pitch": [
-                    { "hwmap": "intakeArmPitchLeft" },
-                    { "hwmap": "intakeArmPitchRight", "reverse" : true }
+                    { "hwmap": "left" },
+                    { "hwmap": "right", "reverse" : true }
                 ],
                 "outtake-elbow-pitch": [
-                    { "hwmap": "outtakeElbowPitchLeft" },
-                    { "hwmap": "outtakeElbowPitchRight", "reverse" : true }
+                    { "hwmap": "left" },
+                    { "hwmap": "right", "reverse" : true }
                 ]
             },
             "odometers": {

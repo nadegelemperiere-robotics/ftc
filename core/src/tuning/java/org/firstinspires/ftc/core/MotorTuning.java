@@ -35,7 +35,6 @@ import org.firstinspires.ftc.core.configuration.Configuration;
 
 /* Components includes */
 import org.firstinspires.ftc.core.components.motors.MotorComponent;
-import org.firstinspires.ftc.core.components.motors.MotorSingle;
 import org.firstinspires.ftc.core.components.controllers.Controller;
 
 /* Robot includes */
@@ -59,9 +58,7 @@ public class MotorTuning extends LinearOpMode{
 
     /* -------- Configuration variables -------- */
     public static long                  SLEEP_MS        = 200;
-
     public static String                CONFIGURATION   = "test";
-
     public static int                   TARGET_POSITION = 0;
 
     /* ---------------- Members ---------------- */

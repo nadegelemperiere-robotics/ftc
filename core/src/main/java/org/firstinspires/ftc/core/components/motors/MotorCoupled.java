@@ -238,7 +238,7 @@ public class MotorCoupled implements MotorComponent {
                     .append("> ")
                     .append(sFirstKey)
                     .append(" HW :")
-                    .append(mSecondHwName)
+                    .append(mFirstHwName)
                     .append(" - DIR : ")
                     .append(sDirection2String.get(mFirst.getDirection()))
                     .append(" - ENC : ")

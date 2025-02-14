@@ -74,7 +74,6 @@ public class MotorMock implements MotorComponent {
         return "\n  P : " + mPosition + " V : " + 0.0 + " P : " + mPower;
     }
 
-
     /* ------------------ Configurable functions ------------------- */
 
     @Override

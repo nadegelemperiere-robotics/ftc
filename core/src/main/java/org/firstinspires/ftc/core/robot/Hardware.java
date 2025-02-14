@@ -11,8 +11,6 @@ package org.firstinspires.ftc.core.robot;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
 
 /* Json includes */
 import org.json.JSONException;
@@ -31,25 +29,25 @@ import org.firstinspires.ftc.core.configuration.Configurable;
 /* Components includes */
 import org.firstinspires.ftc.core.components.motors.MotorComponent;
 import org.firstinspires.ftc.core.components.motors.MotorCoupled;
+import org.firstinspires.ftc.core.components.servos.ServoComponent;
+import org.firstinspires.ftc.core.components.servos.ServoCoupled;
 
 public class Hardware implements Configurable {
 
-    static final String sMotorsKey = "motors";
-    static final String sImusKey = "imus";
-    static final String sServosKey = "servos";
-    static final String sOdometersKey = "odometers";
+    static final String         sMotorsKey      = "motors";
+    static final String         sImusKey        = "imus";
+    static final String         sServosKey      = "servos";
+    static final String         sOdometersKey   = "odometers";
 
 
-    LogManager mLogger;
+    LogManager                  mLogger;
 
-    boolean mConfigurationValid;
+    boolean                     mConfigurationValid;
 
-    HardwareMap mMap;
+    HardwareMap                 mMap;
 
     Map<String, MotorComponent> mMotors;
-
-    Map<String, MotorComponent> mMotorsForTuning;
-
+    Map<String, ServoComponent> mServos;
 
     public Hardware(HardwareMap map, LogManager logger) {
 
@@ -60,11 +58,12 @@ public class Hardware implements Configurable {
         mMap = map;
 
         mMotors = new LinkedHashMap<>();
-        mMotorsForTuning = new LinkedHashMap<>();
+        mServos = new LinkedHashMap<>();
 
     }
 
     public Map<String,MotorComponent>   motors() { return mMotors; }
+    public Map<String,ServoComponent>   servos() { return mServos; }
 
     public boolean                      isConfigured() { return mConfigurationValid;}
 
@@ -88,6 +87,26 @@ public class Hardware implements Configurable {
                         mConfigurationValid = false;
                     } else {
                         mMotors.put(key, motor);
+                    }
+
+                }
+            }
+
+            // Read Servos
+            if (reader.has(sServosKey)) {
+
+                JSONObject servos = reader.getJSONObject(sServosKey);
+                Iterator<String> keys = servos.keys();
+                while (keys.hasNext()) {
+
+                    String key = keys.next();
+
+                    ServoComponent servo = ServoComponent.factory(key, servos.getJSONArray(key), mMap, mLogger);
+                    if (!servo.isConfigured()) {
+                        mLogger.warning("Servo " + key + " configuration is invalid");
+                        mConfigurationValid = false;
+                    } else {
+                        mServos.put(key, servo);
                     }
 
                 }
@@ -120,6 +139,25 @@ public class Hardware implements Configurable {
             }
             writer.put(sMotorsKey, motors);
 
+            // Write servos
+            JSONObject servos = new JSONObject();
+            for (Map.Entry<String, ServoComponent> servo : mServos.entrySet()) {
+                JSONArray array = new JSONArray();
+                JSONObject temp = new JSONObject();
+                servo.getValue().write(temp);
+                if (temp.has(ServoCoupled.sFirstKey)) {
+                    array.put(temp.getJSONObject(ServoCoupled.sFirstKey));
+                }
+                if (temp.has(ServoCoupled.sSecondKey)) {
+                    array.put(temp.getJSONObject(ServoCoupled.sSecondKey));
+                }
+                if (!temp.has(ServoCoupled.sSecondKey) && !temp.has(ServoCoupled.sSecondKey)) {
+                    array.put(temp);
+                }
+                servos.put(servo.getKey(), array);
+            }
+            writer.put(sServosKey, servos);
+
         } catch (JSONException e) { mLogger.error(e.getMessage()); }
     }
 
@@ -144,6 +182,23 @@ public class Hardware implements Configurable {
         result.append("</ul>\n");
         result.append("</details>\n");
 
+        // Log servos
+        result.append("<details style=\"margin-left:10px\">\n");
+        result.append("<summary style=\"font-size: 12px; font-weight: 500\"> SERVOS </summary>\n");
+        result.append("<ul>\n");
+        mServos.forEach((key, value) -> {
+            result.append("<details style=\"margin-left:10px\">\n")
+                    .append("<summary style=\"font-size: 11px; font-weight: 500\"> ")
+                    .append(key.toUpperCase())
+                    .append(" </summary>\n")
+                    .append("<ul>\n")
+                    .append(value.logConfigurationHTML())
+                    .append("</ul>\n")
+                    .append("</details>\n");
+        });
+        result.append("</ul>\n");
+        result.append("</details>\n");
+
         return result.toString();
 
     }
@@ -156,7 +211,19 @@ public class Hardware implements Configurable {
         result.append(header)
                 .append("> MOTORS\n");
 
-         mMotors.forEach((key, value) -> {
+        mMotors.forEach((key, value) -> {
+            result.append(header)
+                    .append("--> ")
+                    .append(key)
+                    .append("\n")
+                    .append(value.logConfigurationText(header + "----"));
+        });
+
+        // Log servos
+        result.append(header)
+                .append("> SERVOS\n");
+
+        mServos.forEach((key, value) -> {
             result.append(header)
                     .append("--> ")
                     .append(key)

@@ -13,7 +13,6 @@ package org.firstinspires.ftc.core.components.motors;
 
 /* System includes */
 import java.util.Map;
-import java.util.List;
 
 /* JSON includes */
 import org.json.JSONObject;
@@ -26,11 +25,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-/* Configuration includes */
-import org.firstinspires.ftc.core.configuration.Configurable;
-
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
+
+/* Configuration includes */
+import org.firstinspires.ftc.core.configuration.Configurable;
 
 public interface MotorComponent extends Configurable {
 
