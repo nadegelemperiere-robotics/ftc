@@ -5,7 +5,7 @@
    Class managing a command
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.orchestration.scheduler;
+package org.firstinspires.ftc.core.orchestration.dispatcher;
 
 /* System includes */
 import java.util.ArrayList;
@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
+import org.firstinspires.ftc.core.tools.Condition;
 
 /* Configuration includes */
 import org.firstinspires.ftc.core.configuration.Configurable;

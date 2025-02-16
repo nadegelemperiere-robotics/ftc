@@ -5,7 +5,7 @@
    Controller test class
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.test.components;
+package org.firstinspires.ftc.core.test.configuration;
 
 /* System includes */
 import java.io.File;
@@ -50,7 +50,7 @@ public class ControllerTest {
     public void setUp() {
         try (MockedStatic<Environment> mockedEnvironment = Mockito.mockStatic(Environment.class)) {
             mockedEnvironment.when(Environment::getExternalStorageDirectory).thenReturn(new File(getClass().getClassLoader().getResource("results").getFile()));
-            mLogger = new LogManager(null, null, "controller-test",3);
+            mLogger = new LogManager(null, null, "controller-test");
             mLogger.level(LogManager.Severity.INFO);
             mLogger.info("Setting it up!");
         }

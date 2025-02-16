@@ -248,6 +248,8 @@ public class ImuComponent implements Configurable {
         } catch(JSONException e) {
             mLogger.error(e.getMessage());
         }
+
+        if(mImu == null) { mConfigurationValid = false; }
     }
 
     /**

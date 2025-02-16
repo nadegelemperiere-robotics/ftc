@@ -57,6 +57,12 @@ public class Hardware implements Configurable {
     Map<String, ImuComponent>       mImus;
     Map<String, OdometerComponent>  mOdometers;
 
+    /**
+     * Constructor
+     *
+     * @param map The controllers hardware map
+     * @param logger The logger to report events
+     */
     public Hardware(HardwareMap map, LogManager logger) {
 
         mLogger = logger;
@@ -64,10 +70,12 @@ public class Hardware implements Configurable {
         mConfigurationValid = true;
 
         mMap = map;
-        LynxFirmware.throwIfModulesAreOutdated(mMap);
 
-        for (LynxModule module : mMap.getAll(LynxModule.class)) {
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        if(mMap != null) {
+            LynxFirmware.throwIfModulesAreOutdated(mMap);
+            for (LynxModule module : mMap.getAll(LynxModule.class)) {
+                module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+            }
         }
 
         mMotors     = new LinkedHashMap<>();
@@ -87,89 +95,85 @@ public class Hardware implements Configurable {
     public void                             read(JSONObject reader) {
 
         mConfigurationValid = true;
-        try {
 
-            // Read Motors
-            if (reader.has(sMotorsKey)) {
+        if(mMap == null) { mConfigurationValid = false; }
+        else {
+            try {
 
-                JSONObject motors = reader.getJSONObject(sMotorsKey);
-                Iterator<String> keys = motors.keys();
-                while (keys.hasNext()) {
+                // Read Motors
+                if (reader.has(sMotorsKey)) {
 
-                    String key = keys.next();
+                    JSONObject motors = reader.getJSONObject(sMotorsKey);
+                    Iterator<String> keys = motors.keys();
+                    while (keys.hasNext()) {
 
-                    MotorComponent motor = MotorComponent.factory(key, motors.getJSONArray(key), mMap, mLogger);
-                    if (!motor.isConfigured()) {
-                        mLogger.warning("Motor " + key + " configuration is invalid");
-                        mConfigurationValid = false;
-                    } else {
-                        mMotors.put(key, motor);
+                        String key = keys.next();
+
+                        MotorComponent motor = MotorComponent.factory(key, motors.getJSONArray(key), mMap, mLogger);
+                        if (!motor.isConfigured()) {
+                            mLogger.warning("Motor " + key + " configuration is invalid");
+                            mConfigurationValid = false;
+                        } else { mMotors.put(key, motor); }
+
                     }
-
                 }
-            }
 
-            // Read Servos
-            if (reader.has(sServosKey)) {
+                // Read Servos
+                if (reader.has(sServosKey)) {
 
-                JSONObject servos = reader.getJSONObject(sServosKey);
-                Iterator<String> keys = servos.keys();
-                while (keys.hasNext()) {
+                    JSONObject servos = reader.getJSONObject(sServosKey);
+                    Iterator<String> keys = servos.keys();
+                    while (keys.hasNext()) {
 
-                    String key = keys.next();
+                        String key = keys.next();
 
-                    ServoComponent servo = ServoComponent.factory(key, servos.getJSONArray(key), mMap, mLogger);
-                    if (!servo.isConfigured()) {
-                        mLogger.warning("Servo " + key + " configuration is invalid");
-                        mConfigurationValid = false;
-                    } else {
-                        mServos.put(key, servo);
+                        ServoComponent servo = ServoComponent.factory(key, servos.getJSONArray(key), mMap, mLogger);
+                        if (!servo.isConfigured()) {
+                            mLogger.warning("Servo " + key + " configuration is invalid");
+                            mConfigurationValid = false;
+                        } else { mServos.put(key, servo); }
+
                     }
-
                 }
-            }
 
-            // Read Imus
-            if (reader.has(sImusKey)) {
+                // Read Imus
+                if (reader.has(sImusKey)) {
 
-                JSONObject imus = reader.getJSONObject(sImusKey);
-                Iterator<String> keys = imus.keys();
-                while (keys.hasNext()) {
+                    JSONObject imus = reader.getJSONObject(sImusKey);
+                    Iterator<String> keys = imus.keys();
+                    while (keys.hasNext()) {
 
-                    String key = keys.next();
+                        String key = keys.next();
 
-                    ImuComponent imu = ImuComponent.factory(key, imus.getJSONObject(key), mMap, mLogger);
-                    if (!imu.isConfigured()) {
-                        mLogger.warning("Imu " + key + " configuration is invalid");
-                        mConfigurationValid = false;
-                    } else {
-                        mImus.put(key, imu);
+                        ImuComponent imu = ImuComponent.factory(key, imus.getJSONObject(key), mMap, mLogger);
+                        if (!imu.isConfigured()) {
+                            mLogger.warning("Imu " + key + " configuration is invalid");
+                            mConfigurationValid = false;
+                        } else { mImus.put(key, imu); }
+
                     }
-
                 }
-            }
 
-            // Read Odometers
-            if (reader.has(sOdometersKey)) {
+                // Read Odometers
+                if (reader.has(sOdometersKey)) {
 
-                JSONObject odometers = reader.getJSONObject(sOdometersKey);
-                Iterator<String> keys = odometers.keys();
-                while (keys.hasNext()) {
+                    JSONObject odometers = reader.getJSONObject(sOdometersKey);
+                    Iterator<String> keys = odometers.keys();
+                    while (keys.hasNext()) {
 
-                    String key = keys.next();
+                        String key = keys.next();
 
-                    OdometerComponent odometer = OdometerComponent.factory(key, odometers.getJSONObject(key), mMap, mLogger);
-                    if (!odometer.isConfigured()) {
-                        mLogger.warning("Odometer " + key + " configuration is invalid");
-                        mConfigurationValid = false;
-                    } else {
-                        mOdometers.put(key, odometer);
+                        OdometerComponent odometer = OdometerComponent.factory(key, odometers.getJSONObject(key), mMap, mLogger);
+                        if (!odometer.isConfigured()) {
+                            mLogger.warning("Odometer " + key + " configuration is invalid");
+                            mConfigurationValid = false;
+                        } else { mOdometers.put(key, odometer); }
+
                     }
-
                 }
+            } catch (JSONException e) {
+                mLogger.error(e.getMessage());
             }
-        } catch (JSONException e) {
-            mLogger.error(e.getMessage());
         }
     }
 
@@ -244,16 +248,14 @@ public class Hardware implements Configurable {
         result.append("<details style=\"margin-left:10px\">\n");
         result.append("<summary style=\"font-size: 12px; font-weight: 500\"> MOTORS </summary>\n");
         result.append("<ul>\n");
-        mMotors.forEach((key, value) -> {
-            result.append("<details style=\"margin-left:10px\">\n")
-                    .append("<summary style=\"font-size: 11px; font-weight: 500\"> ")
-                    .append(key.toUpperCase())
-                    .append(" </summary>\n")
-                    .append("<ul>\n")
-                    .append(value.logConfigurationHTML())
-                    .append("</ul>\n")
-                    .append("</details>\n");
-        });
+        mMotors.forEach((key, value) -> result.append("<details style=\"margin-left:10px\">\n")
+                .append("<summary style=\"font-size: 11px; font-weight: 500\"> ")
+                .append(key.toUpperCase())
+                .append(" </summary>\n")
+                .append("<ul>\n")
+                .append(value.logConfigurationHTML())
+                .append("</ul>\n")
+                .append("</details>\n"));
         result.append("</ul>\n");
         result.append("</details>\n");
 
@@ -261,16 +263,14 @@ public class Hardware implements Configurable {
         result.append("<details style=\"margin-left:10px\">\n");
         result.append("<summary style=\"font-size: 12px; font-weight: 500\"> SERVOS </summary>\n");
         result.append("<ul>\n");
-        mServos.forEach((key, value) -> {
-            result.append("<details style=\"margin-left:10px\">\n")
+        mServos.forEach((key, value) -> result.append("<details style=\"margin-left:10px\">\n")
                     .append("<summary style=\"font-size: 11px; font-weight: 500\"> ")
                     .append(key.toUpperCase())
                     .append(" </summary>\n")
                     .append("<ul>\n")
                     .append(value.logConfigurationHTML())
                     .append("</ul>\n")
-                    .append("</details>\n");
-        });
+                    .append("</details>\n"));
         result.append("</ul>\n");
         result.append("</details>\n");
 
@@ -279,16 +279,14 @@ public class Hardware implements Configurable {
         result.append("<details style=\"margin-left:10px\">\n");
         result.append("<summary style=\"font-size: 12px; font-weight: 500\"> IMUS </summary>\n");
         result.append("<ul>\n");
-        mImus.forEach((key, value) -> {
-            result.append("<details style=\"margin-left:10px\">\n")
-                    .append("<summary style=\"font-size: 11px; font-weight: 500\"> ")
-                    .append(key.toUpperCase())
-                    .append(" </summary>\n")
-                    .append("<ul>\n")
-                    .append(value.logConfigurationHTML())
-                    .append("</ul>\n")
-                    .append("</details>\n");
-        });
+        mImus.forEach((key, value) -> result.append("<details style=\"margin-left:10px\">\n")
+                .append("<summary style=\"font-size: 11px; font-weight: 500\"> ")
+                .append(key.toUpperCase())
+                .append(" </summary>\n")
+                .append("<ul>\n")
+                .append(value.logConfigurationHTML())
+                .append("</ul>\n")
+                .append("</details>\n"));
         result.append("</ul>\n");
         result.append("</details>\n");
 
@@ -297,16 +295,14 @@ public class Hardware implements Configurable {
         result.append("<details style=\"margin-left:10px\">\n");
         result.append("<summary style=\"font-size: 12px; font-weight: 500\"> ODOMETERS </summary>\n");
         result.append("<ul>\n");
-        mOdometers.forEach((key, value) -> {
-            result.append("<details style=\"margin-left:10px\">\n")
+        mOdometers.forEach((key, value) -> result.append("<details style=\"margin-left:10px\">\n")
                     .append("<summary style=\"font-size: 11px; font-weight: 500\"> ")
                     .append(key.toUpperCase())
                     .append(" </summary>\n")
                     .append("<ul>\n")
                     .append(value.logConfigurationHTML())
                     .append("</ul>\n")
-                    .append("</details>\n");
-        });
+                    .append("</details>\n"));
         result.append("</ul>\n");
         result.append("</details>\n");
 
@@ -322,49 +318,41 @@ public class Hardware implements Configurable {
         result.append(header)
                 .append("> MOTORS\n");
 
-        mMotors.forEach((key, value) -> {
-            result.append(header)
+        mMotors.forEach((key, value) -> result.append(header)
                     .append("--> ")
                     .append(key)
                     .append("\n")
-                    .append(value.logConfigurationText(header + "----"));
-        });
+                    .append(value.logConfigurationText(header + "----")));
 
         // Log servos
         result.append(header)
                 .append("> SERVOS\n");
 
-        mServos.forEach((key, value) -> {
-            result.append(header)
+        mServos.forEach((key, value) -> result.append(header)
                     .append("--> ")
                     .append(key)
                     .append("\n")
-                    .append(value.logConfigurationText(header + "----"));
-        });
+                    .append(value.logConfigurationText(header + "----")));
 
         // Log imus
         result.append(header)
                 .append("> IMUS\n");
 
-        mImus.forEach((key, value) -> {
-            result.append(header)
+        mImus.forEach((key, value) -> result.append(header)
                     .append("--> ")
                     .append(key)
                     .append("\n")
-                    .append(value.logConfigurationText(header + "----"));
-        });
+                    .append(value.logConfigurationText(header + "----")));
 
         // Log odometers
         result.append(header)
                 .append("> ODOMETERS\n");
 
-        mOdometers.forEach((key, value) -> {
-            result.append(header)
+        mOdometers.forEach((key, value) -> result.append(header)
                     .append("--> ")
                     .append(key)
                     .append("\n")
-                    .append(value.logConfigurationText(header + "----"));
-        });
+                    .append(value.logConfigurationText(header + "----")));
 
         return result.toString();
 

@@ -76,16 +76,7 @@
                     "back-left-wheel":   "back-left-wheel",
                     "back-right-wheel":  "back-right-wheel"
                 },
-                "odometers" : {
-                    "otos" : {
-                        "hwmap": "sensor_otos",
-                        "heading-offset" : 0.03,
-                        "x-offset" : 0.4566,
-                        "y-offset" : -3.5984,
-                        "heading-ratio" : 0.9964,
-                        "position-ratio" : 1.0
-                    }
-                },
+                "odometers" : "otos",
                 "physics" : {
                     "in-per-tick"               : 1,
                     "lat-in-per-tick"           : 0.7118231519430893,

@@ -5,8 +5,7 @@
    Robot implementation for tests
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.test.orchestration;
-
+package org.firstinspires.ftc.core.orchestration.test;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -29,7 +28,7 @@ public class RobotTest extends Robot {
     private double      mHeading;
 
     public RobotTest(LogManager logger) {
-        super(null,logger);
+        super(logger);
         reset();
     }
 

@@ -7,35 +7,23 @@
 
 package org.firstinspires.ftc.core.robot;
 
-/* System includes */
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /* Tools includes */
-import org.firstinspires.ftc.core.orchestration.sequencer.Context;
 import org.firstinspires.ftc.core.tools.LogManager;
 
-/* Subsystems includes */
-import org.firstinspires.ftc.core.subsystems.Subsystem;
+/* Orchestration includes */
+import org.firstinspires.ftc.core.orchestration.engine.State;
 
-/* Sequencer includes */
-import org.firstinspires.ftc.core.orchestration.sequencer.State;
+public abstract class RobotState implements State {
 
-public class RobotState { //extends State {
+    public abstract static class SharedData{};
 
-    LogManager              mLogger;
+    protected LogManager        mLogger;
 
-    Map<String, Subsystem>  mSubsystems;
+    protected SharedData        mData;
 
-    public  RobotState(LogManager logger) {
+    public  RobotState(SharedData data, LogManager logger) {
         mLogger = logger;
+        mData   = data;
     }
-
-    /**
-     * Step to next state
-     *
-     * @param context context to update
-     */
-    void        next(Context context) {}
 
 }

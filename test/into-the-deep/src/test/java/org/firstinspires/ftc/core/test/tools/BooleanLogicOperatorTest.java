@@ -52,7 +52,7 @@ public class BooleanLogicOperatorTest {
     public void setUp() {
         try (MockedStatic<Environment> mockedEnvironment = Mockito.mockStatic(Environment.class)) {
             mockedEnvironment.when(Environment::getExternalStorageDirectory).thenReturn(new File(getClass().getClassLoader().getResource("results").getFile()));
-            mLogger = new LogManager(null, null, "boolean-logic-test",3);
+            mLogger = new LogManager(null, null, "boolean-logic-test");
             mLogger.info("Setting it up!");
         }
     }

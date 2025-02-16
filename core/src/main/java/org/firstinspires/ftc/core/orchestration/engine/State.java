@@ -4,17 +4,21 @@
    -------------------------------------------------------
    State interface for state machine
    ------------------------------------------------------- */
-package org.firstinspires.ftc.core.orchestration.sequencer;
+
+package org.firstinspires.ftc.core.orchestration.engine;
 
 public interface State {
 
     /**
      * Step to next state
-     *
-     * @param context context to update
      */
-    void        next(Context context);
+    State       next();
 
-    boolean     isFinished();
+    /**
+     * Check if state is ready for change
+     *
+     * @return true if state is ready, false otherwise
+     */
+    boolean     hasFinished();
 
 }

@@ -5,19 +5,18 @@
    State context for state machine
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.orchestration.sequencer;
+package org.firstinspires.ftc.core.orchestration.engine;
 
 public class Context {
 
     protected State mState;
 
-
+    /**
+     * Check if current state is over and move to next step
+     */
     public void update() {
-        if(mState.isFinished()) { mState.next(this); }
+        if(mState.hasFinished()) { mState = mState.next(); }
     }
 
-    public void setState(State state) {
-        this.mState = state;
-    }
 
 }

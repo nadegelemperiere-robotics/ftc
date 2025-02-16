@@ -41,10 +41,10 @@ import org.firstinspires.ftc.core.configuration.Configuration;
 import org.firstinspires.ftc.core.components.controllers.Controller;
 
 /* Controller includes */
-import org.firstinspires.ftc.core.orchestration.dispatcher.Command;
+import org.firstinspires.ftc.core.orchestration.scheduler.Command;
 
 /* Tests includes */
-import org.firstinspires.ftc.core.test.orchestration.RobotTest;
+import org.firstinspires.ftc.core.orchestration.test.RobotTest;
 
 @ExtendWith(MockitoExtension.class)
 public class CommandTest {
@@ -60,7 +60,7 @@ public class CommandTest {
     public void setUp() {
         try (MockedStatic<Environment> mockedEnvironment = Mockito.mockStatic(Environment.class)) {
             mockedEnvironment.when(Environment::getExternalStorageDirectory).thenReturn(new File(getClass().getClassLoader().getResource("results").getFile()));
-            mLogger = new LogManager(null, null, "command-test",3);
+            mLogger = new LogManager(null, null, "command-test");
             mLogger.level(LogManager.Severity.INFO);
             mLogger.info("Setting it up!");
         }

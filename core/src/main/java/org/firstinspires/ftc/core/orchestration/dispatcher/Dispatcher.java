@@ -5,7 +5,7 @@
    Class mapping controller inputs to robot behavior
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.orchestration.scheduler;
+package org.firstinspires.ftc.core.orchestration.dispatcher;
 
 /* System includes */
 import java.util.Map;
@@ -19,6 +19,7 @@ import org.json.JSONArray;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
+import org.firstinspires.ftc.core.tools.Condition;
 
 /* Configuration includes */
 import org.firstinspires.ftc.core.configuration.Configurable;
@@ -29,7 +30,7 @@ import org.firstinspires.ftc.core.components.controllers.Controller;
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Robot;
 
-public class Scheduler implements Configurable {
+public class Dispatcher implements Configurable {
 
     static  final   String              sControllersKey = "controllers";
     static  final   String              sCommandsKey    = "commands";
@@ -51,7 +52,7 @@ public class Scheduler implements Configurable {
      * @param robot robot to command
      * @param logger logger
      */
-    public Scheduler(Map<String,Controller> controllers, Robot robot, LogManager logger) {
+    public Dispatcher(Map<String,Controller> controllers, Robot robot, LogManager logger) {
         mLogger      = logger;
         mControllers = controllers;
         mRobot       = robot;

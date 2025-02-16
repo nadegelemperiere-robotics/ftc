@@ -16,31 +16,46 @@ import org.firstinspires.ftc.core.tools.LogManager;
 /* Configuration includes */
 import org.firstinspires.ftc.core.configuration.Configurable;
 
+/* Robot includes */
+import org.firstinspires.ftc.core.robot.Hardware;
+
 
 public interface Subsystem extends Configurable {
 
-    public static final String sTypeKey = "type";
+    String sTypeKey = "type";
 
-    public static Subsystem   factory(JSONObject reader, LogManager logger) {
+    static Subsystem   factory(String name, JSONObject reader, Hardware hardware, LogManager logger) {
         Subsystem result = null;
         try {
             if (reader.has(sTypeKey)) {
                 String type = reader.getString(sTypeKey);
-                switch (reader.getString(sTypeKey)) {
-                    case "mechanum-drive" :
-                        //result = new MechanumDrive(logger);
-                        //result.read(reader);
+                switch (type) {
+                    case "mecanum-drive" :
+                        result = new MecanumDrive(name,hardware,logger);
+                        result.read(reader);
+                        break;
+                    case "actuator" :
+                        result = new Actuator(name,hardware,logger);
+                        result.read(reader);
+                        break;
+                    case "toggle-actuator" :
+                        result = new ToggleActuator(name,hardware,logger);
+                        result.read(reader);
+                        break;
+                    case "default-slides" :
+                        result = new DefaultSlides(name,hardware,logger);
+                        result.read(reader);
                         break;
                 }
             }
         }
         catch(JSONException e) { logger.error(e.getMessage());}
 
-
-
-
         return result;
     }
+
+    void    update();
+    boolean hasFinished();
 
 
 

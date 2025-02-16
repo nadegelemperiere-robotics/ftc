@@ -91,13 +91,14 @@ public class LogManager implements Configurable {
     // Formatting
     static  final   int             sErrorFontSize   = 14;
     static  final   int             sWarningFontSize = 14;
-    public static  final   int      sMetricFontSize  = 13;
+    public static   final   int     sMetricFontSize  = 13;
     static  final   int             sInfoFontSize    = 13;
     static  final   int             sEntryFontSize   = 15;
 
     // Status
     boolean                         mConfigurationValid;
     Severity                        mLevel;
+    int                             mStackLevel;
     
     // Loggers
     Telemetry                       mDriverStation;
@@ -123,9 +124,22 @@ public class LogManager implements Configurable {
      * @param filename the name of the file to log into (may be empty if shall not be used for logging)
      */
     public LogManager(Telemetry station, FtcDashboard dashboard, String filename) {
-        
+        this(station, dashboard, filename, sStackLevel);
+    }
+
+    /**
+     * Builds a log manager from parameters
+     *
+     * @param station the driver station telemetry from opmode (may be null if shall not be used for logging)
+     * @param dashboard the FTC dashboard instance (may be null if shall not be used for logging)
+     * @param filename the name of the file to log into (may be empty if shall not be used for logging)
+     * @param stackLevel the stack level to get the function name
+     */
+    public LogManager(Telemetry station, FtcDashboard dashboard, String filename, int stackLevel) {
+
         mConfigurationValid = true;
         mLevel = Severity.TRACE;
+        mStackLevel = stackLevel;
 
         mErrors   = new LinkedHashMap<>();
         mWarnings = new LinkedHashMap<>();
@@ -166,6 +180,7 @@ public class LogManager implements Configurable {
 
 
     }
+
 
     /**
      * Minimal level setter
@@ -355,7 +370,7 @@ public class LogManager implements Configurable {
      * @param message the error message
      */
     public void error(Target target, String message) {
-        this.error(target, message, sStackLevel);
+        this.error(target, message, mStackLevel);
     }
 
     /**
@@ -365,7 +380,7 @@ public class LogManager implements Configurable {
      */
     public void error(String message) {
         for(Target target : Target.values()) {
-            this.error(target, message, sStackLevel);
+            this.error(target, message, mStackLevel);
         }
     }
 
@@ -376,7 +391,7 @@ public class LogManager implements Configurable {
      * @param message the warning message
      */
     public void warning(Target target, String message) {
-        this.warning(target, message, sStackLevel);
+        this.warning(target, message, mStackLevel);
     }
 
     /**
@@ -386,7 +401,7 @@ public class LogManager implements Configurable {
      */
     public void warning(String message) {
         for(Target target : Target.values()) {
-            this.warning(target, message, sStackLevel);
+            this.warning(target, message, mStackLevel);
         }
     }
 
@@ -398,7 +413,7 @@ public class LogManager implements Configurable {
      */
     public void metric(String metric, String value) {
         for(Target target : Target.values()) {
-            this.metric(target, metric, value, sStackLevel);
+            this.metric(target, metric, value, mStackLevel);
         }
     }
 
@@ -410,7 +425,7 @@ public class LogManager implements Configurable {
      * @param value the metric value
      */
     public void metric(Target target, String metric, String value) {
-        this.metric(target, metric, value, sStackLevel);
+        this.metric(target, metric, value, mStackLevel);
     }
 
     /**
@@ -420,7 +435,7 @@ public class LogManager implements Configurable {
      */
     public void info(String message) {
         for(Target target : Target.values()) {
-            this.info(target, message, sStackLevel);
+            this.info(target, message, mStackLevel);
         }
     }
 
@@ -431,7 +446,7 @@ public class LogManager implements Configurable {
      * @param message the info message
      */
     public void info(Target target, String message) {
-        this.info(target, message, sStackLevel);
+        this.info(target, message, mStackLevel);
     }
 
     /**
@@ -441,7 +456,7 @@ public class LogManager implements Configurable {
      */
     public void debug(String message) {
         for(Target target : Target.values()) {
-            this.debug(target, message, sStackLevel);
+            this.debug(target, message, mStackLevel);
         }
     }
 
@@ -452,7 +467,7 @@ public class LogManager implements Configurable {
      * @param message the debug message
      */
     public void debug(Target target, String message) {
-        this.debug(target, message, sStackLevel);
+        this.debug(target, message, mStackLevel);
     }
 
     /**
@@ -462,7 +477,7 @@ public class LogManager implements Configurable {
      */
     public void trace(String message) {
         for(Target target : Target.values()) {
-            this.trace(target, message, sStackLevel);
+            this.trace(target, message, mStackLevel);
         }
     }
 
@@ -473,7 +488,7 @@ public class LogManager implements Configurable {
      * @param message the trace message
      */
     public void trace(Target target, String message) {
-        this.trace(target, message, sStackLevel);
+        this.trace(target, message, mStackLevel);
     }
 
     /**
