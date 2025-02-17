@@ -96,84 +96,81 @@ public class Hardware implements Configurable {
 
         mConfigurationValid = true;
 
-        if(mMap == null) { mConfigurationValid = false; }
-        else {
-            try {
+        try {
 
-                // Read Motors
-                if (reader.has(sMotorsKey)) {
+            // Read Motors
+            if (reader.has(sMotorsKey)) {
 
-                    JSONObject motors = reader.getJSONObject(sMotorsKey);
-                    Iterator<String> keys = motors.keys();
-                    while (keys.hasNext()) {
+                JSONObject motors = reader.getJSONObject(sMotorsKey);
+                Iterator<String> keys = motors.keys();
+                while (keys.hasNext()) {
 
-                        String key = keys.next();
+                    String key = keys.next();
 
-                        MotorComponent motor = MotorComponent.factory(key, motors.getJSONArray(key), mMap, mLogger);
-                        if (!motor.isConfigured()) {
-                            mLogger.warning("Motor " + key + " configuration is invalid");
-                            mConfigurationValid = false;
-                        } else { mMotors.put(key, motor); }
+                    MotorComponent motor = MotorComponent.factory(key, motors.getJSONArray(key), mMap, mLogger);
+                    if (!motor.isConfigured()) {
+                        mLogger.warning("Motor " + key + " configuration is invalid");
+                        mConfigurationValid = false;
+                    } else { mMotors.put(key, motor); }
 
-                    }
                 }
-
-                // Read Servos
-                if (reader.has(sServosKey)) {
-
-                    JSONObject servos = reader.getJSONObject(sServosKey);
-                    Iterator<String> keys = servos.keys();
-                    while (keys.hasNext()) {
-
-                        String key = keys.next();
-
-                        ServoComponent servo = ServoComponent.factory(key, servos.getJSONArray(key), mMap, mLogger);
-                        if (!servo.isConfigured()) {
-                            mLogger.warning("Servo " + key + " configuration is invalid");
-                            mConfigurationValid = false;
-                        } else { mServos.put(key, servo); }
-
-                    }
-                }
-
-                // Read Imus
-                if (reader.has(sImusKey)) {
-
-                    JSONObject imus = reader.getJSONObject(sImusKey);
-                    Iterator<String> keys = imus.keys();
-                    while (keys.hasNext()) {
-
-                        String key = keys.next();
-
-                        ImuComponent imu = ImuComponent.factory(key, imus.getJSONObject(key), mMap, mLogger);
-                        if (!imu.isConfigured()) {
-                            mLogger.warning("Imu " + key + " configuration is invalid");
-                            mConfigurationValid = false;
-                        } else { mImus.put(key, imu); }
-
-                    }
-                }
-
-                // Read Odometers
-                if (reader.has(sOdometersKey)) {
-
-                    JSONObject odometers = reader.getJSONObject(sOdometersKey);
-                    Iterator<String> keys = odometers.keys();
-                    while (keys.hasNext()) {
-
-                        String key = keys.next();
-
-                        OdometerComponent odometer = OdometerComponent.factory(key, odometers.getJSONObject(key), mMap, mLogger);
-                        if (!odometer.isConfigured()) {
-                            mLogger.warning("Odometer " + key + " configuration is invalid");
-                            mConfigurationValid = false;
-                        } else { mOdometers.put(key, odometer); }
-
-                    }
-                }
-            } catch (JSONException e) {
-                mLogger.error(e.getMessage());
             }
+
+            // Read Servos
+            if (reader.has(sServosKey)) {
+
+                JSONObject servos = reader.getJSONObject(sServosKey);
+                Iterator<String> keys = servos.keys();
+                while (keys.hasNext()) {
+
+                    String key = keys.next();
+
+                    ServoComponent servo = ServoComponent.factory(key, servos.getJSONArray(key), mMap, mLogger);
+                    if (!servo.isConfigured()) {
+                        mLogger.warning("Servo " + key + " configuration is invalid");
+                        mConfigurationValid = false;
+                    } else { mServos.put(key, servo); }
+
+                }
+            }
+
+            // Read Imus
+            if (reader.has(sImusKey)) {
+
+                JSONObject imus = reader.getJSONObject(sImusKey);
+                Iterator<String> keys = imus.keys();
+                while (keys.hasNext()) {
+
+                    String key = keys.next();
+
+                    ImuComponent imu = ImuComponent.factory(key, imus.getJSONObject(key), mMap, mLogger);
+                    if (!imu.isConfigured()) {
+                        mLogger.warning("Imu " + key + " configuration is invalid");
+                        mConfigurationValid = false;
+                    } else { mImus.put(key, imu); }
+
+                }
+            }
+
+            // Read Odometers
+            if (reader.has(sOdometersKey)) {
+
+                JSONObject odometers = reader.getJSONObject(sOdometersKey);
+                Iterator<String> keys = odometers.keys();
+                while (keys.hasNext()) {
+
+                    String key = keys.next();
+
+                    OdometerComponent odometer = OdometerComponent.factory(key, odometers.getJSONObject(key), mMap, mLogger);
+                    if (!odometer.isConfigured()) {
+                        mLogger.warning("Odometer " + key + " configuration is invalid");
+                        mConfigurationValid = false;
+                    } else { mOdometers.put(key, odometer); }
+
+                }
+            }
+        } catch (JSONException e) {
+            mLogger.error(e.getMessage());
         }
     }
 
@@ -193,7 +190,7 @@ public class Hardware implements Configurable {
                 if (temp.has(MotorCoupled.sSecondKey)) {
                     array.put(temp.getJSONObject(MotorCoupled.sSecondKey));
                 }
-                if (!temp.has(MotorCoupled.sSecondKey) && !temp.has(MotorCoupled.sSecondKey)) {
+                if (temp.length() != 0 && !temp.has(MotorCoupled.sSecondKey) && !temp.has(MotorCoupled.sSecondKey)) {
                     array.put(temp);
                 }
                 motors.put(motor.getKey(), array);
@@ -212,7 +209,7 @@ public class Hardware implements Configurable {
                 if (temp.has(ServoCoupled.sSecondKey)) {
                     array.put(temp.getJSONObject(ServoCoupled.sSecondKey));
                 }
-                if (!temp.has(ServoCoupled.sSecondKey) && !temp.has(ServoCoupled.sSecondKey)) {
+                if (temp.length() != 0 && !temp.has(ServoCoupled.sSecondKey) && !temp.has(ServoCoupled.sSecondKey)) {
                     array.put(temp);
                 }
                 servos.put(servo.getKey(), array);

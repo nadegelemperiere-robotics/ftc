@@ -17,6 +17,8 @@ import android.os.Environment;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +53,11 @@ public class ConfigurationTest {
             mLogger.level(LogManager.Severity.INFO);
             mLogger.info("Setting it up!");
         }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        mLogger.stop();
     }
 
     @Test

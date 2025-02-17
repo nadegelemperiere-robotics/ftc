@@ -18,6 +18,8 @@
 
 package org.firstinspires.ftc.core.components.motors;
 
+/* JSON includes */
+import org.json.JSONObject;
 
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -26,7 +28,9 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
-import org.json.JSONObject;
+
+/* Orchestration includes */
+import org.firstinspires.ftc.core.orchestration.engine.Mock;
 
 public class MotorMock implements MotorComponent {
 
@@ -51,6 +55,7 @@ public class MotorMock implements MotorComponent {
         mLogger             = logger;
         mName               = name;
         mConfigurationValid = true;
+        mPosition           = 0;
 
         mDirection          = DcMotorSimple.Direction.FORWARD;
         mMode               = DcMotor.RunMode.RUN_WITHOUT_ENCODER;
@@ -89,7 +94,7 @@ public class MotorMock implements MotorComponent {
     public String                       logConfigurationHTML() { return "<p>Mock</p>\n"; }
 
     @Override
-    public String                       logConfigurationText(String header) {   return header + "> Mock"; }
+    public String                       logConfigurationText(String header) {   return header + "> Mock\n"; }
 
     /* --------------------- DcMotor functions --------------------- */
 
@@ -121,13 +126,19 @@ public class MotorMock implements MotorComponent {
     public void	                        direction(DcMotorSimple.Direction direction) { mDirection = direction; }
 
     @Override
-    public void	                        targetPosition(int position) { mPosition = position;}
+    public void	                        targetPosition(int position) {
+        Mock.instance().mMockedComponents.put(mName + "-position",(double)position);
+        mPosition = position;
+    }
 
     @Override
     public void	                        zeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior) { mBehavior = zeroPowerBehavior; }
 
     @Override
-    public void	                        power(double power) { mPower = power; }
+    public void	                        power(double power) {
+        Mock.instance().mMockedComponents.put(mName + "-power",power);
+        mPower = power;
+    }
 
     /* -------------------- DcMotorEx functions -------------------- */
 

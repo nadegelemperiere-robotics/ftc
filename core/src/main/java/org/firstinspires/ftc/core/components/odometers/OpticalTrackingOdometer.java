@@ -139,7 +139,7 @@ public class OpticalTrackingOdometer implements OdometerComponent {
 
         try {
 
-            if (reader.has(sHwMapKey)) {
+            if (mMap != null && reader.has(sHwMapKey)) {
                 mHwName = reader.getString(sHwMapKey);
                 mOtos = mMap.tryGet(SparkFunOTOSCorrected.class, mHwName);
             }

@@ -7,6 +7,7 @@
 package org.firstinspires.ftc.core.subsystems;
 
 /* JSON object */
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /* Robot includes */
@@ -39,7 +40,7 @@ public class DefaultSlides extends Actuator {
      *
      * @param power The power to give to the slide motors
      */
-    public void power(double power) {
+    public void                         power(double power) {
 
         if(mMotor != null && this.hasFinished()) {
             if(power < 0 && (mMotor.currentPosition() + mOffset) > mMinPosition) {
@@ -61,7 +62,7 @@ public class DefaultSlides extends Actuator {
      * @param reader The JSON object containing configuration settings.
      */
     @Override
-    public void read(JSONObject reader) {
+    public void                         read(JSONObject reader) {
         super.read(reader);
 
         if(mPositions.containsKey(sMinPosition)) {
@@ -72,6 +73,22 @@ public class DefaultSlides extends Actuator {
             Double position = mPositions.get(sMaxPosition);
             if(position != null) { mMaxPosition = (int)(double)position; }
         }
+    }
+
+    /**
+     * Writes the current slide configuration to a JSON object.
+     *
+     * @param writer The JSON object to store the configuration settings.
+     */
+    @Override
+    public void                         write(JSONObject writer) {
+        try {
+            writer.put(sTypeKey, "default-slides");
+        }
+        catch(JSONException e) {
+            mLogger.error(e.getMessage());
+        }
+        this.writeWithoutType(writer);
     }
 
 

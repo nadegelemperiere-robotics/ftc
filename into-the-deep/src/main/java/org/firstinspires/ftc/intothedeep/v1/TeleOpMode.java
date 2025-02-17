@@ -5,7 +5,7 @@
    Into-The-Deep TeleOp mode
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.intothedeep;
+package org.firstinspires.ftc.intothedeep.v1;
 
 /* System includes */
 import java.util.LinkedHashMap;
@@ -22,19 +22,17 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import org.firstinspires.ftc.core.tools.LogManager;
 
 /* Configuration includes */
-import org.firstinspires.ftc.intothedeep.configuration.SeasonConfiguration;
+import org.firstinspires.ftc.intothedeep.v1.configuration.Configuration;
 
 /* Components includes */
 import org.firstinspires.ftc.core.components.controllers.Controller;
 
-
-
-@TeleOp
+@TeleOp(name = "Robot V1 Teleop", group = "V1")
 public class TeleOpMode extends OpMode {
 
-    LogManager              mLogger;
+    LogManager      mLogger;
 
-    SeasonConfiguration     mConfiguration;
+    Configuration   mConfiguration;
 
     Map<String, Controller> mControllers;
     
@@ -44,11 +42,11 @@ public class TeleOpMode extends OpMode {
         try {
 
             // Log initialization
-            mLogger = new LogManager(telemetry, FtcDashboard.getInstance(),"teleop");
+            mLogger = new LogManager(telemetry, FtcDashboard.getInstance(),"teleop-v1");
             mLogger.clear();
 
             // Configuration initialization
-            mConfiguration = SeasonConfiguration.getInstance();
+            mConfiguration = Configuration.getInstance();
             mConfiguration.logger(mLogger);
 
             // Robot initialization
@@ -88,6 +86,11 @@ public class TeleOpMode extends OpMode {
             mLogger.error(e.getMessage());
         }
         
+    }
+
+    @Override
+    public void stop() {
+        mLogger.stop();
     }
 
 }

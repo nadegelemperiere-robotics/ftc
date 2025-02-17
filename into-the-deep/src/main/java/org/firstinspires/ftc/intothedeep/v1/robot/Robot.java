@@ -2,10 +2,10 @@
    Copyright (c) [2025] Nadege LEMPERIERE
    All rights reserved
    -------------------------------------------------------
-   Season robot configuration
+   Season robot management
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.intothedeep.robot;
+package org.firstinspires.ftc.intothedeep.v1.robot;
 
 /* System includes */
 import java.util.Iterator;
@@ -18,22 +18,17 @@ import org.json.JSONObject;
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-/* Tools includes */
-import org.firstinspires.ftc.core.subsystems.Subsystem;
 import org.firstinspires.ftc.core.tools.LogManager;
-
-/* Robot includes */
-import org.firstinspires.ftc.core.robot.Robot;
 
 /* Subsystem includes */
 import org.firstinspires.ftc.core.subsystems.MecanumDrive;
 import org.firstinspires.ftc.core.subsystems.DefaultSlides;
-import org.firstinspires.ftc.intothedeep.subsystems.IntakeArm;
-import org.firstinspires.ftc.intothedeep.subsystems.OuttakeArm;
-import org.firstinspires.ftc.intothedeep.subsystems.SeasonSubsystem;
+import org.firstinspires.ftc.intothedeep.v1.subsystems.IntakeArm;
+import org.firstinspires.ftc.intothedeep.v1.subsystems.OuttakeArm;
+import org.firstinspires.ftc.intothedeep.v1.subsystems.Subsystem;
 
 
-public class SeasonRobot extends Robot {
+public class Robot extends org.firstinspires.ftc.core.robot.Robot {
 
     static final String sIntakeArmKey       = "intake-arm";
     static final String sIntakeSlidesKey    = "intake-slides";
@@ -41,40 +36,52 @@ public class SeasonRobot extends Robot {
     static final String sOuttakeSlidesKey   = "outtake-slides";
     static final String sChassisKey         = "drive-train";
 
-    SeasonRobotState.SharedData  mData;
+    RobotState.SharedData  mData;
 
-    public  SeasonRobot(HardwareMap map, LogManager logger) {
+    /**
+     * Constructs a season robot instance.
+     *
+     * @param map    The FTC HardwareMap to retrieve hardware.
+     * @param logger The logging manager for error reporting and debugging.
+     */
+    public  Robot(HardwareMap map, LogManager logger) {
         super(map, logger);
-        mData  = new SeasonRobotState.SeasonSharedData();
-        mState = new DefaultState((SeasonRobotState.SeasonSharedData)mData, mLogger);
+        mData  = new RobotState.SharedData();
     }
 
-    public void drive(double x, double y, double heading)   { ((SeasonRobotState)mState).drive(x,y,heading); }
-    public void tuneDriveSpeed(double multiplier)           { ((SeasonRobotState)mState).tuneDriveSpeed(multiplier); }
+    /* ---------------------- TeleOp commands ---------------------- */
+    public void drive(double x, double y, double heading)   { ((RobotState)mState).drive(x,y,heading); }
+    public void tuneDriveSpeed(double multiplier)           { ((RobotState)mState).tuneDriveSpeed(multiplier); }
 
+    public void powerOuttakeSlides(double power)            { ((RobotState)mState).powerOuttakeSlides(power); }
+    public void positionOuttakeSlides(String position)      { ((RobotState)mState).positionOuttakeSlides(position); }
+    public void moveOuttakeArm(String direction)            { ((RobotState)mState).moveOuttakeArm(direction); }
+    public void toggleOuttakeClaw()                         { ((RobotState)mState).toggleOuttakeClaw(); }
 
-    public void powerOuttakeSlides(double power)            { ((SeasonRobotState)mState).powerOuttakeSlides(power); }
-    public void positionOuttakeSlides(String position)      { ((SeasonRobotState)mState).positionOuttakeSlides(position); }
-    public void moveOuttakeArm(String direction)            { ((SeasonRobotState)mState).moveOuttakeArm(direction); }
-    public void toggleOuttakeClaw()                         { ((SeasonRobotState)mState).toggleOuttakeClaw(); }
+    public void powerIntakeSlides(double power)             { ((RobotState)mState).powerIntakeSlides(power); }
+    public void moveIntakeArm(String direction)             { ((RobotState)mState).moveIntakeArm(direction); }
+    public void toggleIntakeClaw()                          { ((RobotState)mState).toggleIntakeClaw(); }
+    public void toggleIntakeWrist()                         { ((RobotState)mState).toggleIntakeWrist(); }
 
+    /* --------------------- States management --------------------- */
+    public void transfer()                                  { this.mState = ((RobotState)mState).toTransfer(); }
+    public void pick()                                      { this.mState = ((RobotState)mState).toPick(); }
 
-    public void powerIntakeSlides(double power)             { ((SeasonRobotState)mState).powerIntakeSlides(power); }
-    public void moveIntakeArm(String direction)             { ((SeasonRobotState)mState).moveIntakeArm(direction); }
-    public void toggleIntakeClaw()                          { ((SeasonRobotState)mState).toggleIntakeClaw(); }
-    public void toggleIntakeWrist()                         { ((SeasonRobotState)mState).toggleIntakeWrist(); }
+    /**
+     * Starts the robot in initial position
+     */
+    public void                         start() {
+        mState = new InitState((RobotState.SharedData)mData, mLogger);
+    }
 
-
-    public void transfer()                                  { this.mState = ((SeasonRobotState)mState).toTransfer(); }
-    public void pick()                                      { this.mState = ((SeasonRobotState)mState).toPick(); }
-
+    /* ------------------ Configurable functions ------------------- */
     @Override
     public void                         read(JSONObject reader) {
 
         mConfigurationValid = true;
         mSubsystems.clear();
 
-        SeasonRobotState.SeasonSharedData data = (SeasonRobotState.SeasonSharedData)mData;
+        RobotState.SharedData data = (RobotState.SharedData)mData;
 
         data.chassis       = null;
         data.intakeArm     = null;
@@ -100,7 +107,7 @@ public class SeasonRobot extends Robot {
 
                     String key = keys.next();
 
-                    Subsystem subsystem = SeasonSubsystem.factory(key, subsystems.getJSONObject(key), mHardware, mLogger);
+                    org.firstinspires.ftc.core.subsystems.Subsystem subsystem = Subsystem.factory(key, subsystems.getJSONObject(key), mHardware, mLogger);
                     if(!subsystem.isConfigured()) {
                         mLogger.warning("Subsystem " + key + " configuration is invalid");
                         mConfigurationValid = false;
@@ -116,33 +123,33 @@ public class SeasonRobot extends Robot {
             mLogger.error(e.getMessage());
         }
 
-        for (Map.Entry<String, Subsystem> subsystem : mSubsystems.entrySet()) {
+        for (Map.Entry<String, org.firstinspires.ftc.core.subsystems.Subsystem> subsystem : mSubsystems.entrySet()) {
             if(subsystem.getKey().equals(sChassisKey)) {
-                Subsystem chassis = subsystem.getValue();
+                org.firstinspires.ftc.core.subsystems.Subsystem chassis = subsystem.getValue();
                 if (chassis instanceof MecanumDrive) {
                     data.chassis = (MecanumDrive) chassis;
                 }
             }
             if(subsystem.getKey().equals(sIntakeArmKey)) {
-                Subsystem arm = subsystem.getValue();
+                org.firstinspires.ftc.core.subsystems.Subsystem arm = subsystem.getValue();
                 if (arm instanceof IntakeArm) {
                     data.intakeArm = (IntakeArm) arm;
                 }
             }
             if(subsystem.getKey().equals(sIntakeSlidesKey)) {
-                Subsystem slides = subsystem.getValue();
+                org.firstinspires.ftc.core.subsystems.Subsystem slides = subsystem.getValue();
                 if (slides instanceof DefaultSlides) {
                     data.intakeSlides = (DefaultSlides) slides;
                 }
             }
             if(subsystem.getKey().equals(sOuttakeSlidesKey)) {
-                Subsystem slides = subsystem.getValue();
+                org.firstinspires.ftc.core.subsystems.Subsystem slides = subsystem.getValue();
                 if (slides instanceof DefaultSlides) {
                     data.outtakeSlides = (DefaultSlides) slides;
                 }
             }
             if(subsystem.getKey().equals(sOuttakeArmKey)) {
-                Subsystem arm = subsystem.getValue();
+                org.firstinspires.ftc.core.subsystems.Subsystem arm = subsystem.getValue();
                 if (arm instanceof OuttakeArm) {
                     data.outtakeArm = (OuttakeArm) arm;
                 }

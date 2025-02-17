@@ -9,7 +9,6 @@ package org.firstinspires.ftc.core.components.odometers;
 
 /* System includes */
 import java.util.LinkedList;
-import java.util.Objects;
 
 /* JSON includes */
 import org.json.JSONException;
@@ -147,7 +146,7 @@ public class PinPointOdometer implements OdometerComponent {
 
         try {
 
-            if(reader.has(sHwMapKey)) {
+            if(mMap != null && reader.has(sHwMapKey)) {
                 mPinPointHwName = reader.getString(sHwMapKey);
                 mPinPoint = mMap.tryGet(GoBildaPinpointDriverRR.class,mPinPointHwName);
             }

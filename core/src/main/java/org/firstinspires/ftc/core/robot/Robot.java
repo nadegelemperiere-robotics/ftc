@@ -45,8 +45,6 @@ public class Robot extends Context implements Configurable {
 
     protected Hardware                  mHardware;
 
-    protected RobotState                mState;
-
     public  Robot(HardwareMap map, LogManager logger) {
         mLogger             = logger;
 
@@ -56,7 +54,9 @@ public class Robot extends Context implements Configurable {
         mSubsystems         = new LinkedHashMap<>();
     }
 
-    public void        update()
+    public void                         start() {}
+
+    public void                         update()
     {
         super.update();
         for (Map.Entry<String, Subsystem> subsystem : mSubsystems.entrySet()) {

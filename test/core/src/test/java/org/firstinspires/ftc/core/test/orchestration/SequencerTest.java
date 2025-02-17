@@ -18,7 +18,8 @@ import android.os.Environment;
 /* Junit 5 includes */
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,6 +56,11 @@ public class SequencerTest {
             mLogger.level(LogManager.Severity.INFO);
             mLogger.info("Setting it up!");
         }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        mLogger.stop();
     }
 
     @Test
@@ -97,8 +103,9 @@ public class SequencerTest {
         );
         mSequencer.run();
         while(!mSequencer.hasFinished()) {
+            mSequencer.update();
             try {
-                Thread.sleep(10);
+                Thread.sleep(5);
             }
             catch(InterruptedException ignored) {}
         }
@@ -106,8 +113,8 @@ public class SequencerTest {
 
         assertEquals(3,mExecution.size(),"3 tasks shall have been executed");
         assertEquals("Task1", mExecution.get(0), "Task 1 shall execute first");
-        assertEquals("Task2", mExecution.get(1), "Task 2 shall execute first");
-        assertEquals("Task3", mExecution.get(2), "Task 3 shall execute first");
+        assertEquals("Task2", mExecution.get(1), "Task 2 shall execute second");
+        assertEquals("Task3", mExecution.get(2), "Task 3 shall execute third");
 
         assertEquals(4,mStartTime.size(),"4 times should have been recorded");
         double duration = (double)(mStartTime.get(1) - mStartTime.get(0)) / 1_000_000;
@@ -120,6 +127,118 @@ public class SequencerTest {
         mLogger.info("Task3 lasted " + duration);
         assertTrue(Math.abs(duration - 1000) < 15,"Task 3 shall have lasted 1000 ms ");
 
+    }
+
+
+    @Test
+    public void interrupt() {
+
+        mSequencer  = new Sequencer(mLogger);
+        mExecution  = new ArrayList<>();
+        mStartTime  = new ArrayList<>();
+        mTimer      = new Timer(mLogger);
+
+        mSequencer.sequence(
+                "NOMINAL",
+                new Task(
+                        "Task1",
+                        () -> {
+                            mStartTime.add(System.nanoTime());
+                            mExecution.add("Task1");
+                            mTimer.arm(200);
+                        },
+                        new Condition(() -> !mTimer.isArmed())
+                ),
+                new Task(
+                        "Task2",
+                        () -> {
+                            mStartTime.add(System.nanoTime());
+                            mExecution.add("Task2");
+                            mTimer.arm(500);
+                        },
+                        new Condition(() -> !mTimer.isArmed())
+                ),
+                new Task(
+                        "Task3",
+                        () -> {
+                            mStartTime.add(System.nanoTime());
+                            mExecution.add("Task3");
+                            mTimer.arm(1000);
+                        },
+                        new Condition(() -> !mTimer.isArmed())
+                )
+        );
+        mSequencer.run();
+
+        for(int i_time = 0; i_time < 20; i_time ++) {
+            mSequencer.update();
+            try {
+                Thread.sleep(5);
+            }
+            catch(InterruptedException ignored) {}
+        }
+
+        mSequencer.sequence(
+                "INTERRUPTED",
+                new Task(
+                        "Task4",
+                        () -> {
+                            mStartTime.add(System.nanoTime());
+                            mExecution.add("Task4");
+                            mTimer.arm(700);
+                        },
+                        new Condition(() -> !mTimer.isArmed())
+                )
+        );
+        mSequencer.run();
+
+        while(!mSequencer.hasFinished()) {
+            mSequencer.update();
+            try {
+                Thread.sleep(5);
+            }
+            catch(InterruptedException ignored) {}
+        }
+        mStartTime.add(System.nanoTime());
+
+        assertEquals(3,mExecution.size(),"3 tasks shall have been executed");
+        assertEquals("Task1", mExecution.get(0), "Task 1 shall execute first");
+        assertEquals("Task2", mExecution.get(1), "Task 2 shall execute first");
+        assertEquals("Task3", mExecution.get(2), "Task 3 shall execute first");
+
+        mExecution.clear();
+        mStartTime.clear();
+
+        mSequencer.sequence(
+                "NOT INTERRUPTED",
+                new Task(
+                        "Task4",
+                        () -> {
+                            mStartTime.add(System.nanoTime());
+                            mExecution.add("Task4");
+                            mTimer.arm(700);
+                        },
+                        new Condition(() -> !mTimer.isArmed())
+                )
+        );
+
+        mSequencer.run();
+        while(!mSequencer.hasFinished()) {
+            mSequencer.update();
+            try {
+                Thread.sleep(5);
+            }
+            catch(InterruptedException ignored) {}
+        }
+        mStartTime.add(System.nanoTime());
+
+        assertEquals(1,mExecution.size(),"1 task shall have been executed");
+        assertEquals("Task4", mExecution.get(0), "Task 4 shall execute first");
+
+        assertEquals(2,mStartTime.size(),"4 times should have been recorded");
+        double duration = (double)(mStartTime.get(1) - mStartTime.get(0)) / 1_000_000;
+        mLogger.info("Task4 lasted " + duration);
+        assertTrue(Math.abs(duration - 700) < 15,"Task 4 shall have lasted 700 ms ");
     }
 }
 

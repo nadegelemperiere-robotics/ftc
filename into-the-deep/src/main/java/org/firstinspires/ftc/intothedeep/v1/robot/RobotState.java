@@ -5,7 +5,7 @@
    Season robot configuration
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.intothedeep.robot;
+package org.firstinspires.ftc.intothedeep.v1.robot;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -13,16 +13,13 @@ import org.firstinspires.ftc.core.tools.LogManager;
 /* Subsystem includes */
 import org.firstinspires.ftc.core.subsystems.DefaultSlides;
 import org.firstinspires.ftc.core.subsystems.MecanumDrive;
-import org.firstinspires.ftc.intothedeep.subsystems.IntakeArm;
-import org.firstinspires.ftc.intothedeep.subsystems.OuttakeArm;
-
-/* Robot includes */
-import org.firstinspires.ftc.core.robot.RobotState;
+import org.firstinspires.ftc.intothedeep.v1.subsystems.IntakeArm;
+import org.firstinspires.ftc.intothedeep.v1.subsystems.OuttakeArm;
 
 
-public abstract class SeasonRobotState extends RobotState {
+public abstract class RobotState extends org.firstinspires.ftc.core.robot.RobotState {
 
-    public static class SeasonSharedData extends RobotState.SharedData {
+    public static class SharedData extends org.firstinspires.ftc.core.robot.RobotState.SharedData {
         public IntakeArm       intakeArm;
         public DefaultSlides   intakeSlides;
         public OuttakeArm      outtakeArm;
@@ -30,12 +27,11 @@ public abstract class SeasonRobotState extends RobotState {
         public MecanumDrive    chassis;
     };
 
-    SharedData      mData;
-
-    public              SeasonRobotState(SeasonSharedData data, LogManager logger) {
+    public              RobotState(SharedData data, LogManager logger) {
         super(data,logger);
     }
 
+    /* ---------------------- TeleOp commands ---------------------- */
     public  void        drive(double x, double y, double heading) {  }
     public  void        tuneDriveSpeed(double multiplier) {}
 
@@ -49,6 +45,7 @@ public abstract class SeasonRobotState extends RobotState {
     public  void        toggleIntakeClaw() {}
     public  void        toggleIntakeWrist() {}
 
+    /* --------------------- States management --------------------- */
     public  RobotState  toTransfer() { return null; }
     public  RobotState  toPick()     { return null; }
 }

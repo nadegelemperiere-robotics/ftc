@@ -40,7 +40,7 @@ public class MecanumDrive implements Subsystem {
     static final String             sPidfKey                    = "pidf";
     static final String             sPhysicsKey                 = "physics";
     static final String             sMotorsKey                  = "motors";
-    static final String             sOdometerKey                = "odometers";
+    static final String             sOdometerKey                = "odometer";
     static final String             sFrontLeftKey               = "front-left-wheel";
     static final String             sBackLeftKey                = "back-left-wheel";
     static final String             sFrontRightKey              = "front-right-wheel";
@@ -350,6 +350,8 @@ public class MecanumDrive implements Subsystem {
         if(mConfigurationValid) {
             try {
 
+                writer.put(sTypeKey, "mecanum-drive");
+
                 JSONObject motors = new JSONObject();
                 motors.put(sFrontLeftKey,mLeftFrontHwName);
                 motors.put(sBackLeftKey,mLeftBackHwName);
@@ -500,7 +502,7 @@ public class MecanumDrive implements Subsystem {
                 header +
                 "--> Left back wheel : " +
                 mLeftBackHwName +
-                "</li>\n" +
+                "\n" +
                 header +
                 "--> Right front wheel : " +
                 mRightFrontHwName +

@@ -16,6 +16,8 @@ import android.os.Environment;
 /* Junit 5 includes */
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,6 +55,11 @@ public class ConditionTest {
             mLogger.level(LogManager.Severity.INFO);
             mLogger.info("Setting it up!");
         }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        mLogger.stop();
     }
 
     @Test

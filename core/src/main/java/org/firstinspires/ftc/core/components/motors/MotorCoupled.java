@@ -195,11 +195,11 @@ public class MotorCoupled implements MotorComponent {
                 JSONObject first = reader.getJSONObject(sFirstKey);
                 JSONObject second = reader.getJSONObject(sSecondKey);
 
-                if(first.has(sHwMapKey)) {
+                if(mMap != null && first.has(sHwMapKey)) {
                     mFirstHwName = first.getString(sHwMapKey);
                     mFirst = mMap.tryGet(DcMotorEx.class, mFirstHwName);
                 }
-                if(second.has(sHwMapKey)) {
+                if(mMap != null && second.has(sHwMapKey)) {
                     mSecondHwName = second.getString(sHwMapKey);
                     mSecond = mMap.tryGet(DcMotorEx.class, mSecondHwName);
                 }

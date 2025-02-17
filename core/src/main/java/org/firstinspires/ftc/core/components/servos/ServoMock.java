@@ -15,6 +15,7 @@ import static java.lang.Math.min;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /* Tools includes */
+import org.firstinspires.ftc.core.orchestration.engine.Mock;
 import org.firstinspires.ftc.core.tools.LogManager;
 import org.json.JSONObject;
 
@@ -35,11 +36,14 @@ public class ServoMock implements ServoComponent {
     /* -------------- Constructors --------------- */
     public ServoMock(String name, LogManager logger)
     {
-        mName   = name;
-        mLogger = logger;
-        mConfigurationValid  = true;
-        mDirection = Servo.Direction.FORWARD;
-        mController = new ServoControllerMock(mLogger);
+        mName                   = name;
+        mLogger                 = logger;
+        mConfigurationValid     = true;
+
+        mController             = new ServoControllerMock(mLogger);
+
+        mDirection              = Servo.Direction.FORWARD;
+        mPosition               = 0;
     }
 
     /* --------------------- Custom functions ---------------------- */
@@ -93,7 +97,7 @@ public class ServoMock implements ServoComponent {
      * @return A string containing the formatted servo configuration details.
      */
     @Override
-    public String                       logConfigurationText(String header) {   return header + "> Mock"; }
+    public String                       logConfigurationText(String header) {   return header + "> Mock\n"; }
 
 
     /* ---------------------- Servo functions ---------------------- */
@@ -152,6 +156,7 @@ public class ServoMock implements ServoComponent {
     {
         mPosition = min(position,mMax);
         mPosition = max(mPosition,mMin);
+        Mock.instance().mMockedComponents.put(mName + "-position",(double)position);
     }
 
 }

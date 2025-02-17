@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Date;
+import java.util.logging.Handler;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -651,6 +652,10 @@ public class LogManager implements Configurable {
         for(Target target : Target.values()) {
             this.write(target);
         }
+        for (Handler handler : mFile.getHandlers()) {
+            handler.flush();
+            handler.close();
+        }
     }
 
     /**
@@ -668,8 +673,10 @@ public class LogManager implements Configurable {
 
         if(!filename.isEmpty()) {
 
-            result = Logger.getLogger("log-manager");
-            FileHandler fileHandler = new FileHandler(filepath,100000,2, true); // Append mode
+            StackTraceElement element = Thread.currentThread().getStackTrace()[3]; // Get caller
+
+            result = Logger.getLogger(element.getFileName());
+            FileHandler fileHandler = new FileHandler(filepath+".%g",1000000,2, true); // Append mode
             SimpleFormatter formatter = new SimpleFormatter() {
                 private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -686,6 +693,7 @@ public class LogManager implements Configurable {
             result.setLevel(Level.ALL);
             result.addHandler(fileHandler);
             result.setUseParentHandlers(false);
+            result.info("------------------------------------------------------");
         }
 
         return result;
@@ -714,7 +722,7 @@ public class LogManager implements Configurable {
                             .append("px\">")
                             .append(element.getFileName())
                             .append(":")
-                            .append(element.getLineNumber())
+                            .append(String.format("%04d", element.getLineNumber()))
                             .append(" - error - ")
                             .append(message)
                             .append("</li>")
@@ -724,7 +732,7 @@ public class LogManager implements Configurable {
                     Objects.requireNonNull(mErrors.get(target))
                             .append(element.getFileName())
                             .append(":")
-                            .append(element.getLineNumber())
+                            .append(String.format("%04d", element.getLineNumber()))
                             .append(" - error - ")
                             .append(message)
                             .append("\n");
@@ -733,7 +741,7 @@ public class LogManager implements Configurable {
                     if (mFile != null) {
                         String local = element.getFileName() +
                                 ":" +
-                                element.getLineNumber() +
+                                String.format("%04d", element.getLineNumber()) +
                                 " - error - " +
                                 message;
                         mFile.log(Level.SEVERE, local);
@@ -766,7 +774,7 @@ public class LogManager implements Configurable {
                             .append("px\">")
                             .append(element.getFileName())
                             .append(":")
-                            .append(element.getLineNumber())
+                            .append(String.format("%04d", element.getLineNumber()))
                             .append(" - ")
                             .append(message)
                             .append("</li>")
@@ -776,7 +784,7 @@ public class LogManager implements Configurable {
                     Objects.requireNonNull(mWarnings.get(target))
                             .append(element.getFileName())
                             .append(":")
-                            .append(element.getLineNumber())
+                            .append(String.format("%04d", element.getLineNumber()))
                             .append(" - warn - ")
                             .append(message)
                             .append("\n");
@@ -785,7 +793,7 @@ public class LogManager implements Configurable {
                     if (mFile != null) {
                         String local = element.getFileName() +
                                 ":" +
-                                element.getLineNumber() +
+                                String.format("%04d", element.getLineNumber()) +
                                 " - " +
                                 message;
                         mFile.log(Level.WARNING, local);
@@ -826,7 +834,7 @@ public class LogManager implements Configurable {
                     if (mFile != null) {
                         String local = element.getFileName() +
                                 ":" +
-                                element.getLineNumber() +
+                                String.format("%04d", element.getLineNumber()) +
                                 " - metric - " +
                                 metric + " : " + value;
                         mFile.log(Level.INFO, local);
@@ -859,7 +867,7 @@ public class LogManager implements Configurable {
                                 .append("px\">")
                                 .append(element.getFileName())
                                 .append(":")
-                                .append(element.getLineNumber())
+                                .append(String.format("%04d", element.getLineNumber()))
                                 .append(" - ")
                                 .append(message)
                                 .append("</p>");
@@ -870,7 +878,7 @@ public class LogManager implements Configurable {
                         Objects.requireNonNull(mInfos.get(target))
                                 .append(element.getFileName())
                                 .append(":")
-                                .append(element.getLineNumber())
+                                .append(String.format("%04d", element.getLineNumber()))
                                 .append(" - info - ")
                                 .append(message)
                                 .append("\n");
@@ -880,7 +888,7 @@ public class LogManager implements Configurable {
                     if (mFile != null) {
                         String local = element.getFileName() +
                                 ":" +
-                                element.getLineNumber() +
+                                String.format("%04d", element.getLineNumber()) +
                                 " - info - " +
                                 message;
                         mFile.log(Level.INFO, local);
@@ -913,7 +921,7 @@ public class LogManager implements Configurable {
                                 .append("px\">")
                                 .append(element.getFileName())
                                 .append(":")
-                                .append(element.getLineNumber())
+                                .append(String.format("%04d", element.getLineNumber()))
                                 .append(" - ")
                                 .append(message)
                                 .append("</p>");
@@ -924,7 +932,7 @@ public class LogManager implements Configurable {
                         Objects.requireNonNull(mDebugs.get(target))
                                 .append(element.getFileName())
                                 .append(":")
-                                .append(element.getLineNumber())
+                                .append(String.format("%04d", element.getLineNumber()))
                                 .append(" - debug - ")
                                 .append(message)
                                 .append("\n");
@@ -934,7 +942,7 @@ public class LogManager implements Configurable {
                     if (mFile != null) {
                         String local = element.getFileName() +
                                 ":" +
-                                element.getLineNumber() +
+                                String.format("%04d", element.getLineNumber()) +
                                 " - debug - " +
                                 message;
                         mFile.log(Level.INFO, local);
@@ -967,7 +975,7 @@ public class LogManager implements Configurable {
                                 .append("px\">")
                                 .append(element.getFileName())
                                 .append(":")
-                                .append(element.getLineNumber())
+                                .append(String.format("%04d", element.getLineNumber()))
                                 .append(" - ")
                                 .append(message)
                                 .append("</p>");
@@ -978,7 +986,7 @@ public class LogManager implements Configurable {
                         Objects.requireNonNull(mTraces.get(target))
                                 .append(element.getFileName())
                                 .append(":")
-                                .append(element.getLineNumber())
+                                .append(String.format("%04d", element.getLineNumber()))
                                 .append(" - trace - ")
                                 .append(message)
                                 .append("\n");
@@ -988,7 +996,7 @@ public class LogManager implements Configurable {
                     if (mFile != null) {
                         String local = element.getFileName() +
                                 ":" +
-                                element.getLineNumber() +
+                                String.format("%04d", element.getLineNumber()) +
                                 " - trace - " +
                                 message;
                         mFile.log(Level.INFO, local);

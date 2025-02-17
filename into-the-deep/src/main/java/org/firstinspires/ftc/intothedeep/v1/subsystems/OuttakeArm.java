@@ -5,7 +5,7 @@
    Intake subsystem
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.intothedeep.subsystems;
+package org.firstinspires.ftc.intothedeep.v1.subsystems;
 
 /* JSON includes */
 import org.json.JSONException;
@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
+import org.firstinspires.ftc.core.tools.Condition;
 
 /* Subsystem includes */
 import org.firstinspires.ftc.core.subsystems.Subsystem;
@@ -23,9 +24,8 @@ import org.firstinspires.ftc.core.subsystems.ToggleActuator;
 import org.firstinspires.ftc.core.robot.Hardware;
 
 /* Orchestration includes */
-import org.firstinspires.ftc.core.orchestration.scheduler.Condition;
-import org.firstinspires.ftc.core.orchestration.sequencer.Sequencer;
-import org.firstinspires.ftc.core.orchestration.sequencer.Task;
+import org.firstinspires.ftc.core.orchestration.engine.Sequencer;
+import org.firstinspires.ftc.core.orchestration.engine.Task;
 
 
 public class OuttakeArm implements Subsystem {
@@ -35,8 +35,12 @@ public class OuttakeArm implements Subsystem {
     static final String sElbowKey  = "elbow";
 
     public enum Position {
-        TRANSFER
+        NONE,
+        INIT,
+        TRANSFER,
+        DROP
     }
+
 
     LogManager      mLogger;
 
@@ -45,6 +49,7 @@ public class OuttakeArm implements Subsystem {
     String          mName;
 
     Sequencer       mSequencer;
+    Position        mPosition;
 
     Hardware        mHardware;
     ToggleActuator  mClaw;
@@ -65,7 +70,8 @@ public class OuttakeArm implements Subsystem {
 
         mName               = name;
 
-        mSequencer          = new Sequencer();
+        mSequencer          = new Sequencer(mLogger);
+        mPosition           = Position.NONE;
 
         mHardware           = hardware;
         mClaw               = null;
@@ -74,13 +80,38 @@ public class OuttakeArm implements Subsystem {
 
     }
 
+    /**
+     * Move arm into a given reference position
+     *
+     * @param position position to reach
+     */
     public void                         position(Position position) {
 
         if(mConfigurationValid) {
 
             switch (position) {
+
+                case INIT :
+                    mPosition = position;
+                    mSequencer.sequence(
+                            new Task(
+                                    () -> {
+                                        mClaw.position("closed",0,500);
+                                        mWrist.position("0",0,500);
+                                        mElbow.position("off",0,500);
+                                    },
+                                    Condition.and(
+                                            new Condition(() -> mClaw.hasFinished()),
+                                            new Condition(() -> mElbow.hasFinished()),
+                                            new Condition(() -> mWrist.hasFinished())
+                                    )
+                            )
+                    );
+                    mSequencer.run();
+                    break;
                 case TRANSFER :
-                    mSequencer.schedule(
+                    mPosition = position;
+                    mSequencer.sequence(
                             new Task(
                                     () -> {
                                         mClaw.position("open",0,500);
@@ -96,20 +127,91 @@ public class OuttakeArm implements Subsystem {
                     );
                     mSequencer.run();
                     break;
+                case DROP :
+                    mPosition = position;
+                    mSequencer.sequence(
+                            new Task(
+                                    () -> {
+                                        mClaw.position("closed",0,500);
+                                        mWrist.position("0",0,500);
+                                        mElbow.position("drop-sample",0,500);
+                                    },
+                                    Condition.and(
+                                            new Condition(() -> mClaw.hasFinished()),
+                                            new Condition(() -> mElbow.hasFinished()),
+                                            new Condition(() -> mWrist.hasFinished())
+                                    )
+                            )
+                    );
+                    mSequencer.run();
+                    break;
             }
         }
 
     }
 
+    /** Move arm into a given direction
+     *
+     * @param direction up or down depending on the direction
+     */
+    public void                         move( String direction ) {
+
+        if(mConfigurationValid) {
+            switch(direction) {
+                case "up":
+                    switch (mPosition) {
+                        case INIT: this.position(Position.DROP); break;
+                        case TRANSFER: this.position(Position.DROP); break;
+                    }
+                    break;
+                case "down":
+                    switch (mPosition) {
+                        case INIT: this.position(Position.TRANSFER); break;
+                        case DROP: this.position(Position.TRANSFER); break;
+                    }
+                    break;
+            }
+        }
+    }
+
+    /**
+     * If claw opened, close it. If claw closed, open it and move away from the
+     * basket to avoid hurting it after releasing a sample
+     */
     public void                         toogleClaw() {
         if(mConfigurationValid) {
-           mSequencer.schedule(
+            if(mClaw.position().equals("open")) {
+                mSequencer.sequence(
                         new Task(
                                 () -> mClaw.toggle(500),
                                 new Condition(() -> mClaw.hasFinished())
                         )
-           );
-           mSequencer.run();
+                );
+                mSequencer.run();
+            }
+            else if(mClaw.position().equals("closed")) {
+                mPosition = Position.INIT;
+                mSequencer.sequence(
+                        "SAFE OPEN CLAW",
+                        new Task(
+                                "Open",
+                                () -> mClaw.toggle(500),
+                                new Condition(() -> mClaw.hasFinished())
+                        ),
+                        new Task(
+                                "Away from basket",
+                                () -> {
+                                    mWrist.position("0",0,200);
+                                    mElbow.position("off",0,200);
+                                },
+                                Condition.and(
+                                        new Condition(() -> mWrist.hasFinished()),
+                                        new Condition(() -> mElbow.hasFinished())
+                                )
+                        )
+                );
+                mSequencer.run();
+            }
         }
     }
 
@@ -122,7 +224,10 @@ public class OuttakeArm implements Subsystem {
             mClaw.update();
             mWrist.update();
             mElbow.update();
+            mSequencer.update();
         }
+        if(!mSequencer.hasFinished()) { mLogger.metric(mName.toUpperCase(), "Reaching position " + mPosition); }
+        else { mLogger.metric(mName.toUpperCase(), "In position " + mPosition); }
 
     }
 
@@ -150,11 +255,12 @@ public class OuttakeArm implements Subsystem {
         mClaw               = null;
         mWrist              = null;
         mElbow              = null;
+        mConfigurationValid = true;
 
         try {
             if(reader.has(sClawKey)) {
                 JSONObject object = reader.getJSONObject(sClawKey);
-                Subsystem subsystem = Subsystem.factory(sClawKey,object,mHardware,mLogger);
+                Subsystem subsystem = Subsystem.factory(mName + "-" + sClawKey,object,mHardware,mLogger);
                 if(subsystem != null) {
                     if (subsystem instanceof ToggleActuator) { mClaw = (ToggleActuator) subsystem; }
                     else { mLogger.error("Claw subsystem is not of type ToggleActuator");}
@@ -162,7 +268,7 @@ public class OuttakeArm implements Subsystem {
             }
             if(reader.has(sWristKey)) {
                 JSONObject object = reader.getJSONObject(sWristKey);
-                Subsystem subsystem = Subsystem.factory(sWristKey,object,mHardware,mLogger);
+                Subsystem subsystem = Subsystem.factory(mName + "-" + sWristKey,object,mHardware,mLogger);
                 if(subsystem != null) {
                     if(subsystem instanceof ToggleActuator) { mWrist = (ToggleActuator)subsystem; }
                     else { mLogger.error("Wrist subsystem is not of type ToggleActuator");}
@@ -170,7 +276,7 @@ public class OuttakeArm implements Subsystem {
             }
             if(reader.has(sElbowKey)) {
                 JSONObject object = reader.getJSONObject(sElbowKey);
-                Subsystem subsystem =  Subsystem.factory(sElbowKey,object,mHardware,mLogger);
+                Subsystem subsystem =  Subsystem.factory(mName + "-" + sElbowKey,object,mHardware,mLogger);
                 if(subsystem != null) {
                     if(subsystem instanceof Actuator) { mElbow = (Actuator)subsystem; }
                     else { mLogger.error("Elbow subsystem is not of type eActuator");}
@@ -206,6 +312,8 @@ public class OuttakeArm implements Subsystem {
         if(mConfigurationValid) {
 
             try {
+
+                writer.put(sTypeKey, "outtake-arm");
 
                 JSONObject claw = new JSONObject();
                 mClaw.write(claw);

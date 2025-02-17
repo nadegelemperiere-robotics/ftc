@@ -18,9 +18,10 @@ import org.firstinspires.ftc.core.robot.Hardware;
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
+
 public class ToggleActuator extends Actuator {
 
-    static final String sToogleKey = "toggle";
+    static final String sToggleKey = "toggle";
 
     String  mPosition1Name;
     String  mPosition2Name;
@@ -49,8 +50,8 @@ public class ToggleActuator extends Actuator {
         mPosition2Name = "";
 
         try {
-            if (reader.has(sToogleKey)) {
-                JSONArray array = reader.getJSONArray(sToogleKey);
+            if (reader.has(sToggleKey)) {
+                JSONArray array = reader.getJSONArray(sToggleKey);
                 if(array.length() == 2) {
                     String name = array.getString(0);
                     if(mPositions.containsKey(name)) {
@@ -88,4 +89,93 @@ public class ToggleActuator extends Actuator {
         else if(mPosition.equals(mPosition2Name)) { this.position(mPosition1Name, 0, timeout); }
 
     }
+
+    /**
+     * Writes the current toggle actuator configuration to a JSON object.
+     *
+     * @param writer The JSON object to store the configuration settings.
+     */
+    @Override
+    public void                         write(JSONObject writer) {
+        try {
+            writer.put(sTypeKey, "toggle-actuator");
+            
+            JSONArray toggle = new JSONArray();
+            toggle.put(mPosition1Name);
+            toggle.put(mPosition2Name);
+            writer.put(sToggleKey,toggle);
+
+        }
+        catch(JSONException e) {
+            mLogger.error(e.getMessage());
+        }
+        this.writeWithoutType(writer);
+    }
+
+    /**
+     * Generates an HTML representation of the actuator configuration for logging purposes.
+     *
+     * @return A string containing the HTML-formatted actuator configuration.
+     */
+    @Override
+    public String                       logConfigurationHTML() {
+
+        StringBuilder result = new StringBuilder();
+
+        if(mConfigurationValid) {
+            result.append(super.logConfigurationHTML());
+
+            result.append("<details>\n");
+            result.append("<summary style=\"font-size: 12px; font-weight: 500\"> TOGGLE </summary>\n");
+            result.append("<ul>\n");
+
+            result.append("<li style=\"padding-left:10px; font-size: 11px\">")
+                    .append(mPosition1Name)
+                    .append("</li>");
+
+            result.append("<li style=\"padding-left:10px; font-size: 11px\">")
+                    .append(mPosition2Name)
+                    .append("</li>");
+
+            result.append("</ul>\n");
+            result.append("</details>\n");
+
+        }
+
+        return result.toString();
+
+    }
+
+    /**
+     * Generates a text-based representation of the actuator configuration for logging.
+     *
+     * @param header A string to prepend to the configuration log.
+     * @return A string containing the formatted actuator configuration details.
+     */
+    @Override
+    public String                       logConfigurationText(String header) {
+
+        StringBuilder result = new StringBuilder();
+
+        if(mConfigurationValid) {
+
+            result.append(super.logConfigurationText(header));
+
+            result.append(header)
+                    .append("> TOGGLE\n");
+            result.append(header)
+                    .append("--> ")
+                    .append(mPosition1Name)
+                    .append("\n");
+            result.append(header)
+                    .append("--> ")
+                    .append(mPosition2Name)
+                    .append("\n");
+        }
+
+        return result.toString();
+
+    }
+
+
 }

@@ -127,7 +127,7 @@ public class MotorSingle implements MotorComponent {
         mMotor = null;
 
         try {
-            if(reader.has(sHwMapKey)) {
+            if(mMap != null && reader.has(sHwMapKey)) {
                 mHwName = reader.getString(sHwMapKey);
                 mMotor = mMap.tryGet(DcMotorEx.class,mHwName);
             }

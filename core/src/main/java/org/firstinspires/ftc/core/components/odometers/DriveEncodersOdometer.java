@@ -10,6 +10,10 @@ package org.firstinspires.ftc.core.components.odometers;
 /* System includes */
 import java.util.LinkedList;
 
+/* JSON includes */
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -36,8 +40,6 @@ import org.firstinspires.ftc.core.tools.LogManager;
 /* Components includes */
 import org.firstinspires.ftc.core.components.imus.ImuComponent;
 import org.firstinspires.ftc.core.components.motors.MotorComponent;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class DriveEncodersOdometer implements OdometerComponent {
 
@@ -100,6 +102,7 @@ public class DriveEncodersOdometer implements OdometerComponent {
         mImuHwName          = "";
 
         mCurrentPose     = new Pose2d(new Vector2d(0,0),0);
+        mInitialPose     = new Pose2d(new Vector2d(0,0),0);
         mCurrentVelocity = new PoseVelocity2d(new Vector2d(0, 0), 0);
         mPoseHistory     = new LinkedList<>();
 
@@ -239,7 +242,7 @@ public class DriveEncodersOdometer implements OdometerComponent {
 
         try {
 
-            if(reader.has(sLeftBackHwMapKey)) {
+            if(mMap != null && reader.has(sLeftBackHwMapKey)) {
                 mLeftBackHwName = reader.getString(sLeftBackHwMapKey);
 //                DcMotorEx motor = mMap.tryGet(DcMotorEx.class,conf.get(0).mapName());
 //                if(motor != null) { mLeftFront = new OverflowEncoder(new RawEncoder(motor)); }

@@ -69,7 +69,7 @@ public interface ServoComponent extends Configurable {
     String                      logConfigurationHTML();
     String                      logConfigurationText(String header);
 
-    /* ---------- Servo methods override --------- */
+    /* ------------------- Servo methods override ------------------ */
 
     ServoControllerComponent    controller();
 

@@ -15,6 +15,7 @@ public class Context {
      * Check if current state is over and move to next step
      */
     public void update() {
+        mState.update();
         if(mState.hasFinished()) { mState = mState.next(); }
     }
 

@@ -216,7 +216,7 @@ public class ThreeDeadWheelsOdometer implements OdometerComponent {
 
         try {
 
-            if(reader.has(sPar0HwMapKey)) {
+            if(mMap != null && reader.has(sPar0HwMapKey)) {
                 mPar0HwMapName = reader.getString(sPar0HwMapKey);
 //                DcMotorEx motor = hwMap.tryGet(DcMotorEx.class,conf.get(0).mapName());
 //                if(motor != null) { mPar0 = new OverflowEncoder(new RawEncoder(motor)); }
@@ -227,10 +227,10 @@ public class ThreeDeadWheelsOdometer implements OdometerComponent {
 //                    mPar0.setDirection(DcMotorSimple.Direction.FORWARD);
 //                }
             }
-            if(reader.has(sPar1HwMapKey)) {
+            if(mMap != null && reader.has(sPar1HwMapKey)) {
                 mPar1HwMapName = reader.getString(sPar1HwMapKey);
             }
-            if(reader.has(sPerpHwMapKey)) {
+            if(mMap != null && reader.has(sPerpHwMapKey)) {
                 mPerpHwMapName = reader.getString(sPar1HwMapKey);
             }
 

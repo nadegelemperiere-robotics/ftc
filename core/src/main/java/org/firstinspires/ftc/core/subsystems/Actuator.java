@@ -31,61 +31,64 @@ import org.firstinspires.ftc.core.robot.Hardware;
 
 public class Actuator implements Subsystem {
 
-    static  final public String sMotorKey           = "motor";
-    static  final public String sServoKey           = "servo";
-    static  final public String sPositionsKey       = "positions";
-    static  final public String sPowersKey          = "powers";
-    static  final public String sSetPositionKey     = "set-position";
-    static  final public String sHoldPositionKey    = "hold-position";
+    static final public String sMotorKey = "motor";
+    static final public String sServoKey = "servo";
+    static final public String sPositionsKey = "positions";
+    static final public String sPowersKey = "powers";
+    static final public String sSetPositionKey = "set-position";
+    static final public String sHoldPositionKey = "hold-position";
 
-    protected LogManager            mLogger;
+    protected LogManager mLogger;
 
-    protected boolean               mConfigurationValid;
-    boolean                         mHasFinished;
+    protected boolean mConfigurationValid;
+    boolean mHasFinished;
 
-    String                          mName;
-    String                          mHwName;
+    String mName;
+    String mHwName;
 
-    protected Hardware              mHardware;
-    protected MotorComponent        mMotor;
-    protected ServoComponent        mServo;
+    protected Hardware mHardware;
+    protected MotorComponent mMotor;
+    protected ServoComponent mServo;
 
-    protected Map<String, Double>   mPositions;
-    protected String                mPosition;
-    protected Double                mOffset;
+    protected Map<String, Double> mPositions;
+    protected String mPosition;
 
-    Timer                           mTimer;
+    Timer mTimer;
 
-    Double                          mTolerance;
-    Double                          mSetPositionPower;
-    Double                          mHoldPositionPower;
+    double mTolerance;
+    protected double mOffset;
+    double mSetPositionPower;
+    double mHoldPositionPower;
 
     /**
      * Constructor
      *
-     * @param name The subsystem name
+     * @param name     The subsystem name
      * @param hardware The robot current hardware
-     * @param logger The logger to report events
+     * @param logger   The logger to report events
      */
     public Actuator(String name, Hardware hardware, LogManager logger) {
 
         mLogger             = logger;
         mConfigurationValid = false;
 
-        mName               = name;
-        mHwName             = "";
+        mName           = name;
+        mHwName         = "";
 
-        mHardware           = hardware;
-        mMotor              = null;
-        mServo              = null;
+        mHardware       = hardware;
+        mMotor          = null;
+        mServo          = null;
 
-        mPositions          = new LinkedHashMap<>();
-        mPosition           = "";
+        mPositions      = new LinkedHashMap<>();
+        mPosition       = "";
 
-        mTimer              = new Timer(mLogger);
+        mTimer          = new Timer(mLogger);
+        mHasFinished    = true;
 
         mSetPositionPower   = 1.0;
         mHoldPositionPower  = 0.0;
+        mTolerance          = 0.0;
+        mOffset             = 0.0;
 
     }
 
@@ -94,43 +97,56 @@ public class Actuator implements Subsystem {
      *
      * @return true if the position was reached, false otherwise
      */
-    public boolean                      hasFinished() { return mHasFinished;}
+    public boolean hasFinished() {
+        return mHasFinished;
+    }
 
     /**
      * Sets the current position offset from the reference position to the real robot state
      *
      * @param offset the offset in ticks
      */
-    public  void                        offset( double offset ) { mOffset = offset; }
+    public void offset(double offset) {
+        mOffset = offset;
+    }
 
     /**
      * Returns the current position offset from the reference position to the real robot state
      *
      * @return the offset in ticks
      */
-    public  double                      offset()                { return mOffset;   }
+    public double offset() {
+        return mOffset;
+    }
 
     /**
      * Returns the name of the current actuator position
      *
      * @return the name of the position, empty string if moving freely
      */
-    public  String                      position()              { return mPosition; }
+    public String position() {
+        return mPosition;
+    }
 
 
     /**
      * Update periodically actuator status
      */
-    public void                         update() {
-        if (mServo != null) { mHasFinished = !(mTimer.isArmed()); }
+    public void update() {
+        if (mServo != null) {
+            mHasFinished = !(mTimer.isArmed());
+        }
         if (mMotor != null) {
-            if(!mHasFinished) {
+            if (!mHasFinished) {
                 mHasFinished = !(mMotor.isBusy()) || !(mTimer.isArmed());
-                if(mHasFinished) { mMotor.power(mHoldPositionPower); }
+                if (mHasFinished) {
+                    mMotor.power(mHoldPositionPower);
+                }
             }
         }
+        if (!mHasFinished) { mLogger.metric(mName.toUpperCase(), "Reaching position " + mPosition); }
+        else { mLogger.metric(mName.toUpperCase(), "In position " + mPosition); }
     }
-
     /**
      * Position the actuator on one of its reference positions
      *
@@ -182,6 +198,7 @@ public class Actuator implements Subsystem {
 
         mMotor = null;
         mServo = null;
+        mConfigurationValid = true;
         mPositions.clear();
 
         try {
@@ -197,11 +214,12 @@ public class Actuator implements Subsystem {
             }
 
             if(mMotor != null && reader.has(sPowersKey)) {
-                if(reader.has(sSetPositionKey)) {
-                    mSetPositionPower = reader.getDouble(sSetPositionKey);
+                JSONObject powers = reader.getJSONObject(sPowersKey);
+                if(powers.has(sSetPositionKey)) {
+                    mSetPositionPower = powers.getDouble(sSetPositionKey);
                 }
-                if(reader.has(sHoldPositionKey)) {
-                    mHoldPositionPower = reader.getDouble(sHoldPositionKey);
+                if(powers.has(sHoldPositionKey)) {
+                    mHoldPositionPower = powers.getDouble(sHoldPositionKey);
                 }
             }
 
@@ -242,18 +260,12 @@ public class Actuator implements Subsystem {
         if(mConfigurationValid) {
 
             try {
-                if(mMotor != null) { writer.put(sMotorKey, mHwName); }
-                if(mServo != null) { writer.put(sServoKey, mHwName); }
-
-                JSONObject positions = new JSONObject();
-                for (Map.Entry<String, Double> entry : mPositions.entrySet()) {
-                    positions.put(entry.getKey(), entry.getValue());
-                }
-                writer.put(sPositionsKey, positions);
-
+                writer.put(sTypeKey,"actuator");
             } catch(JSONException e) {
                 mLogger.error(e.getMessage());
             }
+
+            writeWithoutType(writer);
 
         }
     }
@@ -335,7 +347,7 @@ public class Actuator implements Subsystem {
                         .append("> POSITIONS\n");
                 for (Map.Entry<String, Double> position : mPositions.entrySet()) {
                     result.append(header)
-                            .append("-->")
+                            .append("--> ")
                             .append(position.getKey())
                             .append(" : ")
                             .append(position.getValue())
@@ -346,6 +358,39 @@ public class Actuator implements Subsystem {
 
         return result.toString();
 
+    }
+
+    /**
+     * Writes the current actuator configuration to a JSON object.
+     *
+     * @param writer The JSON object to store the configuration settings.
+     */
+    protected void                      writeWithoutType(JSONObject writer) {
+
+        if(mConfigurationValid) {
+
+            try {
+                if(mMotor != null) { writer.put(sMotorKey, mHwName); }
+                if(mServo != null) { writer.put(sServoKey, mHwName); }
+
+                JSONObject positions = new JSONObject();
+                for (Map.Entry<String, Double> entry : mPositions.entrySet()) {
+                    positions.put(entry.getKey(), entry.getValue());
+                }
+                writer.put(sPositionsKey, positions);
+
+                if(mMotor != null) {
+                    JSONObject powers = new JSONObject();
+                    powers.put(sSetPositionKey, mSetPositionPower);
+                    powers.put(sHoldPositionKey, mHoldPositionPower);
+                    writer.put(sPowersKey, powers);
+                }
+
+            } catch(JSONException e) {
+                mLogger.error(e.getMessage());
+            }
+
+        }
     }
 
 }

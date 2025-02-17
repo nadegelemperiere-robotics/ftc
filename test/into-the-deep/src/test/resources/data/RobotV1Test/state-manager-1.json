@@ -1,52 +1,28 @@
 {
-    "logging"   : { "filename" : true, "driver-station" : true, "dashboard" : true, "level" : "info" },
     "robot"     : {
         "hardware" : {
             "motors": {
-                "front-left-wheel":  [ { "hwmap": "frontLeft" } ],
-                "front-right-wheel": [ { "hwmap": "frontRight" } ],
-                "back-left-wheel":   [ { "hwmap": "backLeft", "direction": "reverse" } ],
-                "back-right-wheel":  [ { "hwmap": "backRight",  "direction": "reverse" } ],
-                "intake-slides": [
-                    { "hwmap": "frontLeft" },
-                    { "hwmap": "frontRight"}
-                ],
-                "outtake-slides": [
-                    { "hwmap": "backLeft", "direction": "reverse" },
-                    { "hwmap": "backRight", "direction": "reverse" }
-                ]
+                "front-left-wheel":    [ ],
+                "front-right-wheel":   [ ],
+                "back-left-wheel":     [ ],
+                "back-right-wheel":    [ ],
+                "intake-slides":       [ ],
+                "outtake-slides":      [ ]
             },
             "servos" : {
-                "intake-elbow-pitch": [ { "hwmap": "left" } ],
-                "intake-wrist-roll":  [ { "hwmap": "left" } ],
-                "intake-claw":        [ { "hwmap": "left" } ],
-                "outtake-wrist-roll": [ { "hwmap": "right" } ],
-                "outtake-claw":       [ { "hwmap": "right" } ],
-                "intake-arm-pitch": [
-                    { "hwmap": "left" },
-                    { "hwmap": "right", "reverse" : true }
-                ],
-                "outtake-elbow-pitch": [
-                    { "hwmap": "left" },
-                    { "hwmap": "right", "reverse" : true }
-                ]
+                "intake-elbow-pitch":  [ ],
+                "intake-wrist-roll":   [ ],
+                "intake-claw":         [ ],
+                "outtake-wrist-roll":  [ ],
+                "outtake-claw":        [ ],
+                "intake-arm-pitch":    [ ],
+                "outtake-elbow-pitch": [ ]
             },
             "odometers": {
-                "otos": {
-                    "hwmap": "sensor_otos",
-                    "heading-offset" : 0.03,
-                    "x-offset" : 0.4566,
-                    "y-offset" : -3.5984,
-                    "heading-ratio" : 0.9964,
-                    "position-ratio" : 1.0
-                }
+                "mock": {  }
             },
             "imus": {
-                "built-in": {
-                    "hwmap": "imu",
-                    "logo-direction": "up",
-                    "usb-direction": "right"
-                }
+                "mock": {  }
             }
         },
         "subsystems" : {
@@ -168,8 +144,8 @@
                     "back-left-wheel":   "back-left-wheel",
                     "back-right-wheel":  "back-right-wheel"
                 },
-                "odometer" : "otos",
-                "reference" : "robot-centric",
+                "odometer" : "mock",
+                "reference" : "field-centric",
                 "physics" : {
                     "in-per-tick"               : 1,
                     "lat-in-per-tick"           : 0.7118231519430893,
@@ -193,53 +169,5 @@
                 }
             }
         }
-    },
-    "control"   : {
-
-        "controllers": {
-            "drive": {
-                "axes" : {
-                    "left_stick_x"  : { "deadzone": 0.1 },
-                    "left_stick_y"  : { "deadzone": 0.1 },
-                    "right_stick_x" : { "deadzone": 0.1 }
-                }
-            }
-        },
-        "commands": [
-
-            {  "action": "drive",
-                "1": { "scale": 1.1, "input": "left_stick_x", "controller" : "drive" },
-                "2": { "scale": -1.0, "input": "left_stick_y", "controller" : "drive" },
-                "3": { "scale": 1.0, "input": "right_stick_x", "controller" : "drive" }
-            },
-            { "action": "tuneDriveSpeed", "1": 0.45, "condition": { "button": "left_bumper", "state": "pressed", "controller" : "drive" } },
-            { "action": "tuneDriveSpeed", "1": 1.0, "condition": { "button": "left_bumper", "state": "notPressed", "controller" : "drive" } },
-
-            { "action": "powerOuttakeSlides", "1": 0.9,  "condition": { "button": "left_bumper", "state": "pressedOnce", "controller" : "mechanisms"} },
-            { "action": "powerOuttakeSlides", "1": -0.7, "condition": { "button": "right_bumper", "state": "pressedOnce", "controller" : "mechanisms"}},
-            { "action": "powerOuttakeSlides", "1": 0.0,  "condition": { "and": [
-                { "button": "right_bumper","state": "notPressed", "controller" : "mechanisms"},
-                { "button": "left_bumper", "state": "notPressed", "controller" : "mechanisms"}
-            ]}},
-            { "action": "positionOuttakeSlides", "1": "transfer", "condition": { "button": "right_stick_button", "state": "pressedOnce", "controller" : "mechanisms" }},
-
-            { "action": "powerIntakeSlides", "1": { "scale": 0.9, "input": "left_trigger" },   "condition" : { "trigger" : "left_trigger", "threshold" : 0.01, "operation" : "greaterThan", "controller" : "mechanisms" }},
-            { "action": "powerIntakeSlides", "1": { "scale": -0.7, "input": "right_trigger" }, "condition" : { "trigger" : "right_trigger", "threshold" : 0.01, "operation" : "greaterThan", "controller" : "mechanisms" }},
-            { "action": "powerIntakeSlides", "1": { "scale": 0.0, "input": "right_trigger" },  "condition" : { "and" : [
-                { "trigger" : "right_trigger", "threshold" : 0.01, "operation" : "lesserThan", "controller" : "mechanisms" },
-                { "trigger" : "left_trigger",  "threshold" : 0.01, "operation" : "lesserThan", "controller" : "mechanisms" }
-            ]}},
-
-            { "action": "moveOuttakeArm",  "1": "down", "condition": { "button": "a", "state": "pressedOnce", "controller" : "mechanisms" }},
-            { "action": "moveOuttakeArm",  "1": "up",   "condition": { "button": "y", "state": "pressedOnce", "controller" : "mechanisms" }},
-
-            { "action": "toggleIntakeClaw",                  "condition": { "button": "dpad_left",  "state": "pressedOnce", "controller" : "mechanisms" } },
-            { "action": "moveIntakeArm",  "direction": "1",  "condition": { "button": "dpad_down",  "state": "pressedOnce", "controller" : "mechanisms" }},
-            { "action": "moveIntakeArm",  "direction": "1",  "condition": { "button": "dpad_up",    "state": "pressedOnce", "controller" : "mechanisms" }},
-            { "action": "toggleIntakeWrist",                 "condition": { "button": "dpad_right", "state": "pressedOnce", "controller" : "mechanisms" }},
-
-            { "action": "transfer", "condition": { "button": "b", "state": "pressedOnce", "controller" : "mechanisms" }}
-
-        ]
     }
 }

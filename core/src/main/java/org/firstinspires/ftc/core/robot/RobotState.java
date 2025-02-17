@@ -26,4 +26,9 @@ public abstract class RobotState implements State {
         mData   = data;
     }
 
+    public  State   next() { return null; }
+
+    public  void    update() {}
+
+    public  boolean hasFinished() { return true; }
 }

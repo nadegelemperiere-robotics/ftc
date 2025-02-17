@@ -4,7 +4,7 @@
    -------------------------------------------------------
    Robot subsystem interface
    ------------------------------------------------------- */
-package org.firstinspires.ftc.intothedeep.subsystems;
+package org.firstinspires.ftc.intothedeep.v1.subsystems;
 
 /* Json includes */
 import org.json.JSONObject;
@@ -16,19 +16,15 @@ import org.firstinspires.ftc.core.tools.LogManager;
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;
 
-/* Subsystem includes */
-import org.firstinspires.ftc.core.subsystems.Subsystem;
-
-
-public interface SeasonSubsystem extends Subsystem {
+public interface Subsystem extends org.firstinspires.ftc.core.subsystems.Subsystem {
 
     String sTypeKey = "type";
 
-    static Subsystem   factory(String name, JSONObject reader, Hardware hardware, LogManager logger) {
+    static org.firstinspires.ftc.core.subsystems.Subsystem   factory(String name, JSONObject reader, Hardware hardware, LogManager logger) {
 
-        Subsystem result = null;
+        org.firstinspires.ftc.core.subsystems.Subsystem result = null;
 
-        result = Subsystem.factory(name, reader, hardware, logger);
+        result = org.firstinspires.ftc.core.subsystems.Subsystem.factory(name, reader, hardware, logger);
         if(result == null) {
             try {
                 if (reader.has(sTypeKey)) {

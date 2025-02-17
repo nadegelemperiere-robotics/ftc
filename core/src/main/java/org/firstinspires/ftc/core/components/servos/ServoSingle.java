@@ -82,7 +82,7 @@ public class ServoSingle implements ServoComponent {
         mServo = null;
 
         try {
-            if(reader.has(sHwMapKey)) {
+            if(mMap != null && reader.has(sHwMapKey)) {
                 mHwName = reader.getString(sHwMapKey);
                 mServo = mMap.tryGet(Servo.class,mHwName);
             }

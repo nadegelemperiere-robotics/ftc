@@ -20,6 +20,8 @@ public class Sequencer {
     LogManager          mLogger;
     
     String              mName;
+
+    boolean             mHasFinished;
     
     LinkedList<Task>    mTasks;
 
@@ -30,6 +32,7 @@ public class Sequencer {
      */
     public Sequencer(LogManager logger) {
         mLogger = logger;
+        mHasFinished = true;
         mTasks  = new LinkedList<>();
     }
 
@@ -38,7 +41,7 @@ public class Sequencer {
      *
      * @param tasks The sequence of tasks to perform
      */
-    public  void sequence(Task... tasks)
+    public void                         sequence(Task... tasks)
     {
         this.sequence("",tasks);
     }
@@ -49,21 +52,27 @@ public class Sequencer {
      * @param name The name of the task sequence
      * @param tasks The sequence of tasks to perform
      */
-    public  void sequence(String name, Task... tasks)
+    public void                         sequence(String name, Task... tasks)
     {
-        if(this.hasFinished()) {
+        if(mHasFinished) {
             mName   = name;
             Collections.addAll(mTasks, tasks);
+        }
+        else {
+            mLogger.warning("Forgot sequence " + name + " because still busy with sequence " + mName);
         }
     }
 
     /**
      * Starts the task sequence
      */
-    public void run() {
+    public void                         run() {
 
-        if(!mTasks.isEmpty()) {
+        if(mHasFinished && !mTasks.isEmpty()) {
+            mHasFinished = false;
             Task current = mTasks.getFirst();
+
+            if(!mName.isEmpty()) { mLogger.metric(mName, "Start"); }
             if(!mName.isEmpty()) { mLogger.metric(mName, current.name()); }
             current.run();
         }
@@ -71,11 +80,9 @@ public class Sequencer {
     }
 
     /**
-     * Check if sequence is over and manage task change - shall be called periodically
-     *
-     * @return true if the task sequence is over
+     * Manage task change - shall be called periodically
      */
-    public boolean hasFinished() {
+    public void                         update() {
 
         if(!mTasks.isEmpty()) {
 
@@ -89,12 +96,23 @@ public class Sequencer {
                     if(!mName.isEmpty()) { mLogger.metric(mName, current.name()); }
                     current.run();
                 }
+                else {
+                    if(!mName.isEmpty()) { mLogger.metric(mName, "Stop"); }
+                }
 
             }
         }
 
-        return mTasks.isEmpty();
+        mHasFinished = mTasks.isEmpty();
+
     }
+
+    /**
+     * Check if sequence is over and manage task change - shall be called periodically
+     *
+     * @return true if the task sequence is over
+     */
+    public boolean hasFinished() { return mHasFinished; }
 
 
 }

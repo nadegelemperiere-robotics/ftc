@@ -27,27 +27,31 @@ import org.firstinspires.ftc.core.configuration.Configurable;
 
 public interface OdometerComponent extends Configurable {
 
-    static OdometerComponent factory(String name, JSONObject reader, HardwareMap hwMap, LogManager logger) {
+    static OdometerComponent factory(String name, JSONObject reader, HardwareMap map, LogManager logger) {
 
         OdometerComponent result = null;
 
         switch (name) {
             case "otos":
-                result = new OpticalTrackingOdometer(name, hwMap, logger);
+                result = new OpticalTrackingOdometer(name, map, logger);
                 result.read(reader);
                 break;
             case "2deadwheels":
-                result = new TwoDeadWheelsOdometer(name, hwMap, logger);
+                result = new TwoDeadWheelsOdometer(name, map, logger);
                 result.read(reader); break;
             case "3deadwheels":
-                result = new ThreeDeadWheelsOdometer(name, hwMap, logger);
+                result = new ThreeDeadWheelsOdometer(name, map, logger);
                 result.read(reader); break;
             case "driveencoders":
-                result = new DriveEncodersOdometer(name, hwMap, logger);
+                result = new DriveEncodersOdometer(name, map, logger);
                 result.read(reader);
                 break;
             case "pinpoint":
-                result = new PinPointOdometer(name, hwMap, logger);
+                result = new PinPointOdometer(name, map, logger);
+                result.read(reader);
+                break;
+            case "mock":
+                result = new MockOdometer(name, logger);
                 result.read(reader);
                 break;
         }
@@ -56,7 +60,7 @@ public interface OdometerComponent extends Configurable {
 
     }
 
-    /* --------------- Accessors -------------- */
+    /* ------------------------- Accessors ------------------------- */
     void            pose(Pose2d current);
     Pose2d          pose();
     PoseVelocity2d  velocity();
@@ -70,7 +74,7 @@ public interface OdometerComponent extends Configurable {
     String          logConfigurationHTML();
     String          logConfigurationText(String header);
 
-    /* ------------- Localization ------------- */
+    /* ------------------------ Localization ----------------------- */
     void            update();
 
 }

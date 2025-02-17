@@ -10,6 +10,11 @@ package org.firstinspires.ftc.core.orchestration.engine;
 public interface State {
 
     /**
+     * Update current state - should be called periodically
+     */
+    void       update();
+
+    /**
      * Step to next state
      */
     State       next();
