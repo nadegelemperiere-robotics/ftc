@@ -120,7 +120,15 @@ public class MotorMock implements MotorComponent {
     public boolean	                    isBusy() { return false; }
 
     @Override
-    public void	                        mode(DcMotor.RunMode mode) { mMode = mode; }
+    public void	                        mode(DcMotor.RunMode mode) {
+        switch(mode) {
+            case RUN_TO_POSITION: Mock.instance().mMockedComponents.put(mName + "-mode", 0.0); break;
+            case RUN_USING_ENCODER: Mock.instance().mMockedComponents.put(mName + "-mode", 1.0); break;
+            case RUN_WITHOUT_ENCODER: Mock.instance().mMockedComponents.put(mName + "-mode", 2.0); break;
+        }
+
+        mMode = mode;
+    }
 
     @Override
     public void	                        direction(DcMotorSimple.Direction direction) { mDirection = direction; }

@@ -14,6 +14,9 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/* Qualcomm includes */
+import com.qualcomm.robotcore.hardware.DcMotor;
+
 /* ACME robotics includes */
 import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -255,24 +258,28 @@ public class MecanumDrive implements Subsystem {
                     mLeftFrontHwName = wheels.getString(sFrontLeftKey);
                     if (motors.containsKey(mLeftFrontHwName)) {
                         mLeftFront = motors.get(mLeftFrontHwName);
+                        if(mLeftFront != null) { mLeftFront.mode(DcMotor.RunMode.RUN_USING_ENCODER); }
                     }
                 }
                 if(wheels.has(sBackLeftKey)) {
                     mLeftBackHwName = wheels.getString(sBackLeftKey);
                     if (motors.containsKey(mLeftBackHwName)) {
                         mLeftBack = motors.get(mLeftBackHwName);
+                        if(mLeftBack != null) { mLeftBack.mode(DcMotor.RunMode.RUN_USING_ENCODER); }
                     }
                 }
                 if(wheels.has(sFrontRightKey)) {
                     mRightFrontHwName = wheels.getString(sFrontRightKey);
                     if (motors.containsKey(mRightFrontHwName)) {
                         mRightFront = motors.get(mRightFrontHwName);
+                        if(mRightFront != null ) { mRightFront.mode(DcMotor.RunMode.RUN_USING_ENCODER); }
                     }
                 }
                 if(wheels.has(sBackRightKey)) {
                     mRightBackHwName = wheels.getString(sBackRightKey);
                     if (motors.containsKey(mRightBackHwName)) {
                         mRightBack = motors.get(mRightBackHwName);
+                        if(mRightBack != null) { mRightBack.mode(DcMotor.RunMode.RUN_USING_ENCODER); }
                     }
                 }
             }

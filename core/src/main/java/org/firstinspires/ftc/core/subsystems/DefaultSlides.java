@@ -10,6 +10,9 @@ package org.firstinspires.ftc.core.subsystems;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/* Qualcomm includes */
+import com.qualcomm.robotcore.hardware.DcMotor;
+
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;
 
@@ -43,6 +46,7 @@ public class DefaultSlides extends Actuator {
     public void                         power(double power) {
 
         if(mMotor != null && this.hasFinished()) {
+            mMotor.mode(DcMotor.RunMode.RUN_USING_ENCODER);
             if(power < 0 && (mMotor.currentPosition() + mOffset) > mMinPosition) {
                 mMotor.power(power);
             }

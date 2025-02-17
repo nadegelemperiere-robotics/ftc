@@ -49,6 +49,13 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
         mData  = new RobotState.SharedData();
     }
 
+    /**
+     * Returns current state
+     *
+     * @return the current robot state
+     */
+    public String   state() { return mState.getClass().getSimpleName(); }
+
     /* ---------------------- TeleOp commands ---------------------- */
     public void drive(double x, double y, double heading)   { ((RobotState)mState).drive(x,y,heading); }
     public void tuneDriveSpeed(double multiplier)           { ((RobotState)mState).tuneDriveSpeed(multiplier); }

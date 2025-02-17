@@ -58,10 +58,10 @@ public class Robot extends Context implements Configurable {
 
     public void                         update()
     {
-        super.update();
         for (Map.Entry<String, Subsystem> subsystem : mSubsystems.entrySet()) {
             subsystem.getValue().update();
         }
+        super.update();
     }
 
     public boolean                      isConfigured() { return mConfigurationValid;}

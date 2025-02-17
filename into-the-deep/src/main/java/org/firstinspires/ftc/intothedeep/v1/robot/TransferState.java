@@ -37,11 +37,10 @@ public class TransferState extends RobotState {
         mSequencer.sequence(
                 "TRANSFER",
                 new Task(
-                        "Stop all motors",
+                        "Stop all mechanisms motors",
                         () -> {
                             ((SharedData)mData).intakeSlides.power(0);
                             ((SharedData)mData).outtakeSlides.power(0);
-                            ((SharedData)mData).chassis.drive(0,0,0);
                         },
                         new Condition(()-> true)
                 ),
