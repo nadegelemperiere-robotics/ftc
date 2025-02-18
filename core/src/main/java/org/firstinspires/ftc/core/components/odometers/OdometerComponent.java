@@ -8,9 +8,6 @@
 
 package org.firstinspires.ftc.core.components.odometers;
 
-/* System includes */
-import java.util.Map;
-
 /* JSON includes */
 import org.json.JSONObject;
 

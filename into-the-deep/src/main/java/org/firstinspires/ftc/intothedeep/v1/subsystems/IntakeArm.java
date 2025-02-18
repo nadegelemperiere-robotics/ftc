@@ -28,7 +28,7 @@ import org.firstinspires.ftc.core.orchestration.engine.Sequencer;
 import org.firstinspires.ftc.core.orchestration.engine.Task;
 
 
-public class IntakeArm implements Subsystem {
+public class IntakeArm extends Subsystem {
 
     static final String sClawKey   = "claw";
     static final String sWristKey  = "wrist";
@@ -44,20 +44,20 @@ public class IntakeArm implements Subsystem {
         TRANSFER
     }
 
-    LogManager      mLogger;
+    final LogManager    mLogger;
 
-    boolean         mConfigurationValid;
+    boolean             mConfigurationValid;
 
-    String          mName;
+    final String        mName;
 
-    Sequencer       mSequencer;
-    Position        mPosition;
+    final Sequencer     mSequencer;
+    Position            mPosition;
 
-    Hardware        mHardware;
-    ToggleActuator  mClaw;
-    ToggleActuator  mWrist;
-    Actuator        mArm;
-    Actuator        mElbow;
+    final Hardware      mHardware;
+    ToggleActuator      mClaw;
+    ToggleActuator      mWrist;
+    Actuator            mArm;
+    Actuator            mElbow;
 
     /**
      * Constructor
@@ -205,16 +205,18 @@ public class IntakeArm implements Subsystem {
             switch(direction) {
                 case "up":
                     switch (mPosition) {
-                        case INIT: this.position(Position.TRANSFER); break;
-                        case OVER_SUBMERSIBLE: this.position(Position.TRANSFER); break;
+                        case INIT:
+                        case OVER_SUBMERSIBLE:
+                            this.position(Position.TRANSFER); break;
                         case DRONE: this.position(Position.OVER_SUBMERSIBLE); break;
                         case GRAB: this.position(Position.DRONE); break;
                     }
                     break;
                 case "down":
                     switch (mPosition) {
-                        case INIT: this.position(Position.OVER_SUBMERSIBLE); break;
-                        case TRANSFER: this.position(Position.OVER_SUBMERSIBLE); break;
+                        case INIT:
+                        case TRANSFER:
+                            this.position(Position.OVER_SUBMERSIBLE); break;
                         case OVER_SUBMERSIBLE: this.position(Position.DRONE); break;
                         case DRONE: this.position(Position.GRAB); break;
                     }

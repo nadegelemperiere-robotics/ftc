@@ -49,17 +49,16 @@ public class Command implements Configurable {
     static  final String        sOperationKey    = "operation";
     static  final String        sThresholdKey    = "threshold";
 
-    LogManager                  mLogger;
+    final LogManager                mLogger;
 
-    boolean                     mConfigurationValid;
+    boolean                         mConfigurationValid;
 
-    Map<String,Controller>      mControllers;
+    final Map<String,Controller>    mControllers;
 
-    Robot                       mRobot;
+    final Robot                     mRobot;
 
-    Condition                   mCondition;
-
-    Runnable                    mAction;
+    Condition                       mCondition;
+    Runnable                        mAction;
 
 
     /**
@@ -327,11 +326,11 @@ class ParamEvaluator {
     static  final String        sInputKey        = "input";
     static  final String        sScaleKey        = "scale";
 
-    LogManager              mLogger;
+    final LogManager                mLogger;
 
-    List<Object>            mParameters;
-    List<Runnable>          mProcessors;
-    Map<String,Controller>  mControllers;
+    final List<Object>              mParameters;
+    final List<Runnable>            mProcessors;
+    final Map<String,Controller>    mControllers;
 
     /**
      * Parameter evaluator constructor

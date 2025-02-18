@@ -13,9 +13,9 @@ import org.firstinspires.ftc.core.tools.Condition;
 
 public class Task {
 
-    Condition       mCondition;
-    Runnable        mAction;
-    String          mName;
+    final Condition       mCondition;
+    final Runnable        mAction;
+    final String          mName;
 
     /**
      * Constructor

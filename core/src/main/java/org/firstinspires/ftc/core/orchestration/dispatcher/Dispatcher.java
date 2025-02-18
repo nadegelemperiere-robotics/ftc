@@ -35,15 +35,15 @@ public class Dispatcher implements Configurable {
     static  final   String              sControllersKey = "controllers";
     static  final   String              sCommandsKey    = "commands";
 
-    protected LogManager                mLogger;
+    final   protected LogManager            mLogger;
 
-    boolean                             mConfigurationValid;
+    boolean                                 mConfigurationValid;
 
-    protected Robot                     mRobot;
+    protected final Robot                   mRobot;
 
-    protected Map<String,Controller>    mControllers;
+    protected final Map<String,Controller>  mControllers;
 
-    List<Command>                       mCommands;
+    final List<Command>                     mCommands;
 
     /**
      * ControlMapper constructor
@@ -196,7 +196,7 @@ public class Dispatcher implements Configurable {
     /**
      * Function to loop into commands
      */
-    public void loop() {
+    public void update() {
 
         mLogger.info(LogManager.Target.FILE,"start");
 

@@ -17,13 +17,13 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 public class Sequencer {
 
-    LogManager          mLogger;
+    final LogManager        mLogger;
     
-    String              mName;
+    String                  mName;
 
-    boolean             mHasFinished;
+    boolean                 mHasFinished;
     
-    LinkedList<Task>    mTasks;
+    final LinkedList<Task>  mTasks;
 
     /**
      * Constructor

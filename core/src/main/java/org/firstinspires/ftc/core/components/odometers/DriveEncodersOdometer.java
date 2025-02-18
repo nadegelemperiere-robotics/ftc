@@ -52,41 +52,41 @@ public class DriveEncodersOdometer implements OdometerComponent {
     static  final String    sLateralInPerTickKey = "lateral-in-per-tick";
     static  final String    sInPerTickKey        = "in-per-tick";
 
-    LogManager                  mLogger;
+    final   LogManager              mLogger;
 
-    boolean                     mConfigurationValid;
-    boolean                     mIsFirstTime;
+    boolean                         mConfigurationValid;
+    boolean                         mIsFirstTime;
 
-    String                      mName;
-    String                      mLeftBackHwName;
-    String                      mLeftFrontHwName;
-    String                      mRightBackHwName;
-    String                      mRightFrontHwName;
-    String                      mImuHwName;
+    final   String                  mName;
+    String                          mLeftBackHwName;
+    String                          mLeftFrontHwName;
+    String                          mRightBackHwName;
+    String                          mRightFrontHwName;
+    String                          mImuHwName;
 
-    HardwareMap                 mMap;
-    Encoder                     mLeftFront;
-    Encoder                     mRightFront;
-    Encoder                     mLeftBack;
-    Encoder                     mRightBack;
-    ImuComponent                mImu;
+    final   HardwareMap             mMap;
+    Encoder                         mLeftFront;
+    Encoder                         mRightFront;
+    Encoder                         mLeftBack;
+    Encoder                         mRightBack;
+    ImuComponent                    mImu;
 
-    Pose2d                      mInitialPose;
-    Pose2d                      mCurrentPose;
-    PoseVelocity2d              mCurrentVelocity;
-    public LinkedList<Pose2d>   mPoseHistory;
+    Pose2d                          mInitialPose;
+    Pose2d                          mCurrentPose;
+    PoseVelocity2d                  mCurrentVelocity;
+    public final LinkedList<Pose2d> mPoseHistory;
 
-    double                      mInPerTick;
-    double                      mTrackWidthTicks;
-    double                      mLateralInPerTick;
+    double                          mInPerTick;
+    double                          mTrackWidthTicks;
+    double                          mLateralInPerTick;
 
-    double                      mLastHeading;
-    double                      mLastLeftFrontPos;
-    double                      mLastLeftBackPos;
-    double                      mLastRightFrontPos;
-    double                      mLastRightBackPos;
+    double                          mLastHeading;
+    double                          mLastLeftFrontPos;
+    double                          mLastLeftBackPos;
+    double                          mLastRightFrontPos;
+    double                          mLastRightBackPos;
 
-    MecanumKinematics           mKinematics;
+    MecanumKinematics               mKinematics;
 
     public  DriveEncodersOdometer(String name, HardwareMap hwMap, LogManager logger) {
 

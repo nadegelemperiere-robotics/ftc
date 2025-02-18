@@ -28,13 +28,13 @@ import org.json.JSONObject;
 
 public class MotorSingle implements MotorComponent {
 
-    LogManager          mLogger;
+    final LogManager    mLogger;
 
     boolean             mConfigurationValid;
-    String              mName;
+    final String        mName;
     String              mHwName;
 
-    HardwareMap         mMap;
+    final HardwareMap   mMap;
     DcMotorEx           mMotor;
 
     int                 mInvertPosition;

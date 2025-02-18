@@ -41,19 +41,19 @@ public class OpticalTrackingOdometer implements OdometerComponent {
     static  final public    String sYOffsetKey        = "y-offset";
     static  final public    String sHeadingOffsetKey  = "heading-offset";
 
-    LogManager                  mLogger;
+    final LogManager            mLogger;
 
     boolean                     mConfigurationValid;
 
-    String                      mName;
+    final String                mName;
     String                      mHwName;
 
-    HardwareMap                 mMap;
+    final HardwareMap           mMap;
     SparkFunOTOSCorrected       mOtos;
 
     Pose2d                      mCurrentPose;
     PoseVelocity2d              mCurrentVelocity;
-    public LinkedList<Pose2d>   mPoseHistory;
+    final LinkedList<Pose2d>    mPoseHistory;
 
     public  OpticalTrackingOdometer(String name, HardwareMap hwMap, LogManager logger) {
 

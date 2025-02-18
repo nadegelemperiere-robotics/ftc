@@ -18,7 +18,6 @@ import android.os.Environment;
 /* Junit 5 includes */
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -99,7 +98,7 @@ public class DispatcherTest {
         mGamepad.left_bumper    = true;
         mGamepad.right_bumper   = true;
         mGamepad.a              = true;
-        mDispatcher.loop();
+        mDispatcher.update();
 
         assertTrue(mRobot.test1Check(), "Scheduler should not have called test1");
         assertEquals(0.9,mRobot.test2Value1(), 0.0000001,"Scheduler should have called test2 with parameter 0.9");
@@ -139,7 +138,7 @@ public class DispatcherTest {
         mGamepad.left_bumper    = true;
         mGamepad.right_bumper   = true;
         mGamepad.a              = true;
-        mDispatcher.loop();
+        mDispatcher.update();
 
         assertTrue(mRobot.test1Check(), "Scheduler should not have called test1");
         assertEquals(0.9,mRobot.test2Value1(), 0.0000001,"Scheduler should have called test2 with parameter 0.9");
@@ -159,7 +158,7 @@ public class DispatcherTest {
         mGamepad.left_bumper    = true;
         mGamepad.right_bumper   = true;
         mGamepad.a              = true;
-        mDispatcher.loop();
+        mDispatcher.update();
 
         assertTrue(mRobot.test1Check(), "Scheduler should not have called test1");
         assertEquals(-10000,mRobot.test2Value1(), 0.0000001,"Scheduler should not have called test2");
@@ -173,11 +172,11 @@ public class DispatcherTest {
         mRobot.reset();
 
         mGamepad.left_bumper    = false;
-        mDispatcher.loop();
+        mDispatcher.update();
         mRobot.reset();
         mGamepad.left_trigger   = 0.6f;
         mGamepad.left_bumper    = true;
-        mDispatcher.loop();
+        mDispatcher.update();
         assertEquals(0.6,mRobot.test2Value2(), 0.0000001,"Scheduler should have called test2 with parameter 0.4");
         mRobot.reset();
 

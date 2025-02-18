@@ -58,13 +58,12 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 public class ImuMock implements ImuComponent {
 
-    LogManager                                      mLogger;
+    final LogManager                                mLogger;
 
-    boolean                                         mConfigurationValid;
-    String                                          mName;
+    final boolean                                   mConfigurationValid;
+    final String                                    mName;
 
     double                                          mCurrentHeading;
-    double                                          mHeadingOffset;
 
     /* ----------------------- Constructors ------------------------ */
     /**
@@ -79,22 +78,7 @@ public class ImuMock implements ImuComponent {
         mLogger = logger;
         mName   = name;
         mCurrentHeading = 0;
-        mHeadingOffset = 0;
     }
-
-    /**
-     * Retrieves the configured heading offset.
-     *
-     * @return The current heading offset in radians.
-     */
-    public double                       headingOffset() { return mHeadingOffset; }
-
-    /**
-     * Sets the heading offset for the IMU.
-     *
-     * @param offset The heading offset in radians.
-     */
-    public void                         headingOffset(double offset) { mHeadingOffset = offset; }
 
     /**
      * Retrieves the name of the IMU component.
@@ -108,7 +92,7 @@ public class ImuMock implements ImuComponent {
      *
      * @return The heading in radians, adjusted with the configured offset.
      */
-    public double                       heading() { return mHeadingOffset + mCurrentHeading; }
+    public double                       heading() { return mCurrentHeading; }
 
     /**
      * Retrieves the current angular velocity around the Z-axis in radians per second.

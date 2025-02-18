@@ -15,11 +15,11 @@ import org.firstinspires.ftc.core.orchestration.engine.State;
 
 public abstract class RobotState implements State {
 
-    public abstract static class SharedData{};
+    public abstract static class SharedData{}
 
-    protected LogManager        mLogger;
+    protected final LogManager        mLogger;
 
-    protected SharedData        mData;
+    protected final SharedData        mData;
 
     public  RobotState(SharedData data, LogManager logger) {
         mLogger = logger;

@@ -74,7 +74,7 @@ public interface ImuComponent extends Configurable {
      * @param logger The logging manager to handle system logs.
      * @return A fully configured ImuComponent instance.
      */
-    public static ImuComponent factory(String name, JSONObject reader, HardwareMap map, LogManager logger) {
+    static ImuComponent factory(String name, JSONObject reader, HardwareMap map, LogManager logger) {
 
         ImuComponent result = null;
 
@@ -95,8 +95,6 @@ public interface ImuComponent extends Configurable {
     /* --------------------- Custom functions ---------------------- */
 
     String                      name();
-    public double               headingOffset();
-    public void                 headingOffset(double offset);
 
     /* ------------------ Configurable functions ------------------- */
 

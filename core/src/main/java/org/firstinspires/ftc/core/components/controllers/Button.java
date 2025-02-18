@@ -1,14 +1,41 @@
-/* -------------------------------------------------------
-   Copyright (c) [2025] Nadege LEMPERIERE
-   All rights reserved
-   -------------------------------------------------------
-   SmartButton class that manages gamepad button
-   --> Adds the capability to detect when button is pressed
-   and was released before, to trigger events only once on button
-   pressed
-   --> Adds the capability to use triggers has buttons with a
-   threshold
-   ------------------------------------------------------- */
+/**
+ * -------------------------------------------------------
+ * Copyright (c) 2025 Nadege LEMPERIERE
+ * All rights reserved
+ * -------------------------------------------------------
+ * Button class provides an abstraction for handling
+ * gamepad buttons using reflection.
+ * -------------------------------------------------------
+ * <p>
+ * This class allows checking button states, including:
+ * - Whether a button is currently pressed.
+ * - Whether a button was pressed once.
+ * - Whether a button was released once.
+ * <p>
+ * Features:
+ * - Uses reflection to access button fields dynamically.
+ * - Supports trigger-based buttons with threshold detection.
+ * - Implements edge detection for press and release events.
+ * - Provides logging capabilities for button actions.
+ * <p>
+ * Dependencies:
+ * - Qualcomm Robotics SDK (Gamepad API)
+ * - Custom LogManager for logging
+ * <p>
+ * Usage:
+ * 1. Create a `Button` instance, linking it to a gamepad button.
+ * 2. Call `pressed()`, `pressedOnce()`, or `releasedOnce()`
+ *    to detect button states.
+ * <p>
+ * Example:
+ * {@code
+ *      Button aButton = new Button(gamepad1, "a", logger);
+ *      if (aButton.pressedOnce()) {
+ *          // Execute action when button "A" is first pressed
+ *      }
+ * }
+ */
+
 
 package org.firstinspires.ftc.core.components.controllers;
 
@@ -25,15 +52,15 @@ public class Button {
 
     static  final   double      sTriggerThreshold = 0;
 
-                    LogManager  mLogger;
+            final   LogManager  mLogger;
 
-                    Gamepad     mGamepad;
-                    String      mName;
+            final   Gamepad     mGamepad;
+            final   String      mName;
 
 
                     boolean     mWasPressed;
                     boolean     mWasReleased;
-                    double      mMultiplier;
+            final   double      mMultiplier;
 
     /**
      * Button constructor

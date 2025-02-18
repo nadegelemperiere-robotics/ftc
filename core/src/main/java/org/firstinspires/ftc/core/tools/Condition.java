@@ -173,13 +173,13 @@ public class Condition {
     /**
      * NOT operator
      *
-     * @param conditions a list of input conditions
+     * @param condition an input conditions
      */
     public  static Condition not(Condition condition) {
         return new Condition(() -> !condition.mLogic.getAsBoolean());
     }
 
-    BooleanSupplier mLogic;
+    final BooleanSupplier mLogic;
 
     /**
      * Constructor

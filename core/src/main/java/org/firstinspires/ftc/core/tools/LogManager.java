@@ -97,25 +97,25 @@ public class LogManager implements Configurable {
     static  final   int             sEntryFontSize   = 15;
 
     // Status
-    boolean                         mConfigurationValid;
-    Severity                        mLevel;
-    int                             mStackLevel;
+    boolean                                 mConfigurationValid;
+    Severity                                mLevel;
+    final int                               mStackLevel;
     
     // Loggers
-    Telemetry                       mDriverStation;
-    FtcDashboard                    mDashboard;
-    Logger                          mFile;
-    String                          mFilename;
+    Telemetry                               mDriverStation;
+    FtcDashboard                            mDashboard;
+    Logger                                  mFile;
+    final String                            mFilename;
 
     // Persistence
-    Map<Target,StringBuilder>       mErrors;
-    Map<Target,StringBuilder>       mWarnings;
-    Map<Target,Map<String,String>>  mMetrics;
+    final Map<Target,StringBuilder>         mErrors;
+    final Map<Target,StringBuilder>         mWarnings;
+    final Map<Target,Map<String,String>>    mMetrics;
 
     // Temporary
-    Map<Target,StringBuilder>       mInfos;
-    Map<Target,StringBuilder>       mDebugs;
-    Map<Target,StringBuilder>       mTraces;
+    final Map<Target,StringBuilder>         mInfos;
+    final Map<Target,StringBuilder>         mDebugs;
+    final Map<Target,StringBuilder>         mTraces;
 
     /**
      * Builds a log manager from parameters

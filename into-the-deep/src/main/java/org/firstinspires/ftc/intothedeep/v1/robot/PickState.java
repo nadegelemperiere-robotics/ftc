@@ -18,7 +18,7 @@ import org.firstinspires.ftc.core.orchestration.engine.State;
 
 public class PickState extends RobotState {
 
-    Sequencer mSequencer;
+    final Sequencer mSequencer;
 
     /**
      * Constructs a pick state with the associated sample picking sequence

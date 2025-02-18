@@ -101,7 +101,7 @@
                     "min"               : 0,
                     "transfer-exchange" : 167,
                     "retracted"         : 250,
-                    "autonomous-sample" : 260,
+                    "autonomous-sample" : 280,
                     "transfer-away"     : 300,
                     "max"               : 315
                 },
@@ -118,7 +118,8 @@
                     "servo"     : "outtake-claw",
                     "positions" : {
                         "open"         : 0.36,
-                        "closed"       : 0.73
+                        "closed"       : 0.73,
+                        "ultraclosed"  : 0.75
                     }
                 },
                 "wrist" : {
@@ -134,12 +135,12 @@
                     "type"      : "actuator",
                     "servo"     : "outtake-elbow-pitch",
                     "positions" : {
-                        "autonomous-clip-specimen"  : 0.011,
-                        "autonomous-let-specimen"   : 0.025,
-                        "drop-sample"               : 0.05,
-                        "off"                       : 0.08,
-                        "vertical"                  : 0.085,
-                        "transfer"                  : 0.11
+                        "autonomous-specimen-behind" : 0.011,
+                        "autonomous-specimen-ahead"  : 0.025,
+                        "drop-sample"                : 0.05,
+                        "off"                        : 0.08,
+                        "vertical"                   : 0.085,
+                        "transfer"                   : 0.11
                     }
                 }
             },
@@ -195,7 +196,6 @@
         }
     },
     "control"   : {
-
         "controllers": {
             "drive": {
                 "axes" : {

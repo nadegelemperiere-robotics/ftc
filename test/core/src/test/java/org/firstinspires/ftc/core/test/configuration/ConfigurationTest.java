@@ -209,8 +209,6 @@ class ConfigurableTest implements Configurable {
 
     public boolean isConfigured() { return mConfigurationValid; }
 
-    public void register(String topic) { }
-
     public String logConfigurationHTML() {
 
         String result = "";

@@ -1,14 +1,43 @@
-/* -------------------------------------------------------
-   Copyright (c) [2025] Nadege LEMPERIERE
-   All rights reserved
-   -------------------------------------------------------
-   SmartButton class that manages gamepad button
-   --> Adds the capability to detect when button is pressed
-   and was released before, to trigger events only once on button
-   pressed
-   --> Adds the capability to use triggers has buttons with a
-   threshold
-   ------------------------------------------------------- */
+/**
+ * -------------------------------------------------------
+ * Copyright (c) 2025 Nadege LEMPERIERE
+ * All rights reserved
+ * -------------------------------------------------------
+ * Axis class provides an abstraction for accessing
+ * gamepad analog axes (e.g., triggers or joystick axes)
+ * using reflection.
+ * -------------------------------------------------------
+ * <p>
+ * This class allows configurable input scaling, deadzone
+ * handling, and maximum value capping for gamepad axes.
+ * It reads values dynamically via reflection, making it
+ * adaptable to different hardware configurations.
+ * <p>
+ * Features:
+ * - Reads gamepad axis values dynamically.
+ * - Supports deadzone and maximum value configurations.
+ * - Multiplies input values for sensitivity adjustments.
+ * - Logs configuration in text and HTML formats.
+ * - Stores and retrieves configurations using JSON.
+ * <p>
+ * Dependencies:
+ * - Qualcomm Robotics SDK (Gamepad API)
+ * - JSON Processing (org.json)
+ * - Custom LogManager for logging
+ * <p>
+ * Usage:
+ * 1. Create an `Axis` instance, linking it to a specific
+ *    gamepad axis.
+ * 2. Optionally configure deadzones and scaling.
+ * 3. Read values using `value()`.
+ * <p>
+ * Example:
+ * {@code
+ *      Axis trigger = new Axis(gamepad1, "left_trigger", 1.0, logger);
+ *      double triggerValue = trigger.value();
+ * }
+ */
+
 
 package org.firstinspires.ftc.core.components.controllers;
 
@@ -36,14 +65,14 @@ public class Axis implements Configurable {
             static  final   String      sDeadzoneKey   = "deadzone";
             static  final   String      sMaximumKey    = "maximum";
 
-                            LogManager  mLogger;
+                    final   LogManager  mLogger;
 
                             boolean     mConfigurationValid;
 
-                            Gamepad     mGamepad;
-                            String      mName;
+                    final   Gamepad     mGamepad;
+                    final   String      mName;
 
-                            double      mMultiplier;
+                    final   double      mMultiplier;
                             double      mDeadZone;
                             double      mMaximum;
 
@@ -141,13 +170,6 @@ public class Axis implements Configurable {
     public boolean  isConfigured() {
         return mConfigurationValid;
     }
-
-    /**
-     * Manages registration
-     *
-     * @param topic : topic under which the object wa registered
-     */
-    public void     register(String topic) {}
 
     /**
      * Configuration logging into HTML

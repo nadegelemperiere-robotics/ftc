@@ -22,7 +22,7 @@ import org.firstinspires.ftc.core.orchestration.engine.Sequencer;
 
 public class InitState extends RobotState {
 
-    Sequencer   mSequencer;
+    final Sequencer   mSequencer;
 
     public  InitState(SharedData data, LogManager logger) {
         super(data,logger);

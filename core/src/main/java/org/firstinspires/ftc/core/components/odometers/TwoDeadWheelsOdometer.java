@@ -51,17 +51,17 @@ public class TwoDeadWheelsOdometer implements OdometerComponent {
     static  final String sPerpTicksKey  = "perp-x-ticks";
     static  final String sInPerTickKey  = "in-per-tick";
 
-    LogManager                  mLogger;
+    final LogManager            mLogger;
 
     boolean                     mConfigurationValid;
     boolean                     mIsFirstTime;
 
-    String                      mName;
+    final String                mName;
     String                      mParHwMapName;
     String                      mPerpHwMapName;
     String                      mImuHwMapName;
 
-    HardwareMap                 mMap;
+    final HardwareMap           mMap;
     Encoder                     mPar;
     Encoder                     mPerp;
     ImuComponent                mImu;
@@ -69,7 +69,7 @@ public class TwoDeadWheelsOdometer implements OdometerComponent {
     Pose2d                      mInitialPose;
     Pose2d                      mCurrentPose;
     PoseVelocity2d              mCurrentVelocity;
-    public LinkedList<Pose2d>   mPoseHistory;
+    final LinkedList<Pose2d>    mPoseHistory;
 
     double                      mParYTicks;
     double                      mPerpXTicks;

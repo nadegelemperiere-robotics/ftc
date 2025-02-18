@@ -11,27 +11,32 @@ package org.firstinspires.ftc.core.components.servos;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+/* JSON includes */
+import org.json.JSONObject;
+
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.Servo;
 
 /* Tools includes */
-import org.firstinspires.ftc.core.orchestration.engine.Mock;
 import org.firstinspires.ftc.core.tools.LogManager;
-import org.json.JSONObject;
+
+/* Orchestration includes */
+import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
+
 
 public class ServoMock implements ServoComponent {
 
-    LogManager                  mLogger;
+    final LogManager                mLogger;
 
-    boolean                     mConfigurationValid;
-    String                      mName;
+    final boolean                   mConfigurationValid;
+    final String                    mName;
 
-    ServoControllerComponent    mController;
+    final ServoControllerComponent  mController;
 
-    Servo.Direction             mDirection;
-    double                      mPosition;
-    double                      mMin;
-    double                      mMax;
+    Servo.Direction                 mDirection;
+    double                          mPosition;
+    double                          mMin;
+    double                          mMax;
 
     /* -------------- Constructors --------------- */
     public ServoMock(String name, LogManager logger)
@@ -156,7 +161,7 @@ public class ServoMock implements ServoComponent {
     {
         mPosition = min(position,mMax);
         mPosition = max(mPosition,mMin);
-        Mock.instance().mMockedComponents.put(mName + "-position",(double)position);
+        InterOpMode.instance().add(mName + "-position",position);
     }
 
 }

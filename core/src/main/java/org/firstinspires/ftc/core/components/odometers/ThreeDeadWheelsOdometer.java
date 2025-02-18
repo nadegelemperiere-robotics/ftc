@@ -56,17 +56,17 @@ public class ThreeDeadWheelsOdometer implements OdometerComponent {
     static  final String    sPerpTicksKey  = "perp-x-ticks";
     static  final String    sInPerTickKey  = "in-per-tick";
 
-    LogManager                  mLogger;
+    final LogManager            mLogger;
 
     boolean                     mConfigurationValid;
     boolean                     mIsFirstTime;
 
-    String                      mName;
+    final String                mName;
     String                      mPar0HwMapName;
     String                      mPar1HwMapName;
     String                      mPerpHwMapName;
 
-    HardwareMap                 mMap;
+    final HardwareMap           mMap;
     Encoder                     mPar0;
     Encoder                     mPar1;
     Encoder                     mPerp;
@@ -74,7 +74,7 @@ public class ThreeDeadWheelsOdometer implements OdometerComponent {
     Pose2d                      mInitialPose;
     Pose2d                      mCurrentPose;
     PoseVelocity2d              mCurrentVelocity;
-    public LinkedList<Pose2d>   mPoseHistory;
+    final LinkedList<Pose2d>    mPoseHistory;
 
     double                      mPar0YTicks;
     double                      mPar1YTicks;

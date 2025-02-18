@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 /* ACME robotics includes */
 import com.acmerobotics.dashboard.FtcDashboard;
 
+
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
@@ -27,14 +28,23 @@ import org.firstinspires.ftc.intothedeep.v1.configuration.Configuration;
 /* Components includes */
 import org.firstinspires.ftc.core.components.controllers.Controller;
 
+/* Robot includes */
+import org.firstinspires.ftc.intothedeep.v1.robot.Robot;
+
+/* Orchestration includes */
+import org.firstinspires.ftc.intothedeep.v1.orchestration.Dispatcher;
+import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
+
 @TeleOp(name = "Robot V1 Teleop", group = "V1")
 public class TeleOpMode extends OpMode {
 
-    LogManager      mLogger;
+    LogManager              mLogger;
 
-    Configuration   mConfiguration;
+    Configuration           mConfiguration;
 
     Map<String, Controller> mControllers;
+    Robot                   mRobot;
+    Dispatcher              mDispatcher;
     
     @Override
     public void init(){
@@ -50,17 +60,18 @@ public class TeleOpMode extends OpMode {
             mConfiguration.logger(mLogger);
 
             // Robot initialization
-            //mRobot = new SeasonRobot(mLogger);
+            mRobot = new Robot(hardwareMap, mLogger);
 
             // Control initialization
-//            mControllers = new LinkedHashMap<>();
-//            mControllers.put("drive", new Controller(gamepad1, mLogger));
-//            mControllers.put("mechanisms", new Controller(gamepad2, mLogger));
-//            mControl = new ControlMapper(mControllers, mConfiguration, mLogger);
-//
-//            // Register configurables
-//            mConfiguration.register("control", mControl);
-//            mConfiguration.register("logging",mLogger);
+            mControllers = new LinkedHashMap<>();
+            mControllers.put("drive", new Controller(gamepad1, mLogger));
+            mControllers.put("mechanisms", new Controller(gamepad2, mLogger));
+            mDispatcher = new Dispatcher(mControllers, mRobot, mLogger);
+
+            // Register configurables
+            mConfiguration.register("logging", mLogger);
+            mConfiguration.register("robot",mRobot);
+            mConfiguration.register("control", mDispatcher);
             mConfiguration.read();
             mConfiguration.log();
 
@@ -72,14 +83,24 @@ public class TeleOpMode extends OpMode {
         }
 
     }
+
+    @Override
+    public void start() {
+        // Starting position is not specified, then it will become
+        // (0,0,0) if no data from previous OpMode, or the last OpMode pose if data from previous OpMode
+        mRobot.start(Robot.Mode.TELEOP,null);
+    }
+
     @Override
     public void loop (){
 
         try {
 
-            mLogger.info("" + this.time);
+            mLogger.info("START LOOP");
+            mRobot.update();
+            mDispatcher.update();
+            mLogger.info("END LOOP");
             mLogger.update();
-            
 
         }
         catch(Exception e){
@@ -90,6 +111,8 @@ public class TeleOpMode extends OpMode {
 
     @Override
     public void stop() {
+        mRobot.persist();
+        InterOpMode.instance().log(mLogger);
         mLogger.stop();
     }
 

@@ -32,12 +32,11 @@ import org.firstinspires.ftc.core.components.servos.ServoComponent;
 
 public class Tuning extends Hardware {
 
-    Map<String, MotorComponent> mSingleMotors;
-    Map<String, List<String>>   mMotorMapping;
+    final Map<String, MotorComponent> mSingleMotors;
+    final Map<String, List<String>>   mMotorMapping;
 
-    Map<String, ServoComponent> mSingleServos;
-    Map<String, List<String>>   mServoMapping;
-
+    final Map<String, ServoComponent> mSingleServos;
+    final Map<String, List<String>>   mServoMapping;
 
     public Tuning(HardwareMap map, LogManager logger) {
         super(map, logger);

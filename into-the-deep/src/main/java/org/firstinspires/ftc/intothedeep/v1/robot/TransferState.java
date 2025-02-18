@@ -22,7 +22,7 @@ import org.firstinspires.ftc.core.orchestration.engine.Sequencer;
 
 public class TransferState extends RobotState {
 
-    Sequencer   mSequencer;
+    final Sequencer   mSequencer;
 
     /**
      * Constructs a transfer state with the associated sample transfer sequence

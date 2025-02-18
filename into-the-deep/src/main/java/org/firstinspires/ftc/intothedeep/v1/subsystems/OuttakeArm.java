@@ -28,7 +28,7 @@ import org.firstinspires.ftc.core.orchestration.engine.Sequencer;
 import org.firstinspires.ftc.core.orchestration.engine.Task;
 
 
-public class OuttakeArm implements Subsystem {
+public class OuttakeArm extends Subsystem {
 
     static final String sClawKey   = "claw";
     static final String sWristKey  = "wrist";
@@ -38,23 +38,26 @@ public class OuttakeArm implements Subsystem {
         NONE,
         INIT,
         TRANSFER,
-        DROP
+        DROP,
+        SPECIMEN_BEHIND,
+        SPECIMEN_AHEAD,
+        VERTICAL
     }
 
 
-    LogManager      mLogger;
+    final LogManager    mLogger;
 
-    boolean         mConfigurationValid;
+    boolean             mConfigurationValid;
 
-    String          mName;
+    final String        mName;
 
-    Sequencer       mSequencer;
-    Position        mPosition;
+    final Sequencer     mSequencer;
+    Position            mPosition;
 
-    Hardware        mHardware;
-    ToggleActuator  mClaw;
-    ToggleActuator  mWrist;
-    Actuator        mElbow;
+    final Hardware      mHardware;
+    ToggleActuator      mClaw;
+    ToggleActuator      mWrist;
+    Actuator            mElbow;
 
     /**
      * Constructor
@@ -145,6 +148,60 @@ public class OuttakeArm implements Subsystem {
                     );
                     mSequencer.run();
                     break;
+                case SPECIMEN_BEHIND :
+                    mPosition = position;
+                    mSequencer.sequence(
+                            new Task(
+                                    () -> {
+                                        mWrist.position("0",0,500);
+                                        mElbow.position("autonomous-specimen-behind",0,500);
+                                    },
+                                    Condition.and(
+                                            new Condition(() -> mClaw.hasFinished()),
+                                            new Condition(() -> mElbow.hasFinished()),
+                                            new Condition(() -> mWrist.hasFinished())
+                                    )
+                            )
+                    );
+                    mSequencer.run();
+                    break;
+                case SPECIMEN_AHEAD :
+                    mPosition = position;
+                    mSequencer.sequence(
+                            new Task(
+                                    () -> {
+                                        mClaw.position("closed",0,500);
+                                        mWrist.position("0",0,500);
+                                        mElbow.position("autonomous-specimen-ahead",0,500);
+                                    },
+                                    Condition.and(
+                                            new Condition(() -> mClaw.hasFinished()),
+                                            new Condition(() -> mElbow.hasFinished()),
+                                            new Condition(() -> mWrist.hasFinished())
+                                    )
+                            )
+                    );
+                    mSequencer.run();
+                    break;
+                case VERTICAL :
+                    mPosition = position;
+                    mSequencer.sequence(
+                            new Task(
+                                    () -> {
+                                        mClaw.position("closed",0,500);
+                                        mWrist.position("0",0,500);
+                                        mElbow.position("vertical",0,500);
+                                    },
+                                    Condition.and(
+                                            new Condition(() -> mClaw.hasFinished()),
+                                            new Condition(() -> mElbow.hasFinished()),
+                                            new Condition(() -> mWrist.hasFinished())
+                                    )
+                            )
+                    );
+                    mSequencer.run();
+                    break;
+
             }
         }
 
@@ -160,17 +217,34 @@ public class OuttakeArm implements Subsystem {
             switch(direction) {
                 case "up":
                     switch (mPosition) {
-                        case INIT: this.position(Position.DROP); break;
-                        case TRANSFER: this.position(Position.DROP); break;
+                        case INIT:
+                        case TRANSFER:
+                            this.position(Position.DROP); break;
                     }
                     break;
                 case "down":
                     switch (mPosition) {
-                        case INIT: this.position(Position.TRANSFER); break;
-                        case DROP: this.position(Position.TRANSFER); break;
+                        case INIT:
+                        case DROP:
+                            this.position(Position.TRANSFER); break;
                     }
                     break;
             }
+        }
+    }
+
+    /**
+     * Close the claw firmly to make specimen turn around the bar when released
+     */
+    public void                         ultraclose() {
+        if(mConfigurationValid) {
+            mSequencer.sequence(
+                    new Task(
+                            () -> mClaw.position("ultraclosed",0,500),
+                            new Condition(() -> mClaw.hasFinished())
+                    )
+            );
+            mSequencer.run();
         }
     }
 

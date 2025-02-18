@@ -16,9 +16,9 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 public class ServoControllerMock implements ServoControllerComponent {
 
-    LogManager                  mLogger;
+    final LogManager            mLogger;
 
-    boolean                     mConfigurationValid;
+    final boolean               mConfigurationValid;
 
     ServoController.PwmStatus   mStatus;
 

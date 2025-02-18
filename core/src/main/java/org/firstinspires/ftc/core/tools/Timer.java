@@ -9,12 +9,12 @@ package org.firstinspires.ftc.core.tools;
 
 public class Timer {
 
-    LogManager      mLogger;
+    final LogManager    mLogger;
 
-    private long    mStartTime;
-    private boolean mIsRunning;
-    private boolean mHasAlreadyBeenCalled;
-    private int     mTarget;
+    private long        mStartTime;
+    private boolean     mIsRunning;
+    private boolean     mHasAlreadyBeenCalled;
+    private int         mTarget;
 
     public Timer(LogManager logger){
         mIsRunning = false;

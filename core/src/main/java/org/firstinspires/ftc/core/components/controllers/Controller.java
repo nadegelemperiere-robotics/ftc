@@ -1,14 +1,51 @@
-/* -------------------------------------------------------
-   Copyright (c) [2025] Nadege LEMPERIERE
-   All rights reserved
-   -------------------------------------------------------
-   Gamepad extended management
-   ------------------------------------------------------- */
+/**
+ * -------------------------------------------------------
+ * Copyright (c) 2025 Nadege LEMPERIERE
+ * All rights reserved
+ * -------------------------------------------------------
+ * Controller class provides an abstraction layer for
+ * managing gamepad inputs, including buttons and axes.
+ * -------------------------------------------------------
+ * <p>
+ * This class extends the standard FTC Gamepad by:
+ * - Providing easy access to buttons and axes.
+ * - Implementing press and release detection for buttons.
+ * - Supporting scaling and deadzone adjustments for axes.
+ * - Allowing configuration storage via JSON.
+ * - Logging configuration details in both HTML and text formats.
+ * <p>
+ * Features:
+ * - Supports all FTC Gamepad buttons and axes.
+ * - Provides structured access via `buttons` and `axes` inner classes.
+ * - Configurable deadzone and scaling for analog inputs.
+ * - Edge detection for button press/release events.
+ * - Reads and writes configurations in JSON format.
+ * - Supports logging for debugging.
+ * <p>
+ * Dependencies:
+ * - Qualcomm Robotics SDK (Gamepad API)
+ * - JSON Processing (org.json)
+ * - Custom LogManager for logging
+ * <p>
+ * Usage:
+ * 1. Create a `Controller` instance linked to a `Gamepad`.
+ * 2. Access button states via `buttons.a.pressed()` etc.
+ * 3. Read joystick/trigger values via `axes.left_stick_x.value()`.
+ * 4. Store and retrieve configurations in JSON format.
+ * <p>
+ * Example:
+ * {@code
+ *      Controller controller = new Controller(gamepad1, logger);
+ * <p>
+ *      if (controller.buttons.a.pressedOnce()) {
+ *          // Action when button A is first pressed
+ *      }
+ * <p>
+ *      double joystickX = controller.axes.left_stick_x.value();
+ * }
+ */
 
 package org.firstinspires.ftc.core.components.controllers;
-
-/* System includes */
-import java.util.Map;
 
 /* JSON includes */
 import org.json.JSONException;
@@ -71,10 +108,10 @@ public class Controller implements Configurable {
 
     }
 
-    public  Buttons     buttons;
-    public  Axes        axes;
+    public  final   Buttons     buttons;
+    public  final   Axes        axes;
 
-            LogManager  mLogger;
+            final   LogManager  mLogger;
 
             boolean     mConfigurationValid;
 
@@ -136,13 +173,6 @@ public class Controller implements Configurable {
     public boolean isConfigured() {
         return mConfigurationValid;
     }
-
-    /**
-     * Manages registration
-     *
-     * @param topic : topic under which the object wa registered
-     */
-    public void register(String topic) {}
 
     /**
      * Configuration logging into HTML

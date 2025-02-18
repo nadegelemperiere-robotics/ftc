@@ -37,14 +37,20 @@ public class Robot extends Context implements Configurable {
     protected static final String      sHardwareKey   = "hardware";
     protected static final String      sSubsystemsKey = "subsystems";
 
-    protected LogManager                mLogger;
+    protected final LogManager              mLogger;
 
-    protected Map<String, Subsystem>    mSubsystems;
+    protected final Map<String, Subsystem>  mSubsystems;
 
-    protected boolean                   mConfigurationValid;
+    protected boolean                       mConfigurationValid;
 
-    protected Hardware                  mHardware;
+    protected final Hardware                mHardware;
 
+    /**
+     * Robot constructor
+     *
+     * @param map Hardware map to look for components
+     * @param logger Logger
+     */
     public  Robot(HardwareMap map, LogManager logger) {
         mLogger             = logger;
 
@@ -54,8 +60,14 @@ public class Robot extends Context implements Configurable {
         mSubsystems         = new LinkedHashMap<>();
     }
 
+    /**
+     * Robot start function
+     */
     public void                         start() {}
 
+    /**
+     * Robot update function updating all subsystems + current state
+     */
     public void                         update()
     {
         for (Map.Entry<String, Subsystem> subsystem : mSubsystems.entrySet()) {
@@ -64,9 +76,30 @@ public class Robot extends Context implements Configurable {
         super.update();
     }
 
+    /**
+     * Robot persist function, storing all subsystems interopmodes data to the InterOpMode singleton
+     */
+    public void                         persist()
+    {
+        for (Map.Entry<String, Subsystem> subsystem : mSubsystems.entrySet()) {
+            subsystem.getValue().persist();
+        }
+    }
+
+    /**
+     * Determines if the robot is configured correctly.
+     *
+     * @return True if the robot is configured, false otherwise.
+     */
     public boolean                      isConfigured() { return mConfigurationValid;}
 
-
+    /**
+     * Reads all subsystems declared in the JSON object. Relies on
+     * Default subsystem factory, so should be overloaded if using specific
+     * subsystems
+     *
+     * @param reader The JSON object containing configuration settings.
+     */
     public void                         read(JSONObject reader) {
 
         mConfigurationValid = true;
@@ -108,6 +141,11 @@ public class Robot extends Context implements Configurable {
 
     }
 
+    /**
+     * Writes the current robot configuration to a JSON object.
+     *
+     * @param writer The JSON object to store the configuration settings.
+     */
     public void                         write(JSONObject writer) {
 
         if(mConfigurationValid) {
@@ -131,6 +169,11 @@ public class Robot extends Context implements Configurable {
 
     }
 
+    /**
+     * Generates an HTML representation of the robot configuration for logging purposes.
+     *
+     * @return A string containing the HTML-formatted actuator configuration.
+     */
     public String                       logConfigurationHTML() {
         StringBuilder result = new StringBuilder();
 
@@ -158,6 +201,12 @@ public class Robot extends Context implements Configurable {
 
     }
 
+    /**
+     * Generates a text-based representation of the robot configuration for logging.
+     *
+     * @param header A string to prepend to the configuration log.
+     * @return A string containing the formatted robot configuration details.
+     */
     public String                       logConfigurationText(String header)
     {
         StringBuilder result = new StringBuilder();

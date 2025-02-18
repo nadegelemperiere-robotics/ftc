@@ -46,16 +46,16 @@ public class Hardware implements Configurable {
     static final String             sOdometersKey   = "odometers";
 
 
-    LogManager                      mLogger;
+    final LogManager                        mLogger;
 
-    boolean                         mConfigurationValid;
+    boolean                                 mConfigurationValid;
 
-    HardwareMap                     mMap;
+    final HardwareMap                       mMap;
 
-    Map<String, MotorComponent>     mMotors;
-    Map<String, ServoComponent>     mServos;
-    Map<String, ImuComponent>       mImus;
-    Map<String, OdometerComponent>  mOdometers;
+    final Map<String, MotorComponent>       mMotors;
+    final Map<String, ServoComponent>       mServos;
+    final Map<String, ImuComponent>         mImus;
+    final Map<String, OdometerComponent>    mOdometers;
 
     /**
      * Constructor

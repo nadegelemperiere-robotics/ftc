@@ -35,9 +35,9 @@ public class ServoCoupled implements ServoComponent {
     public static final String  sFirstKey  = "first";
     public static final String  sSecondKey = "second";
 
-    LogManager                  mLogger;
+    final LogManager            mLogger;
 
-    String                      mName;
+    final String                mName;
     String                      mFirstHwName;
     String                      mSecondHwName;
 
@@ -47,7 +47,7 @@ public class ServoCoupled implements ServoComponent {
 
     Servo.Direction             mDirection;
 
-    HardwareMap                 mMap;
+    final HardwareMap           mMap;
     Servo                       mFirst;
     Servo                       mSecond;
 

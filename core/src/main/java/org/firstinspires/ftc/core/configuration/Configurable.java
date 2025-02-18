@@ -18,28 +18,28 @@ public interface Configurable {
      *
      * @param reader : JSON object containing configuration
      */
-    public void read(JSONObject reader);
+    void read(JSONObject reader);
 
     /**
      * Writes configuration to a JSON object
      *
      * @param writer : JSON object to write configuration includes
      */
-    public void write(JSONObject writer);
+    void write(JSONObject writer);
 
     /**
      * Configuration checking
      *
      * @return true if object is correctly configured, false otherwise
      */
-    public boolean isConfigured();
+    boolean isConfigured();
 
     /**
      * Configuration logging into HTML
      *
      * @return configuration as html string
      */
-    public String logConfigurationHTML();
+    String logConfigurationHTML();
 
     /**
      * Configuration logging into string

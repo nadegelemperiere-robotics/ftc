@@ -44,7 +44,7 @@ public class Configuration {
     boolean                         mIsValid;
 
     // Registered configurables to read and write configuration
-    Map<String, Configurable>       mConfigRegistry;
+    final Map<String, Configurable> mConfigRegistry;
 
     // Loggers
     LogManager                      mLogger;

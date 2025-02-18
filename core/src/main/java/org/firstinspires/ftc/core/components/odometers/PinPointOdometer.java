@@ -38,29 +38,23 @@ public class PinPointOdometer implements OdometerComponent {
 
     static  final           double sInToMm            = 25.4;
 
-    LogManager                  mLogger;
+    final LogManager            mLogger;
 
     boolean                     mConfigurationValid;
 
-    String                      mName;
+    final String                mName;
     String                      mPinPointHwName;
 
-    HardwareMap                 mMap;
+    final HardwareMap           mMap;
     GoBildaPinpointDriverRR     mPinPoint;
 
-    Pose2d                      mInitialPose;
     Pose2d                      mCurrentPose;
-    Pose2d                      mRobotPose;
     PoseVelocity2d              mCurrentVelocity;
-    public LinkedList<Pose2d>   mPoseHistory;
+    final LinkedList<Pose2d>    mPoseHistory;
 
     double                      mXOffset;
     double                      mYOffset;
     double                      mEncoderResolution;
-
-    double                      mParYTicks;
-    double                      mPerpXTicks;
-    double                      mInPerTick;
 
     public  PinPointOdometer(String name, HardwareMap hwMap, LogManager logger) {
 
@@ -70,8 +64,8 @@ public class PinPointOdometer implements OdometerComponent {
         mName           = name;
         mPinPointHwName = "";
 
+        mMap             = hwMap;
         mPinPoint        = null;
-        mRobotPose       = new Pose2d(new Vector2d(0,0),0);
         mCurrentPose     = new Pose2d(new Vector2d(0,0),0);
         mCurrentVelocity = new PoseVelocity2d(new Vector2d(0, 0), 0);
         mPoseHistory     = new LinkedList<>();

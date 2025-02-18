@@ -72,9 +72,9 @@ public class MotorCoupled implements MotorComponent {
     public static final String  sFirstKey  = "first";
     public static final String  sSecondKey = "second";
 
-    LogManager                  mLogger;
+    final LogManager            mLogger;
 
-    String                      mName;
+    final String                mName;
     String                      mFirstHwName;
     String                      mSecondHwName;
 
@@ -82,7 +82,7 @@ public class MotorCoupled implements MotorComponent {
     
     DcMotorSimple.Direction     mDirection;
 
-    HardwareMap                 mMap;
+    final HardwareMap           mMap;
     DcMotorEx                   mFirst;
     DcMotorEx                   mSecond;
     int                         mFirstInvertPosition;

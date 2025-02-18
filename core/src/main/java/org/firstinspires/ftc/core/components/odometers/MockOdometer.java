@@ -8,11 +8,9 @@
 package org.firstinspires.ftc.core.components.odometers;
 
 /* JSON includes */
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /* ACME includes */
-import com.acmerobotics.roadrunner.MecanumKinematics;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -22,11 +20,11 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 public class MockOdometer implements OdometerComponent {
 
-    LogManager                  mLogger;
+    final LogManager            mLogger;
 
-    boolean                     mConfigurationValid;
+    final boolean               mConfigurationValid;
 
-    String                      mName;
+    final String                mName;
 
     Pose2d                      mInitialPose;
     Pose2d                      mCurrentPose;

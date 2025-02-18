@@ -20,17 +20,15 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 public class ServoSingle implements ServoComponent {
 
-    LogManager                  mLogger;
+    final LogManager            mLogger;
 
     boolean                     mConfigurationValid;
-    String                      mName;
+    final String                mName;
     String                      mHwName;
 
     ServoControllerComponent    mController;
 
-    Servo.Direction             mDirection;
-
-    HardwareMap                 mMap;
+    final HardwareMap           mMap;
     Servo                       mServo;
 
     /* -------------- Constructors --------------- */
@@ -47,7 +45,6 @@ public class ServoSingle implements ServoComponent {
 
         mController         = null;
         mServo              = null;
-        mDirection          = Servo.Direction.FORWARD;
 
     }
     /* --------------------- Custom functions ---------------------- */

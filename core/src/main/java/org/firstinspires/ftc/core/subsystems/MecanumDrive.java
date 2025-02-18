@@ -11,6 +11,7 @@ package org.firstinspires.ftc.core.subsystems;
 import java.util.Map;
 
 /* JSON object */
+import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,6 +20,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 /* ACME robotics includes */
 import com.acmerobotics.roadrunner.Rotation2d;
+import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 
 /* Tools includes */
@@ -32,13 +34,12 @@ import org.firstinspires.ftc.core.components.odometers.OdometerComponent;
 import org.firstinspires.ftc.core.robot.Hardware;
 
 
-public class MecanumDrive implements Subsystem {
+public class MecanumDrive extends Subsystem {
 
     enum Mode {
         FIELD_CENTRIC,
         ROBOT_CENTRIC
     }
-
 
     static final String             sPidfKey                    = "pidf";
     static final String             sPhysicsKey                 = "physics";
@@ -70,19 +71,19 @@ public class MecanumDrive implements Subsystem {
     static final String             sRobotCentricKey            = "robot-centric";
     static final String             sFieldCentricKey            = "field-centric";
 
-    LogManager                      mLogger;
+    final LogManager                mLogger;
 
     protected boolean               mConfigurationValid;
     boolean                         mHasFinished;
 
-    String                          mName;
+    final String                    mName;
     String                          mLeftFrontHwName;
     String                          mLeftBackHwName;
     String                          mRightFrontHwName;
     String                          mRightBackHwName;
     String                          mLocalizerHwName;
 
-    Hardware                        mHardware;
+    final Hardware                  mHardware;
     MotorComponent                  mLeftFront;
     MotorComponent                  mRightFront;
     MotorComponent                  mLeftBack;
@@ -109,7 +110,7 @@ public class MecanumDrive implements Subsystem {
 
     double                          mDrivingSpeedMultiplier;
     Mode                            mDrivingMode;
-    double                          mHeadingOffset;
+    Pose2d                          mInitialPose;
 
     public  MecanumDrive(String name, Hardware hardware, LogManager logger) {
 
@@ -152,57 +153,71 @@ public class MecanumDrive implements Subsystem {
         mHeadingGain            = 0;
         mHeadingVelocityGain    = 0;
 
+        // Reading initial position from interopmodes stored data if exist
+        mInitialPose = new Pose2d(new Vector2d(0,0),0);
+        Object pose = InterOpMode.instance().get(mName + "-pose");
+        if(pose != null) { mInitialPose = (Pose2d) pose; }
+
+    }
+
+    public void                         initialize(Pose2d pose) {
+        if(mConfigurationValid) { mInitialPose = pose; }
     }
 
     public boolean                      hasFinished() { return mHasFinished; }
 
     public void                         driveSpeedMultiplier(double multiplier) {
-        mDrivingSpeedMultiplier = multiplier;
+        if(mConfigurationValid) { mDrivingSpeedMultiplier = multiplier; }
     }
-
-    public double                       driveSpeedMultiplier()  { return mDrivingSpeedMultiplier; }
-
-    public void                         headingOffset(double offset) {
-        mHeadingOffset = offset;
-    }
-
-    public double                       headingOffset()  { return mHeadingOffset; }
 
     public void                         update() {
-        mLocalizer.update();
+        if(mConfigurationValid) { mLocalizer.update(); }
     }
 
     public void                         drive(double xSpeed, double ySpeed, double headingSpeed) {
 
-        double x = xSpeed;
-        double y = ySpeed;
+        double vx = xSpeed;
+        double vy = ySpeed;
 
         if(mConfigurationValid) {
 
             if (mDrivingMode == Mode.FIELD_CENTRIC) {
                 Rotation2d rotation = mLocalizer.pose().heading;
-                rotation = rotation.plus(mHeadingOffset);
+                rotation = rotation.times(mInitialPose.heading);
                 Vector2d robotcentric = rotation.times(new Vector2d(xSpeed, ySpeed));
-                x = robotcentric.x;
-                y = robotcentric.y;
+                vx = robotcentric.x;
+                vy = robotcentric.y;
             }
 
-            x *= 1.1; // Counteract imperfect strafing
+            vx *= 1.1; // Counteract imperfect strafing
 
             // Denominator is the largest motor power (absolute value) or 1
             // This ensures all the powers maintain the same ratio,
             // but only if at least one is out of the range [-1, 1]
 
-            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(headingSpeed), 1);
-            double frontLeftPower = (y + x + headingSpeed) / denominator * mDrivingSpeedMultiplier;
-            double backLeftPower = (y - x + headingSpeed) / denominator * mDrivingSpeedMultiplier;
-            double frontRightPower = (y - x - headingSpeed) / denominator * mDrivingSpeedMultiplier;
-            double backRightPower = (y + x - headingSpeed) / denominator * mDrivingSpeedMultiplier;
+            double denominator = Math.max(Math.abs(vy) + Math.abs(vx) + Math.abs(headingSpeed), 1);
+            double frontLeftPower = (vy + vx + headingSpeed) / denominator * mDrivingSpeedMultiplier;
+            double backLeftPower = (vy - vx + headingSpeed) / denominator * mDrivingSpeedMultiplier;
+            double frontRightPower = (vy - vx - headingSpeed) / denominator * mDrivingSpeedMultiplier;
+            double backRightPower = (vy + vx - headingSpeed) / denominator * mDrivingSpeedMultiplier;
 
             mLeftFront.power(frontLeftPower);
             mLeftBack.power(backLeftPower);
             mRightFront.power(frontRightPower);
             mRightBack.power(backRightPower);
+        }
+    }
+
+    /**
+     * Persist data to be able to keep the same behavior after a reinitialization.
+     * Read current heading and transform it into the FTC field coordinate system
+     */
+    public void                         persist()
+    {
+        if(mConfigurationValid) {
+            Pose2d current = mLocalizer.pose();
+            current = current.times(mInitialPose);
+            InterOpMode.instance().add(mName + "-pose", current);
         }
     }
 
@@ -222,6 +237,13 @@ public class MecanumDrive implements Subsystem {
     public void                         read(JSONObject reader) {
 
         mConfigurationValid     = true;
+
+        mLeftFront              = null;
+        mRightFront             = null;
+        mLeftBack               = null;
+        mRightBack              = null;
+        mLocalizer              = null;
+
         mInPerTick              = 1.0;
         mLatInPerTick           = 1.0;
         mTrackWidthTicks        = 0.0;

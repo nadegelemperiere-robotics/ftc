@@ -35,13 +35,13 @@ public class BooleanLogicOperator implements Configurable {
             );
 
     // Status
-    boolean                 mConfigurationValid;
+    boolean                         mConfigurationValid;
 
-    LogManager              mLogger;
+    final   LogManager              mLogger;
 
-    Map<Integer,JSONObject> mValues;
-    BooleanNode             mTree;
-    Integer                 mCurrentIndex;
+    final   Map<Integer,JSONObject> mValues;
+    BooleanNode                     mTree;
+    Integer                         mCurrentIndex;
 
 
 
@@ -107,7 +107,7 @@ public class BooleanLogicOperator implements Configurable {
 
         JSONObject object = new JSONObject();
         this.writeBooleanLogic(mTree,object);
-        return header + object.toString();
+        return header + object;
     }
 
     /**
@@ -343,15 +343,10 @@ class BooleanNode {
     }
 
     Operation           mOperation;
-    boolean             mIsVariable;
+    final   boolean     mIsVariable;
     Integer             mIndex;
     List<BooleanNode>   mChildren; // Children nodes
-
-    BooleanNode(Operation operation) {
-        mOperation = operation;
-        mIsVariable = false;
-    }
-
+    
     BooleanNode(Operation operation, List<BooleanNode> children) {
         mIsVariable = false;
         mOperation = operation;

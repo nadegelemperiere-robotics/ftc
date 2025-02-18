@@ -30,15 +30,15 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.core.tools.LogManager;
 
 /* Orchestration includes */
-import org.firstinspires.ftc.core.orchestration.engine.Mock;
+import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 
 public class MotorMock implements MotorComponent {
 
-    LogManager                  mLogger;
+    final LogManager            mLogger;
 
-    boolean                     mConfigurationValid;
+    final boolean               mConfigurationValid;
 
-    String                      mName;
+    final String                mName;
 
     DcMotor.Direction           mDirection;
 
@@ -94,7 +94,7 @@ public class MotorMock implements MotorComponent {
     public String                       logConfigurationHTML() { return "<p>Mock</p>\n"; }
 
     @Override
-    public String                       logConfigurationText(String header) {   return header + "> Mock\n"; }
+    public String                       logConfigurationText(String header) {   return header + "> MockF\n"; }
 
     /* --------------------- DcMotor functions --------------------- */
 
@@ -121,12 +121,7 @@ public class MotorMock implements MotorComponent {
 
     @Override
     public void	                        mode(DcMotor.RunMode mode) {
-        switch(mode) {
-            case RUN_TO_POSITION: Mock.instance().mMockedComponents.put(mName + "-mode", 0.0); break;
-            case RUN_USING_ENCODER: Mock.instance().mMockedComponents.put(mName + "-mode", 1.0); break;
-            case RUN_WITHOUT_ENCODER: Mock.instance().mMockedComponents.put(mName + "-mode", 2.0); break;
-        }
-
+        InterOpMode.instance().add(mName + "-mode", mode);
         mMode = mode;
     }
 
@@ -135,7 +130,7 @@ public class MotorMock implements MotorComponent {
 
     @Override
     public void	                        targetPosition(int position) {
-        Mock.instance().mMockedComponents.put(mName + "-position",(double)position);
+        InterOpMode.instance().add(mName + "-position",position);
         mPosition = position;
     }
 
@@ -144,7 +139,7 @@ public class MotorMock implements MotorComponent {
 
     @Override
     public void	                        power(double power) {
-        Mock.instance().mMockedComponents.put(mName + "-power",power);
+        InterOpMode.instance().add(mName + "-power",power);
         mPower = power;
     }
 

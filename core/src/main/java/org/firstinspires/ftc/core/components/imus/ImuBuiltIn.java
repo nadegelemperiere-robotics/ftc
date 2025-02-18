@@ -79,7 +79,7 @@ public class ImuBuiltIn implements ImuComponent {
     static final String sLogoDirectionKey  = "logo-direction";
     static final String sUsbDirectionKey   = "usb-direction";
 
-    Map<String, RevHubOrientationOnRobot.LogoFacingDirection> sString2LogoFacing = Map.of(
+    static final Map<String, RevHubOrientationOnRobot.LogoFacingDirection> sString2LogoFacing = Map.of(
             "up", RevHubOrientationOnRobot.LogoFacingDirection.UP,
             "down",RevHubOrientationOnRobot.LogoFacingDirection.DOWN,
             "right",RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
@@ -87,7 +87,7 @@ public class ImuBuiltIn implements ImuComponent {
             "backward",RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
             "forward",RevHubOrientationOnRobot.LogoFacingDirection.FORWARD
     );
-    Map<RevHubOrientationOnRobot.LogoFacingDirection, String> sLogoFacing2String = Map.of(
+    static final Map<RevHubOrientationOnRobot.LogoFacingDirection, String> sLogoFacing2String = Map.of(
             RevHubOrientationOnRobot.LogoFacingDirection.UP,      "up",
             RevHubOrientationOnRobot.LogoFacingDirection.DOWN,    "down",
             RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,   "right",
@@ -96,7 +96,7 @@ public class ImuBuiltIn implements ImuComponent {
             RevHubOrientationOnRobot.LogoFacingDirection.FORWARD, "forward"
     );
 
-    Map<String, RevHubOrientationOnRobot.UsbFacingDirection> sString2UsbFacing = Map.of(
+    static final Map<String, RevHubOrientationOnRobot.UsbFacingDirection> sString2UsbFacing = Map.of(
             "up", RevHubOrientationOnRobot.UsbFacingDirection.UP,
             "down",RevHubOrientationOnRobot.UsbFacingDirection.DOWN,
             "right",RevHubOrientationOnRobot.UsbFacingDirection.RIGHT,
@@ -104,7 +104,7 @@ public class ImuBuiltIn implements ImuComponent {
             "backward",RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD,
             "forward",RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
     );
-    Map<RevHubOrientationOnRobot.UsbFacingDirection, String> sUsbFacing2String = Map.of(
+    static final Map<RevHubOrientationOnRobot.UsbFacingDirection, String> sUsbFacing2String = Map.of(
             RevHubOrientationOnRobot.UsbFacingDirection.UP,         "up",
             RevHubOrientationOnRobot.UsbFacingDirection.DOWN,       "down",
             RevHubOrientationOnRobot.UsbFacingDirection.RIGHT,      "right",
@@ -113,13 +113,13 @@ public class ImuBuiltIn implements ImuComponent {
             RevHubOrientationOnRobot.UsbFacingDirection.FORWARD,"forward"
     );
 
-    LogManager                                      mLogger;
+    final LogManager                                mLogger;
 
     boolean                                         mConfigurationValid;
-    String                                          mName;
+    final String                                    mName;
     String                                          mHwName;
 
-    HardwareMap                                     mMap;
+    final HardwareMap                               mMap;
     IMU                                             mImu;
     RevHubOrientationOnRobot.LogoFacingDirection    mLogo;
     RevHubOrientationOnRobot.UsbFacingDirection     mUsb;

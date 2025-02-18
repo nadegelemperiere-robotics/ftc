@@ -15,13 +15,13 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 public class ServoControllerSingle implements ServoControllerComponent {
 
-    LogManager              mLogger;
+    final LogManager        mLogger;
 
     boolean                 mConfigurationValid;
 
-    String                  mName;
+    final String            mName;
 
-    ServoController         mController;
+    final ServoController   mController;
 
     /* -------------- Constructors --------------- */
     public ServoControllerSingle(ServoController controller, String name, LogManager logger)

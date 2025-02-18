@@ -16,14 +16,14 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 public class ServoControllerCoupled implements ServoControllerComponent {
 
-    LogManager              mLogger;
+    final LogManager        mLogger;
 
     boolean                 mConfigurationValid;
 
-    String                  mName;
+    final String            mName;
 
-    ServoController         mFirst;
-    ServoController         mSecond;
+    final ServoController   mFirst;
+    final ServoController   mSecond;
 
     /* -------------- Constructors --------------- */
     public ServoControllerCoupled(ServoController first, ServoController second, String name, LogManager logger)

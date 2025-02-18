@@ -29,36 +29,39 @@ import org.firstinspires.ftc.core.components.servos.ServoComponent;
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;
 
-public class Actuator implements Subsystem {
+/* Orchestration includes */
+import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 
-    static final public String sMotorKey = "motor";
-    static final public String sServoKey = "servo";
-    static final public String sPositionsKey = "positions";
-    static final public String sPowersKey = "powers";
-    static final public String sSetPositionKey = "set-position";
-    static final public String sHoldPositionKey = "hold-position";
+public class Actuator extends Subsystem {
 
-    protected LogManager mLogger;
+    public static final String sMotorKey = "motor";
+    public static final String sServoKey = "servo";
+    public static final String sPositionsKey = "positions";
+    public static final String sPowersKey = "powers";
+    public static final String sSetPositionKey = "set-position";
+    public static final String sHoldPositionKey = "hold-position";
 
-    protected boolean mConfigurationValid;
-    boolean mHasFinished;
+    protected final LogManager          mLogger;
 
-    String mName;
-    String mHwName;
+    protected boolean                   mConfigurationValid;
+    boolean                             mHasFinished;
 
-    protected Hardware mHardware;
-    protected MotorComponent mMotor;
-    protected ServoComponent mServo;
+    final String                        mName;
+    String                              mHwName;
 
-    protected Map<String, Double> mPositions;
-    protected String mPosition;
+    protected final Hardware            mHardware;
+    protected MotorComponent            mMotor;
+    protected ServoComponent            mServo;
 
-    Timer mTimer;
+    protected final Map<String, Double> mPositions;
+    protected String                    mPosition;
 
-    double mTolerance;
-    protected double mOffset;
-    double mSetPositionPower;
-    double mHoldPositionPower;
+    final Timer                         mTimer;
+
+    double                              mTolerance;
+    protected double                    mOffset;
+    double                              mSetPositionPower;
+    double                              mHoldPositionPower;
 
     /**
      * Constructor
@@ -88,7 +91,12 @@ public class Actuator implements Subsystem {
         mSetPositionPower   = 1.0;
         mHoldPositionPower  = 0.0;
         mTolerance          = 0.0;
+
+        // Reading offset from interopmodes stored data if exist
         mOffset             = 0.0;
+        Object offset = InterOpMode.instance().get(mName + "-offset");
+        if(offset != null) { mOffset = (double) offset; }
+
 
     }
 
@@ -99,24 +107,6 @@ public class Actuator implements Subsystem {
      */
     public boolean hasFinished() {
         return mHasFinished;
-    }
-
-    /**
-     * Sets the current position offset from the reference position to the real robot state
-     *
-     * @param offset the offset in ticks
-     */
-    public void offset(double offset) {
-        mOffset = offset;
-    }
-
-    /**
-     * Returns the current position offset from the reference position to the real robot state
-     *
-     * @return the offset in ticks
-     */
-    public double offset() {
-        return mOffset;
     }
 
     /**
@@ -158,11 +148,11 @@ public class Actuator implements Subsystem {
         if( mMotor != null && mPositions.containsKey(position) && mConfigurationValid && this.hasFinished()) {
 
             mMotor.targetPositionTolerance(tolerance);
-            mTolerance = ((double)tolerance);
+            mTolerance = tolerance;
 
             Double target = mPositions.get(position);
             if(target != null) {
-                mMotor.targetPosition((int)((double)target - mOffset));
+                mMotor.targetPosition((int)(target - mOffset));
                 mMotor.mode(DcMotor.RunMode.RUN_TO_POSITION);
                 mHasFinished = false;
                 mMotor.power(mSetPositionPower);
@@ -182,9 +172,30 @@ public class Actuator implements Subsystem {
     }
 
     /**
+     * Persist data to be able to keep the same behavior after a reinitialization.
+     * If the motor is stopped in a position that is not its 0, next OpMode, it will
+     * Restart as if the current position was its 0. Therefore, all the registered
+     * positions will be offseted. We store the current position to remember that
+     * a motor 0 now corresponds to this position
+     */
+    @Override
+    public void                         persist()
+    {
+        if(mMotor != null) {
+            // Now the 0 position in actuator reference will correspond to the previous offset + the current position
+            // Example :
+            // - Stopping first at a motor position of 320
+            // - Storing offset = 320 then reset motor to 0 -> Now accessing position 0 means asking motor for position -320
+            // - Stopping a second time at motor position of -320
+            // - Storing offset +320 -320 = 0 -> Accessing position 0 is now back to asking motor position 0
+            InterOpMode.instance().add(mName + "-offset", mOffset + (double)mMotor.currentPosition());
+        }
+    }
+
+    /**
      * Determines if the actuator subsystem is configured correctly.
      *
-     * @return True if the component is configured, false otherwise.
+     * @return True if the actuator is configured, false otherwise.
      */
     @Override
     public boolean                      isConfigured() { return mConfigurationValid;}

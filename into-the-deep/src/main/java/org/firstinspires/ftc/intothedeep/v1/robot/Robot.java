@@ -18,6 +18,10 @@ import org.json.JSONObject;
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+/* ACME robotics includes */
+import com.acmerobotics.roadrunner.Pose2d;
+
+/* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
 /* Subsystem includes */
@@ -30,13 +34,19 @@ import org.firstinspires.ftc.intothedeep.v1.subsystems.Subsystem;
 
 public class Robot extends org.firstinspires.ftc.core.robot.Robot {
 
+    public enum Mode {
+        TELEOP,
+        AUTO_SAMPLE,
+        AUTO_SPECIMEN
+    }
+
     static final String sIntakeArmKey       = "intake-arm";
     static final String sIntakeSlidesKey    = "intake-slides";
     static final String sOuttakeArmKey      = "outtake-arm";
     static final String sOuttakeSlidesKey   = "outtake-slides";
     static final String sChassisKey         = "drive-train";
 
-    RobotState.SharedData  mData;
+    final RobotState.SharedData  mData;
 
     /**
      * Constructs a season robot instance.
@@ -49,12 +59,6 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
         mData  = new RobotState.SharedData();
     }
 
-    /**
-     * Returns current state
-     *
-     * @return the current robot state
-     */
-    public String   state() { return mState.getClass().getSimpleName(); }
 
     /* ---------------------- TeleOp commands ---------------------- */
     public void drive(double x, double y, double heading)   { ((RobotState)mState).drive(x,y,heading); }
@@ -71,14 +75,30 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
     public void toggleIntakeWrist()                         { ((RobotState)mState).toggleIntakeWrist(); }
 
     /* --------------------- States management --------------------- */
-    public void transfer()                                  { this.mState = ((RobotState)mState).toTransfer(); }
-    public void pick()                                      { this.mState = ((RobotState)mState).toPick(); }
+    /**
+     * Returns current state
+     *
+     * @return the current robot state
+     */
+    public String   state()                                 { return mState.getClass().getSimpleName(); }
+
+    public void     transfer()                              { this.mState = ((RobotState)mState).toTransfer(); }
+    public void     pick()                                  { this.mState = ((RobotState)mState).toPick(); }
 
     /**
      * Starts the robot in initial position
      */
-    public void                         start() {
-        mState = new InitState((RobotState.SharedData)mData, mLogger);
+    public void                         start(Mode mode, Pose2d pose) {
+        if(mConfigurationValid) {
+            super.start();
+            if(pose != null) { mData.chassis.initialize(pose); }
+            switch (mode) {
+                case TELEOP: mState = new InitState(mData, mLogger); break;
+                case AUTO_SAMPLE: mState = new AutonomousSampleState(mData, mLogger); break;
+                case AUTO_SPECIMEN: mState = new AutonomousSpecimenState(mData, mLogger); break;
+            }
+        }
+
     }
 
     /* ------------------ Configurable functions ------------------- */
@@ -88,13 +108,11 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
         mConfigurationValid = true;
         mSubsystems.clear();
 
-        RobotState.SharedData data = (RobotState.SharedData)mData;
-
-        data.chassis       = null;
-        data.intakeArm     = null;
-        data.outtakeArm    = null;
-        data.intakeSlides  = null;
-        data.outtakeSlides = null;
+        mData.chassis       = null;
+        mData.intakeArm     = null;
+        mData.outtakeArm    = null;
+        mData.intakeSlides  = null;
+        mData.outtakeSlides = null;
 
         try {
             if(reader.has(sHardwareKey)) {
@@ -134,52 +152,52 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
             if(subsystem.getKey().equals(sChassisKey)) {
                 org.firstinspires.ftc.core.subsystems.Subsystem chassis = subsystem.getValue();
                 if (chassis instanceof MecanumDrive) {
-                    data.chassis = (MecanumDrive) chassis;
+                    mData.chassis = (MecanumDrive) chassis;
                 }
             }
             if(subsystem.getKey().equals(sIntakeArmKey)) {
                 org.firstinspires.ftc.core.subsystems.Subsystem arm = subsystem.getValue();
                 if (arm instanceof IntakeArm) {
-                    data.intakeArm = (IntakeArm) arm;
+                    mData.intakeArm = (IntakeArm) arm;
                 }
             }
             if(subsystem.getKey().equals(sIntakeSlidesKey)) {
                 org.firstinspires.ftc.core.subsystems.Subsystem slides = subsystem.getValue();
                 if (slides instanceof DefaultSlides) {
-                    data.intakeSlides = (DefaultSlides) slides;
+                    mData.intakeSlides = (DefaultSlides) slides;
                 }
             }
             if(subsystem.getKey().equals(sOuttakeSlidesKey)) {
                 org.firstinspires.ftc.core.subsystems.Subsystem slides = subsystem.getValue();
                 if (slides instanceof DefaultSlides) {
-                    data.outtakeSlides = (DefaultSlides) slides;
+                    mData.outtakeSlides = (DefaultSlides) slides;
                 }
             }
             if(subsystem.getKey().equals(sOuttakeArmKey)) {
                 org.firstinspires.ftc.core.subsystems.Subsystem arm = subsystem.getValue();
                 if (arm instanceof OuttakeArm) {
-                    data.outtakeArm = (OuttakeArm) arm;
+                    mData.outtakeArm = (OuttakeArm) arm;
                 }
             }
         }
 
-        if(data.chassis == null) {
+        if(mData.chassis == null) {
             mLogger.error("Chassis not found in subsystems");
             mConfigurationValid = false;
         }
-        if(data.intakeArm == null) {
+        if(mData.intakeArm == null) {
             mLogger.error("Intake arm not found in subsystems");
             mConfigurationValid = false;
         }
-        if(data.intakeSlides == null) {
+        if(mData.intakeSlides == null) {
             mLogger.error("Intake slides not found in subsystems");
             mConfigurationValid = false;
         }
-        if(data.outtakeArm == null) {
+        if(mData.outtakeArm == null) {
             mLogger.error("Outtake arm not found in subsystems");
             mConfigurationValid = false;
         }
-        if(data.outtakeSlides == null) {
+        if(mData.outtakeSlides == null) {
             mLogger.error("Outtake slides not found in subsystems");
             mConfigurationValid = false;
         }

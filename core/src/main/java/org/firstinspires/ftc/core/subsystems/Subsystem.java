@@ -19,12 +19,11 @@ import org.firstinspires.ftc.core.configuration.Configurable;
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;
 
+public abstract class Subsystem implements Configurable {
 
-public interface Subsystem extends Configurable {
+    protected static final String sTypeKey = "type";
 
-    String sTypeKey = "type";
-
-    static Subsystem   factory(String name, JSONObject reader, Hardware hardware, LogManager logger) {
+    public static Subsystem   factory(String name, JSONObject reader, Hardware hardware, LogManager logger) {
         Subsystem result = null;
         try {
             if (reader.has(sTypeKey)) {
@@ -54,11 +53,11 @@ public interface Subsystem extends Configurable {
         return result;
     }
 
-    void    update();
-    boolean hasFinished();
+    /* ----------------------- Task management --------------------- */
+    public void    update() {}
+    public boolean hasFinished() { return true; }
 
-
-
-
+    /* ------------ Inter OpModes persistence management ----------- */
+    public void    persist() {}
 
 }
