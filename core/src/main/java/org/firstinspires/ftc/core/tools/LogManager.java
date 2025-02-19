@@ -507,6 +507,7 @@ public class LogManager implements Configurable {
             for (Map.Entry<String, String> metric : Objects.requireNonNull(mMetrics.get(target)).entrySet()) {
                 mDriverStation.addLine(metric.getKey() + " : " + metric.getValue());
             }
+            if(mMetrics.get(target).isEmpty()) { mDriverStation.addLine(""); }
             mDriverStation.addLine("---------- INFOS ----------");
             mDriverStation.addLine(Objects.requireNonNull(mInfos.get(Target.DRIVER_STATION)).toString());
             mDriverStation.addLine("---------- DEBUGS ---------");
@@ -644,9 +645,32 @@ public class LogManager implements Configurable {
             this.clear(target);
         }
     }
+    /**
+     * Reset all logs for a specific sink - persisted ones are lost
+     *
+     * @param target the target log sink
+     */
+    public void reset(Target target) {
+        mErrors.put(target,new StringBuilder());
+        mWarnings.put(target,new StringBuilder());
+        mInfos.put(target,new StringBuilder());
+        mDebugs.put(target,new StringBuilder());
+        mTraces.put(target,new StringBuilder());
+        mMetrics.put(target, new LinkedHashMap<>());
+    }
 
     /**
-     * Clear logs for all sinks - persisted ones are not lost
+     * Reset logs for all sinks - persisted ones are lost
+     */
+    public void reset() {
+        for(Target target : Target.values()) {
+            this.reset(target);
+        }
+    }
+
+
+    /**
+     * stop logging for all sinks - last ones are flushed
      */
     public void stop() {
         for(Target target : Target.values()) {
@@ -675,7 +699,7 @@ public class LogManager implements Configurable {
 
             StackTraceElement element = Thread.currentThread().getStackTrace()[3]; // Get caller
 
-            result = Logger.getLogger(element.getFileName());
+            result = Logger.getLogger(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")));
             FileHandler fileHandler = new FileHandler(filepath+".%g",1000000,2, true); // Append mode
             SimpleFormatter formatter = new SimpleFormatter() {
                 private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -720,7 +744,9 @@ public class LogManager implements Configurable {
                             .append("<li style=\"color: red; margin-left:30px; list-style-type: square; font-size: ")
                             .append(sErrorFontSize)
                             .append("px\">")
-                            .append(element.getFileName())
+                            .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
+                            .append(".")
+                            .append(element.getMethodName())
                             .append(":")
                             .append(String.format("%04d", element.getLineNumber()))
                             .append(" - error - ")
@@ -730,7 +756,9 @@ public class LogManager implements Configurable {
                     break;
                 case DRIVER_STATION:
                     Objects.requireNonNull(mErrors.get(target))
-                            .append(element.getFileName())
+                            .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
+                            .append(".")
+                            .append(element.getMethodName())
                             .append(":")
                             .append(String.format("%04d", element.getLineNumber()))
                             .append(" - error - ")
@@ -739,8 +767,10 @@ public class LogManager implements Configurable {
                     break;
                 case FILE:
                     if (mFile != null) {
-                        String local = element.getFileName() +
-                                ":" +
+                        String local = element.getFileName().substring(0, element.getFileName().lastIndexOf(".")) +
+                                "." +
+                                element.getMethodName() +
+                                " : " +
                                 String.format("%04d", element.getLineNumber()) +
                                 " - error - " +
                                 message;
@@ -772,7 +802,9 @@ public class LogManager implements Configurable {
                             .append("<li style=\"color: orange; margin-left:30px; list-style-type: square; font-size: ")
                             .append(sWarningFontSize)
                             .append("px\">")
-                            .append(element.getFileName())
+                            .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
+                            .append(".")
+                            .append(element.getMethodName())
                             .append(":")
                             .append(String.format("%04d", element.getLineNumber()))
                             .append(" - ")
@@ -782,7 +814,9 @@ public class LogManager implements Configurable {
                     break;
                 case DRIVER_STATION:
                     Objects.requireNonNull(mWarnings.get(target))
-                            .append(element.getFileName())
+                            .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
+                            .append(".")
+                            .append(element.getMethodName())
                             .append(":")
                             .append(String.format("%04d", element.getLineNumber()))
                             .append(" - warn - ")
@@ -791,7 +825,9 @@ public class LogManager implements Configurable {
                     break;
                 case FILE:
                     if (mFile != null) {
-                        String local = element.getFileName() +
+                        String local = element.getFileName().substring(0, element.getFileName().lastIndexOf(".")) +
+                                "." +
+                                element.getMethodName() +
                                 ":" +
                                 String.format("%04d", element.getLineNumber()) +
                                 " - " +
@@ -832,8 +868,10 @@ public class LogManager implements Configurable {
                     break;
                 case FILE:
                     if (mFile != null) {
-                        String local = element.getFileName() +
-                                ":" +
+                        String local = element.getFileName().substring(0, element.getFileName().lastIndexOf(".")) +
+                                "." +
+                                element.getMethodName() +
+                                " : " +
                                 String.format("%04d", element.getLineNumber()) +
                                 " - metric - " +
                                 metric + " : " + value;
@@ -862,21 +900,26 @@ public class LogManager implements Configurable {
                 case DASHBOARD:
                     if (mDashboard != null) {
                         Objects.requireNonNull(mInfos.get(target))
-                                .append("<p style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
+                                .append("<li style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
                                 .append(sInfoFontSize)
                                 .append("px\">")
-                                .append(element.getFileName())
+                                .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
+                                .append(".")
+                                .append(element.getMethodName())
                                 .append(":")
                                 .append(String.format("%04d", element.getLineNumber()))
                                 .append(" - ")
                                 .append(message)
-                                .append("</p>");
+                                .append("</li>")
+                                .append("\n");
                     }
                     break;
                 case DRIVER_STATION:
                     if (mDriverStation != null) {
                         Objects.requireNonNull(mInfos.get(target))
-                                .append(element.getFileName())
+                                .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
+                                .append(".")
+                                .append(element.getMethodName())
                                 .append(":")
                                 .append(String.format("%04d", element.getLineNumber()))
                                 .append(" - info - ")
@@ -886,7 +929,9 @@ public class LogManager implements Configurable {
                     break;
                 case FILE:
                     if (mFile != null) {
-                        String local = element.getFileName() +
+                        String local = element.getFileName().substring(0, element.getFileName().lastIndexOf(".")) +
+                                "." +
+                                element.getMethodName() +
                                 ":" +
                                 String.format("%04d", element.getLineNumber()) +
                                 " - info - " +
@@ -916,21 +961,26 @@ public class LogManager implements Configurable {
                 case DASHBOARD:
                     if (mDashboard != null) {
                         Objects.requireNonNull(mDebugs.get(target))
-                                .append("<p style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
+                                .append("<li style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
                                 .append(sInfoFontSize)
                                 .append("px\">")
-                                .append(element.getFileName())
+                                .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
+                                .append(".")
+                                .append(element.getMethodName())
                                 .append(":")
                                 .append(String.format("%04d", element.getLineNumber()))
                                 .append(" - ")
                                 .append(message)
-                                .append("</p>");
+                                .append("</li>")
+                                .append("\n");
                     }
                     break;
                 case DRIVER_STATION:
                     if (mDriverStation != null) {
                         Objects.requireNonNull(mDebugs.get(target))
-                                .append(element.getFileName())
+                                .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
+                                .append(".")
+                                .append(element.getMethodName())
                                 .append(":")
                                 .append(String.format("%04d", element.getLineNumber()))
                                 .append(" - debug - ")
@@ -940,7 +990,9 @@ public class LogManager implements Configurable {
                     break;
                 case FILE:
                     if (mFile != null) {
-                        String local = element.getFileName() +
+                        String local = element.getFileName().substring(0, element.getFileName().lastIndexOf(".")) +
+                                "." +
+                                element.getMethodName() +
                                 ":" +
                                 String.format("%04d", element.getLineNumber()) +
                                 " - debug - " +
@@ -970,21 +1022,26 @@ public class LogManager implements Configurable {
                 case DASHBOARD:
                     if (mDashboard != null) {
                         Objects.requireNonNull(mTraces.get(target))
-                                .append("<p style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
+                                .append("<li style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
                                 .append(sInfoFontSize)
                                 .append("px\">")
-                                .append(element.getFileName())
+                                .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
+                                .append(".")
+                                .append(element.getMethodName())
                                 .append(":")
                                 .append(String.format("%04d", element.getLineNumber()))
                                 .append(" - ")
                                 .append(message)
-                                .append("</p>");
+                                .append("</li>")
+                                .append("\n");
                     }
                     break;
                 case DRIVER_STATION:
                     if (mDriverStation != null) {
                         Objects.requireNonNull(mTraces.get(target))
-                                .append(element.getFileName())
+                                .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
+                                .append(".")
+                                .append(element.getMethodName())
                                 .append(":")
                                 .append(String.format("%04d", element.getLineNumber()))
                                 .append(" - trace - ")
@@ -994,7 +1051,9 @@ public class LogManager implements Configurable {
                     break;
                 case FILE:
                     if (mFile != null) {
-                        String local = element.getFileName() +
+                        String local = element.getFileName().substring(0, element.getFileName().lastIndexOf(".")) +
+                                "." +
+                                element.getMethodName() +
                                 ":" +
                                 String.format("%04d", element.getLineNumber()) +
                                 " - trace - " +

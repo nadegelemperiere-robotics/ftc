@@ -7,9 +7,6 @@
 
 package org.firstinspires.ftc.core.components.odometers;
 
-/* System includes */
-import java.util.LinkedList;
-
 /* JSON includes */
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,7 +47,6 @@ public class PinPointOdometer implements OdometerComponent {
 
     Pose2d                      mCurrentPose;
     PoseVelocity2d              mCurrentVelocity;
-    final LinkedList<Pose2d>    mPoseHistory;
 
     double                      mXOffset;
     double                      mYOffset;
@@ -61,14 +57,13 @@ public class PinPointOdometer implements OdometerComponent {
         mLogger             = logger;
         mConfigurationValid = false;
 
-        mName           = name;
-        mPinPointHwName = "";
+        mName               = name;
+        mPinPointHwName     = "";
 
-        mMap             = hwMap;
-        mPinPoint        = null;
-        mCurrentPose     = new Pose2d(new Vector2d(0,0),0);
-        mCurrentVelocity = new PoseVelocity2d(new Vector2d(0, 0), 0);
-        mPoseHistory     = new LinkedList<>();
+        mMap                = hwMap;
+        mPinPoint           = null;
+        mCurrentPose        = new Pose2d(new Vector2d(0,0),0);
+        mCurrentVelocity    = new PoseVelocity2d(new Vector2d(0, 0), 0);
 
     }
 
@@ -89,12 +84,6 @@ public class PinPointOdometer implements OdometerComponent {
             mCurrentPose = mPinPoint.getPositionRR();
             mCurrentVelocity = mPinPoint.getVelocityRR();
 
-            // RR standard
-            mPoseHistory.add(mCurrentPose);
-            while (mPoseHistory.size() > 100) {
-                mPoseHistory.removeFirst();
-            }
-
         }
     }
 
@@ -103,19 +92,20 @@ public class PinPointOdometer implements OdometerComponent {
 
     @Override
     public PoseVelocity2d   velocity() { return mCurrentVelocity;    }
-
+    
     @Override
     public void             log() {
         if (mConfigurationValid) {
-            mLogger.metric("x",mCurrentPose.position.x + " inches");
-            mLogger.metric("y",mCurrentPose.position.y + " inches");
-            mLogger.metric("heading",mCurrentPose.heading.toDouble() + " rad");
+            mLogger.metric(mName + "-x", mCurrentPose.position.x + " inches");
+            mLogger.metric(mName + "-y", mCurrentPose.position.y + " inches");
+            mLogger.metric(mName + "-heading", mCurrentPose.heading.toDouble() + " rad");
 
-            mLogger.metric("vx",mCurrentVelocity.linearVel.x + " inches/s");
-            mLogger.metric("vy",mCurrentVelocity.linearVel.y + " inches/s");
-            mLogger.metric("vheading",mCurrentVelocity.angVel + " rad/s");
+            mLogger.metric(mName + "-vx",mCurrentVelocity.linearVel.x + " inches/s");
+            mLogger.metric(mName + "-vy",mCurrentVelocity.linearVel.y + " inches/s");
+            mLogger.metric(mName + "-vheading",mCurrentVelocity.angVel + " rad/s");
         }
     }
+
 
     /* ------------------ Configurable functions ------------------- */
 

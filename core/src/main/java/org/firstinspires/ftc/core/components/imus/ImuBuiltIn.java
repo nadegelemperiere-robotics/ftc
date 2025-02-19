@@ -54,6 +54,7 @@ package org.firstinspires.ftc.core.components.imus;
 import java.util.Map;
 
 /* JSON includes */
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -144,19 +145,6 @@ public class ImuBuiltIn implements ImuComponent {
         mHeadingOffset = 0;
     }
 
-    /**
-     * Retrieves the configured heading offset.
-     *
-     * @return The current heading offset in radians.
-     */
-    public double                       headingOffset() { return mHeadingOffset; }
-
-    /**
-     * Sets the heading offset for the IMU.
-     *
-     * @param offset The heading offset in radians.
-     */
-    public void                         headingOffset(double offset) { mHeadingOffset = offset; }
 
     /**
      * Retrieves the name of the IMU component.
@@ -164,6 +152,20 @@ public class ImuBuiltIn implements ImuComponent {
      * @return The name of the component.
      */
     public String                       name() { return mName; }
+
+    /**
+     * Logs the current imu yaw, pitch and roll.
+     *
+     * @return A formatted string containing imu telemetry data.
+     */
+    public String                       log() {
+        String result = "";
+        if(mConfigurationValid) {
+            YawPitchRollAngles orientation = mImu.getRobotYawPitchRollAngles();
+            result += "\n Y : " + orientation.getYaw(AngleUnit.DEGREES) + " P : " + orientation.getPitch(AngleUnit.DEGREES) + " R : " + orientation.getRoll(AngleUnit.DEGREES);
+        }
+        return result;
+    }
 
     /**
      * Retrieves the current heading (yaw angle) of the robot in radians.

@@ -8,7 +8,6 @@
 package org.firstinspires.ftc.core.subsystems;
 
 /* System includes */
-import java.util.Iterator;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -24,7 +23,6 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 /* ACME robotics includes */
-import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.Vector2d;
 
 /* Tools includes */
@@ -38,64 +36,58 @@ import org.firstinspires.ftc.core.components.odometers.OdometerComponent;
 import org.firstinspires.ftc.core.robot.Hardware;
 
 
-public class TankDrive extends Subsystem {
+public class TankDrive extends DriveTrain {
 
+    static final String sLeftKey                    = "left";
+    static final String sRightKey                   = "right";
+    static final String sInPerTickKey               = "in-per-tick";
+    static final String sTrackWidthTicksKey         = "track-width-ticks";
+    static final String sMaxWheelVelocityKey        = "max-wheel-velocity";
+    static final String sMinProfileAccelerationKey  = "min-profile-acceleration";
+    static final String sMaxProfileAccelerationKey  = "max-profile-acceleration";
+    static final String sMaxHeadingVelocityKey      = "max-heading-velocity";
+    static final String sMaxHeadingAccelerationKey  = "max-heading-acceleration";
+    static final String sKsKey                      = "ks";
+    static final String sKvKey                      = "kv";
+    static final String sKaKey                      = "ka";
+    static final String sRamseteZetaKey             = "ramsete-zeta";
+    static final String sRamseteBBArKey             = "ramsete-bbar";
+    static final String sTurnGainKey                = "turn-gain";
+    static final String sTurnVelocityGainKey        = "turn-velocity-gain";
 
-    static final String sPidfKey = "pidf";
-    static final String sPhysicsKey = "physics";
-    static final String sMotorsKey = "motors";
-    static final String sOdometerKey = "odometer";
-    static final String sLeftKey = "left";
-    static final String sRightKey = "right";
-    static final String sInPerTickKey = "in-per-tick";
-    static final String sTrackWidthTicksKey = "track-width-ticks";
-    static final String sMaxWheelVelocityKey = "max-wheel-velocity";
-    static final String sMinProfileAccelerationKey = "min-profile-acceleration";
-    static final String sMaxProfileAccelerationKey = "max-profile-acceleration";
-    static final String sMaxHeadingVelocityKey = "max-heading-velocity";
-    static final String sMaxHeadingAccelerationKey = "max-heading-acceleration";
-    static final String sKsKey = "ks";
-    static final String sKvKey = "kv";
-    static final String sKaKey = "ka";
-    static final String sRamseteZetaKey = "ramsete-zeta";
-    static final String sRamseteBBArKey = "ramsete-bbar";
-    static final String sTurnGainKey = "turn-gain";
-    static final String sTurnVelocityGainKey = "turn-velocity-gain";
+    final LogManager        mLogger;
 
-    final LogManager mLogger;
+    protected boolean       mConfigurationValid;
+    boolean                 mHasFinished;
 
-    protected boolean mConfigurationValid;
-    boolean mHasFinished;
+    final String            mName;
 
-    final String mName;
+    List<String>            mLeftHwName;
+    List<String>            mRightHwName;
+    String                  mLocalizerHwName;
 
-    List<String> mLeftHwName;
-    List<String> mRightHwName;
-    String mLocalizerHwName;
+    final Hardware          mHardware;
+    List<MotorComponent>    mLeft;
+    List<MotorComponent>    mRight;
+    OdometerComponent       mLocalizer;
 
-    final Hardware mHardware;
-    List<MotorComponent> mLeft;
-    List<MotorComponent> mRight;
-    OdometerComponent mLocalizer;
+    double                  mInPerTick;
+    double                  mTrackWidthTicks;
+    double                 mMaxWheelVelocity;
+    double                 mMinProfileAcceleration;
+    double                 mMaxProfileAcceleration;
+    double                 mMaxHeadingVelocity;
+    double                 mMaxHeadingAcceleration;
+    double                 mKs;
+    double                 mKv;
+    double                 mKa;
+    double                 mRamseteZeta;
+    double                 mRamseteBBAr;
+    double                 mTurnGain;
+    double                 mTurnVelocityGain;
 
-
-    double mInPerTick;
-    double mTrackWidthTicks;
-    double mMaxWheelVelocity;
-    double mMinProfileAcceleration;
-    double mMaxProfileAcceleration;
-    double mMaxHeadingVelocity;
-    double mMaxHeadingAcceleration;
-    double mKs;
-    double mKv;
-    double mKa;
-    double mRamseteZeta;
-    double mRamseteBBAr;
-    double mTurnGain;
-    double mTurnVelocityGain;
-
-    double mDrivingSpeedMultiplier;
-    Pose2d mInitialPose;
+    double                 mDrivingSpeedMultiplier;
+    Pose2d                 mInitialPose;
 
     public TankDrive(String name, Hardware hardware, LogManager logger) {
 
@@ -137,6 +129,10 @@ public class TankDrive extends Subsystem {
 
     }
 
+    public void                         log() {
+        mLocalizer.log();
+    }
+
     public void                         initialize(Pose2d pose) {
         if(mConfigurationValid) { mInitialPose = pose; }
     }
@@ -157,7 +153,8 @@ public class TankDrive extends Subsystem {
         if(mConfigurationValid) { mLocalizer.update(); }
     }
 
-    public void drive(double forwardSpeed, double headingSpeed) {
+    @Override
+    public void drive(double forwardSpeed, double nothing, double headingSpeed) {
 
         if (mConfigurationValid) {
 
@@ -405,24 +402,24 @@ public class TankDrive extends Subsystem {
 
         // Log motors
         result.append("<details style=\"margin-left:10px\">\n")
-                .append("<summary style=\"font-size: 12px; font-weight: 500\"> MOTORS </summary>\n")
+                .append("<summary style=\"font-size: 10px; font-weight: 500\"> MOTORS </summary>\n")
                 .append("<ul>\n")
-                .append("<summary style=\"font-size: 12px; font-weight: 500\"> LEFT </summary>\n")
+                .append("<summary style=\"font-size: 10px; font-weight: 500\"> LEFT </summary>\n")
                 .append("<ul>\n");
 
         for (int i_left = 0; i_left < mLeftHwName.size(); i_left++) {
-            result.append("<li style=\"padding-left:10px; font-size: 11px\">")
+            result.append("<li style=\"padding-left:10px; font-size: 10px\">")
                     .append(mLeftHwName.get(i_left))
                     .append("</li>\n");
         }
 
         result.append("</ul>\n")
                 .append("</details>\n")
-                .append("<summary style=\"font-size: 12px; font-weight: 500\"> RIGHT </summary>\n")
+                .append("<summary style=\"font-size: 10px; font-weight: 500\"> RIGHT </summary>\n")
                 .append("<ul>\n");
 
         for (int i_right = 0; i_right < mRightHwName.size(); i_right++) {
-            result.append("<li style=\"padding-left:10px; font-size: 11px\">")
+            result.append("<li style=\"padding-left:10px; font-size: 10px\">")
                     .append(mRightHwName.get(i_right))
                     .append("</li>\n");
         }
@@ -433,33 +430,34 @@ public class TankDrive extends Subsystem {
                 .append("</details>\n");
 
         // Log localizer
-        result.append("<p style=\"font-size: 12px; font-weight: 500\"> ODOMETER :")
+
+        result.append("<p style=\"padding-left:10px; font-size: 10px;\"> <span style=\"font-weight: 500\"> ODOMETER : </span>")
                 .append(mLocalizerHwName)
                 .append("</p>\n");
 
         // Log physics
         result.append("<details style=\"margin-left:10px\">\n")
-                .append("<summary style=\"font-size: 12px; font-weight: 500\"> PHYSICS </summary>\n")
+                .append("<summary style=\"font-size: 10px; font-weight: 500\"> PHYSICS </summary>\n")
                 .append("<ul>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> In per tick : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> In per tick : ")
                 .append(mInPerTick)
                 .append("</li>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> Track width in ticks : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> Track width in ticks : ")
                 .append(mTrackWidthTicks)
                 .append("</li>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> Max wheel velocity : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> Max wheel velocity : ")
                 .append(mMaxWheelVelocity)
                 .append("</li>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> Min profile acceleration : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> Min profile acceleration : ")
                 .append(mMinProfileAcceleration)
                 .append("</li>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> Max profile acceleration : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> Max profile acceleration : ")
                 .append(mMaxProfileAcceleration)
                 .append("</li>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> Max heading velocity : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> Max heading velocity : ")
                 .append(mMaxHeadingVelocity)
                 .append("</li>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> Max heading acceleration : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> Max heading acceleration : ")
                 .append(mMaxHeadingAcceleration)
                 .append("</li>\n")
                 .append("</ul>\n")
@@ -467,27 +465,27 @@ public class TankDrive extends Subsystem {
 
         // Log pidf
         result.append("<details style=\"margin-left:10px\">\n")
-                .append("<summary style=\"font-size: 12px; font-weight: 500\"> PIDF </summary>\n")
+                .append("<summary style=\"font-size: 10px; font-weight: 500\"> PIDF </summary>\n")
                 .append("<ul>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> Ks : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> Ks : ")
                 .append(mKs)
                 .append("</li>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> Kv : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> Kv : ")
                 .append(mKv)
                 .append("</li>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> Ka : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> Ka : ")
                 .append(mKa)
                 .append("</li>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> Ramsete zeta : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> Ramsete zeta : ")
                 .append(mRamseteZeta)
                 .append("</li>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> Ramsete bbar : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> Ramsete bbar : ")
                 .append(mRamseteBBAr)
                 .append("</li>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> Turn gain : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> Turn gain : ")
                 .append(mTurnGain)
                 .append("</li>\n")
-                .append("<li style=\"padding-left:10px; font-size: 11px\"> Turn velocity gain : ")
+                .append("<li style=\"padding-left:10px; font-size: 10px\"> Turn velocity gain : ")
                 .append(mTurnVelocityGain)
                 .append("</li>\n")
                 .append("</ul>\n")
@@ -521,7 +519,7 @@ public class TankDrive extends Subsystem {
 
         // Log localizer
         result.append(header)
-                .append(" ODOMETER :")
+                .append(" ODOMETER : ")
                 .append(mLocalizerHwName)
                 .append("\n");
 

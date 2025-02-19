@@ -86,6 +86,7 @@ public class TeleOpMode extends OpMode {
 
     @Override
     public void start() {
+        mLogger.reset();
         // Starting position is not specified, then it will become
         // (0,0,0) if no data from previous OpMode, or the last OpMode pose if data from previous OpMode
         mRobot.start(Robot.Mode.TELEOP,null);

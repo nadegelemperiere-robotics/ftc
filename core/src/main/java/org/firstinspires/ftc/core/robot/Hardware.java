@@ -108,7 +108,11 @@ public class Hardware implements Configurable {
                     String key = keys.next();
 
                     MotorComponent motor = MotorComponent.factory(key, motors.getJSONArray(key), mMap, mLogger);
-                    if (!motor.isConfigured()) {
+                    if(motor == null) {
+                        mLogger.warning("Motor " + key + " not recognized by factory");
+                        mConfigurationValid = false;
+                    }
+                    else if (!motor.isConfigured()) {
                         mLogger.warning("Motor " + key + " configuration is invalid");
                         mConfigurationValid = false;
                     } else { mMotors.put(key, motor); }
@@ -126,7 +130,11 @@ public class Hardware implements Configurable {
                     String key = keys.next();
 
                     ServoComponent servo = ServoComponent.factory(key, servos.getJSONArray(key), mMap, mLogger);
-                    if (!servo.isConfigured()) {
+                    if(servo == null) {
+                        mLogger.warning("Servo " + key + " not recognized by factory");
+                        mConfigurationValid = false;
+                    }
+                    else if (!servo.isConfigured()) {
                         mLogger.warning("Servo " + key + " configuration is invalid");
                         mConfigurationValid = false;
                     } else { mServos.put(key, servo); }
@@ -144,7 +152,11 @@ public class Hardware implements Configurable {
                     String key = keys.next();
 
                     ImuComponent imu = ImuComponent.factory(key, imus.getJSONObject(key), mMap, mLogger);
-                    if (!imu.isConfigured()) {
+                    if(imu == null) {
+                        mLogger.warning("Imu " + key + " not recognized by factory");
+                        mConfigurationValid = false;
+                    }
+                    else if (!imu.isConfigured()) {
                         mLogger.warning("Imu " + key + " configuration is invalid");
                         mConfigurationValid = false;
                     } else { mImus.put(key, imu); }
@@ -161,8 +173,12 @@ public class Hardware implements Configurable {
 
                     String key = keys.next();
 
-                    OdometerComponent odometer = OdometerComponent.factory(key, odometers.getJSONObject(key), mMap, mLogger);
-                    if (!odometer.isConfigured()) {
+                    OdometerComponent odometer = OdometerComponent.factory(key, odometers.getJSONObject(key), mMap, mMotors, mImus, mLogger);
+                    if(odometer == null) {
+                        mLogger.warning("Odometer " + key + " not recognized by factory");
+                        mConfigurationValid = false;
+                    }
+                    else if (!odometer.isConfigured()) {
                         mLogger.warning("Odometer " + key + " configuration is invalid");
                         mConfigurationValid = false;
                     } else { mOdometers.put(key, odometer); }
@@ -241,6 +257,10 @@ public class Hardware implements Configurable {
     {
         StringBuilder result = new StringBuilder();
 
+        result.append("<details style=\"margin-left:10px\">\n");
+        result.append("<summary style=\"font-size: 12px; font-weight: 500\"> HARDWARE </summary>\n");
+        result.append("<ul>\n");
+
         // Log motors
         result.append("<details style=\"margin-left:10px\">\n");
         result.append("<summary style=\"font-size: 12px; font-weight: 500\"> MOTORS </summary>\n");
@@ -300,6 +320,9 @@ public class Hardware implements Configurable {
                     .append(value.logConfigurationHTML())
                     .append("</ul>\n")
                     .append("</details>\n"));
+        result.append("</ul>\n");
+        result.append("</details>\n");
+
         result.append("</ul>\n");
         result.append("</details>\n");
 

@@ -73,28 +73,58 @@ public class MotorMock implements MotorComponent {
     @Override
     public void                         encoderCorrection(boolean ShallCorrect) {  }
 
+    /**
+     * Logs the current motor positions, velocities, and power levels.
+     *
+     * @return A formatted string containing motor telemetry data.
+     */
     @Override
-    public String                       logPositions()
+    public String                       log()
     {
         return "\n  P : " + mPosition + " V : " + 0.0 + " P : " + mPower;
     }
 
     /* ------------------ Configurable functions ------------------- */
-
+    /**
+     * Determines if the coupled motor component is configured correctly.
+     *
+     * @return True if the component is configured, false otherwise.
+     */
     @Override
     public boolean                      isConfigured() { return mConfigurationValid;}
 
+    /**
+     * Reads and applies the motor configuration from a JSON object.
+     *
+     * @param reader The JSON object containing configuration settings.
+     */
     @Override
     public void                         read(JSONObject reader) { }
 
+    /**
+     * Writes the current motor configuration to a JSON object.
+     *
+     * @param writer The JSON object to store the configuration settings.
+     */
     @Override
     public void                         write(JSONObject writer) { }
 
+    /**
+     * Generates an HTML representation of the motor configuration for logging purposes.
+     *
+     * @return A string containing the HTML-formatted motor configuration.
+     */
     @Override
-    public String                       logConfigurationHTML() { return "<p>Mock</p>\n"; }
+    public String                       logConfigurationHTML() { return "<p style=\"padding-left:10px; font-size: 11px\">Mock</p>\n"; }
 
+    /**
+     * Generates a text-based representation of the motor configuration for logging.
+     *
+     * @param header A string to prepend to the configuration log.
+     * @return A string containing the formatted motor configuration details.
+     */
     @Override
-    public String                       logConfigurationText(String header) {   return header + "> MockF\n"; }
+    public String                       logConfigurationText(String header) {   return header + "> Mock\n"; }
 
     /* --------------------- DcMotor functions --------------------- */
 

@@ -8,22 +8,17 @@
 package org.firstinspires.ftc.core.components.odometers;
 
 /* System includes */
-import java.util.LinkedList;
+import java.util.Map;
 
 /* JSON includes */
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /* Qualcomm includes */
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 /* ACME robotics includes */
-import com.acmerobotics.roadrunner.ftc.Encoder;
-import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
-import com.acmerobotics.roadrunner.ftc.RawEncoder;
-import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
 import com.acmerobotics.roadrunner.MecanumKinematics;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -32,7 +27,7 @@ import com.acmerobotics.roadrunner.DualNum;
 import com.acmerobotics.roadrunner.Time;
 import com.acmerobotics.roadrunner.Twist2dDual;
 import com.acmerobotics.roadrunner.Vector2dDual;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -52,46 +47,49 @@ public class DriveEncodersOdometer implements OdometerComponent {
     static  final String    sLateralInPerTickKey = "lateral-in-per-tick";
     static  final String    sInPerTickKey        = "in-per-tick";
 
-    final   LogManager              mLogger;
+    final LogManager                    mLogger;
 
-    boolean                         mConfigurationValid;
-    boolean                         mIsFirstTime;
+    boolean                             mConfigurationValid;
+    boolean                             mIsFirstTime;
 
-    final   String                  mName;
-    String                          mLeftBackHwName;
-    String                          mLeftFrontHwName;
-    String                          mRightBackHwName;
-    String                          mRightFrontHwName;
-    String                          mImuHwName;
+    final String                        mName;
+    String                              mLeftBackHwName;
+    String                              mLeftFrontHwName;
+    String                              mRightBackHwName;
+    String                              mRightFrontHwName;
+    String                              mImuHwName;
 
-    final   HardwareMap             mMap;
-    Encoder                         mLeftFront;
-    Encoder                         mRightFront;
-    Encoder                         mLeftBack;
-    Encoder                         mRightBack;
-    ImuComponent                    mImu;
+    final HardwareMap                   mMap;
+    final Map<String, MotorComponent>   mMotors;
+    final Map<String, ImuComponent>     mImus;
+    Encoder                             mLeftFront;
+    Encoder                             mRightFront;
+    Encoder                             mLeftBack;
+    Encoder                             mRightBack;
+    ImuComponent                        mImu;
 
-    Pose2d                          mInitialPose;
-    Pose2d                          mCurrentPose;
-    PoseVelocity2d                  mCurrentVelocity;
-    public final LinkedList<Pose2d> mPoseHistory;
+    Pose2d                              mInitialPose;
+    Pose2d                              mCurrentPose;
+    PoseVelocity2d                      mCurrentVelocity;
 
-    double                          mInPerTick;
-    double                          mTrackWidthTicks;
-    double                          mLateralInPerTick;
+    double                              mInPerTick;
+    double                              mTrackWidthTicks;
+    double                              mLateralInPerTick;
 
-    double                          mLastHeading;
-    double                          mLastLeftFrontPos;
-    double                          mLastLeftBackPos;
-    double                          mLastRightFrontPos;
-    double                          mLastRightBackPos;
+    double                              mLastHeading;
+    double                              mLastLeftFrontPos;
+    double                              mLastLeftBackPos;
+    double                              mLastRightFrontPos;
+    double                              mLastRightBackPos;
 
-    MecanumKinematics               mKinematics;
+    MecanumKinematics                   mKinematics;
 
-    public  DriveEncodersOdometer(String name, HardwareMap hwMap, LogManager logger) {
+    final ElapsedTime                   mTimer;
+
+    public  DriveEncodersOdometer(String name, HardwareMap hwMap, Map<String, MotorComponent> motors, Map<String,ImuComponent> imus,LogManager logger) {
 
         mLogger             = logger;
-        mConfigurationValid = true;
+        mConfigurationValid = false;
         mIsFirstTime        = true;
 
         mName               = name;
@@ -104,15 +102,17 @@ public class DriveEncodersOdometer implements OdometerComponent {
         mCurrentPose     = new Pose2d(new Vector2d(0,0),0);
         mInitialPose     = new Pose2d(new Vector2d(0,0),0);
         mCurrentVelocity = new PoseVelocity2d(new Vector2d(0, 0), 0);
-        mPoseHistory     = new LinkedList<>();
 
         mMap        = hwMap;
+        mMotors     = motors;
+        mImus       = imus;
         mLeftFront  = null;
         mLeftBack   = null;
         mRightFront = null;
         mRightBack  = null;
         mImu        = null;
 
+        mTimer = new ElapsedTime();
 
     }
 
@@ -130,16 +130,15 @@ public class DriveEncodersOdometer implements OdometerComponent {
 
             Twist2dDual<Time> twist;
 
-            PositionVelocityPair leftFrontPosVel = mLeftFront.getPositionAndVelocity();
-            PositionVelocityPair leftBackPosVel = mLeftBack.getPositionAndVelocity();
-            PositionVelocityPair rightBackPosVel = mRightBack.getPositionAndVelocity();
-            PositionVelocityPair rightFrontPosVel = mRightFront.getPositionAndVelocity();
+            PositionVelocityPair leftFrontPosVel = mLeftFront.update();
+            PositionVelocityPair leftBackPosVel = mLeftBack.update();
+            PositionVelocityPair rightBackPosVel = mRightBack.update();
+            PositionVelocityPair rightFrontPosVel = mRightFront.update();
 
             double heading = mImu.heading();
 
             if (!mIsFirstTime) {
                 mIsFirstTime = true;
-
 
                 twist = new Twist2dDual<>(
                         Vector2dDual.constant(new Vector2d(0.0, 0.0), 2),
@@ -147,7 +146,6 @@ public class DriveEncodersOdometer implements OdometerComponent {
                 );
             }
             else {
-
                 double headingDelta = heading - mLastHeading;
                 twist = mKinematics.forward(new MecanumKinematics.WheelIncrements<>(
                         new DualNum<Time>(new double[]{
@@ -179,16 +177,12 @@ public class DriveEncodersOdometer implements OdometerComponent {
             mLastLeftBackPos = leftBackPosVel.position;
             mLastRightBackPos = rightBackPosVel.position;
             mLastRightFrontPos = rightFrontPosVel.position;
-
             mLastHeading = heading;
+
+            mTimer.reset();
 
             mCurrentPose = mCurrentPose.plus(twist.value());
             mCurrentVelocity = twist.velocity().value();
-
-            mPoseHistory.add(mCurrentPose);
-            while (mPoseHistory.size() > 100) {
-                mPoseHistory.removeFirst();
-            }
 
         }
     }
@@ -204,6 +198,7 @@ public class DriveEncodersOdometer implements OdometerComponent {
     @Override
     public void             log() {
         if (mConfigurationValid) {
+
             mLogger.metric("x", mCurrentPose.position.x + " inches");
             mLogger.metric("y", mCurrentPose.position.y + " inches");
             mLogger.metric("heading", mCurrentPose.heading.toDouble() + " rad");
@@ -244,27 +239,33 @@ public class DriveEncodersOdometer implements OdometerComponent {
 
             if(mMap != null && reader.has(sLeftBackHwMapKey)) {
                 mLeftBackHwName = reader.getString(sLeftBackHwMapKey);
-//                DcMotorEx motor = mMap.tryGet(DcMotorEx.class,conf.get(0).mapName());
-//                if(motor != null) { mLeftFront = new OverflowEncoder(new RawEncoder(motor)); }
-//                if(mLeftFront != null && MotorComponent.sString2Direction.containsKey(conf.get(0).direction())) {
-//                    mLeftFront.setDirection(Objects.requireNonNull(MotorComponent.sString2Direction.get(conf.get(0).direction())));
-//                }
-//                else if(mLeftFront != null)                {
-//                    mLeftFront.setDirection(DcMotorSimple.Direction.FORWARD);
-//                }
-                // Should be better to get it from motor list
+                if(mMotors.containsKey(mLeftBackHwName)) {
+                    mLeftBack = new Encoder(mMotors.get(mLeftBackHwName), mLogger);
+                }
             }
             if(reader.has(sLeftFrontHwMapKey)) {
                 mLeftFrontHwName = reader.getString(sLeftFrontHwMapKey);
+                if(mMotors.containsKey(mLeftFrontHwName)) {
+                    mLeftFront = new Encoder(mMotors.get(mLeftFrontHwName), mLogger);
+                }
             }
             if(reader.has(sRightBackHwMapKey)) {
                 mRightBackHwName = reader.getString(sRightBackHwMapKey);
+                if(mMotors.containsKey(mRightBackHwName)) {
+                    mRightBack = new Encoder(mMotors.get(mRightBackHwName), mLogger);
+                }
             }
             if(reader.has(sRightFrontHwMapKey)) {
                 mRightFrontHwName = reader.getString(sRightFrontHwMapKey);
+                if(mMotors.containsKey(mRightFrontHwName)) {
+                    mRightFront = new Encoder(mMotors.get(mRightFrontHwName), mLogger);
+                }
             }
             if(reader.has(sImuHwMapKey)) {
                 mImuHwName = reader.getString(sImuHwMapKey);
+                if(mImus.containsKey(mImuHwName)) {
+                    mImu = mImus.get(mImuHwName);
+                }
             }
 
             mInPerTick  = 1.0;
@@ -291,11 +292,11 @@ public class DriveEncodersOdometer implements OdometerComponent {
         }
         catch(JSONException e) { mLogger.error(e.getMessage()); }
 
-        if(mLeftFront == null)  { mConfigurationValid = false; }
-        if(mLeftBack == null)   { mConfigurationValid = false; }
-        if(mRightFront == null) { mConfigurationValid = false; }
-        if(mRightBack == null)  { mConfigurationValid = false; }
-        if(mImu == null)  { mConfigurationValid = false; }
+        if(mLeftFront == null || !mLeftFront.isConfigured())    { mConfigurationValid = false; }
+        if(mLeftBack == null || !mLeftBack.isConfigured())      { mConfigurationValid = false; }
+        if(mRightFront == null || !mRightFront.isConfigured())  { mConfigurationValid = false; }
+        if(mRightBack == null || !mRightBack.isConfigured())    { mConfigurationValid = false; }
+        if(mImu == null)                                        { mConfigurationValid = false; }
 
     }
 

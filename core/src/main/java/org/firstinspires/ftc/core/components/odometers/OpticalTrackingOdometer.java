@@ -7,20 +7,15 @@
 
 package org.firstinspires.ftc.core.components.odometers;
 
-/* System includes */
-import java.util.LinkedList;
-
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 
 /* ACME robotics includes */
-import com.acmerobotics.roadrunner.ftc.SparkFunOTOSCorrected;
+import com.acmerobotics.roadrunner.ftc.OTOSKt;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
-import static com.acmerobotics.roadrunner.ftc.OTOSKt.OTOSPoseToRRPose;
-import static com.acmerobotics.roadrunner.ftc.OTOSKt.RRPoseToOTOSPose;
 
 /* FTC controller includes */
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -49,11 +44,10 @@ public class OpticalTrackingOdometer implements OdometerComponent {
     String                      mHwName;
 
     final HardwareMap           mMap;
-    SparkFunOTOSCorrected       mOtos;
+    SparkFunOTOS                mOtos;
 
     Pose2d                      mCurrentPose;
     PoseVelocity2d              mCurrentVelocity;
-    final LinkedList<Pose2d>    mPoseHistory;
 
     public  OpticalTrackingOdometer(String name, HardwareMap hwMap, LogManager logger) {
 
@@ -65,7 +59,6 @@ public class OpticalTrackingOdometer implements OdometerComponent {
 
         mCurrentPose        = new Pose2d(new Vector2d(0,0),0);
         mCurrentVelocity    = new PoseVelocity2d(new Vector2d(0, 0), 0);
-        mPoseHistory        = new LinkedList<>();
 
         mOtos               = null;
     }
@@ -73,7 +66,7 @@ public class OpticalTrackingOdometer implements OdometerComponent {
     @Override
     public void                         pose(Pose2d current) {
         if(mConfigurationValid) {
-            mOtos.setPosition(RRPoseToOTOSPose(current));
+            mOtos.setPosition(OTOSKt.RRPoseToOTOSPose(current));
         }
     }
 
@@ -86,15 +79,13 @@ public class OpticalTrackingOdometer implements OdometerComponent {
             SparkFunOTOS.Pose2D otosAcc = new SparkFunOTOS.Pose2D();
 
             mOtos.getPosVelAcc(otosPose,otosVel,otosAcc);
-            mCurrentPose = OTOSPoseToRRPose(otosPose);
+            mCurrentPose = OTOSKt.OTOSPoseToRRPose(otosPose);
+
             mCurrentVelocity = new PoseVelocity2d(new Vector2d(otosVel.x, otosVel.y), otosVel.h);
 
-            // RR standard
-            mPoseHistory.add(mCurrentPose);
-            while (mPoseHistory.size() > 100) {
-                mPoseHistory.removeFirst();
-            }
-
+            Vector2d fieldVel = new Vector2d(otosVel.x, otosVel.y);
+            Vector2d robotVel = fieldVel.times(otosVel.h);
+            mCurrentVelocity = new PoseVelocity2d(robotVel, otosVel.h);
         }
     }
     @Override
@@ -104,17 +95,18 @@ public class OpticalTrackingOdometer implements OdometerComponent {
     public PoseVelocity2d               velocity() { return mCurrentVelocity;    }
 
     @Override
-    public void                         log() {
+    public void             log() {
         if (mConfigurationValid) {
-            mLogger.metric("x",mCurrentPose.position.x + " inches");
-            mLogger.metric("y",mCurrentPose.position.y + " inches");
-            mLogger.metric("heading",mCurrentPose.heading.toDouble() + " rad");
+            mLogger.metric(mName + "-x", mCurrentPose.position.x + " inches");
+            mLogger.metric(mName + "-y", mCurrentPose.position.y + " inches");
+            mLogger.metric(mName + "-heading", mCurrentPose.heading.toDouble() + " rad");
 
-            mLogger.metric("vx",mCurrentVelocity.linearVel.x + " inches/s");
-            mLogger.metric("vy",mCurrentVelocity.linearVel.y + " inches/s");
-            mLogger.metric("vheading",mCurrentVelocity.angVel + " rad/s");
+            mLogger.metric(mName + "-vx",mCurrentVelocity.linearVel.x + " inches/s");
+            mLogger.metric(mName + "-vy",mCurrentVelocity.linearVel.y + " inches/s");
+            mLogger.metric(mName + "-vheading",mCurrentVelocity.angVel + " rad/s");
         }
     }
+
 
     /* ------------------ Configurable functions ------------------- */
 
@@ -141,7 +133,7 @@ public class OpticalTrackingOdometer implements OdometerComponent {
 
             if (mMap != null && reader.has(sHwMapKey)) {
                 mHwName = reader.getString(sHwMapKey);
-                mOtos = mMap.tryGet(SparkFunOTOSCorrected.class, mHwName);
+                mOtos = mMap.tryGet(SparkFunOTOS.class, mHwName);
             }
 
             if (mOtos != null) {
@@ -276,6 +268,8 @@ public class OpticalTrackingOdometer implements OdometerComponent {
         return result.toString();
 
     }
+
+    /* -------------------- Accessors for tuning ------------------- */
 
     public void                         headingRatio(double ratio) {
         if(mConfigurationValid) { mOtos.setAngularScalar(ratio); }

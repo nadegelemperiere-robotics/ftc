@@ -77,6 +77,16 @@ public class Robot extends Context implements Configurable {
     }
 
     /**
+     * Robot logging function logging all subsystems + current state
+     */
+    public void                         log()
+    {
+        for (Map.Entry<String, Subsystem> subsystem : mSubsystems.entrySet()) {
+            subsystem.getValue().log();
+        }
+    }
+
+    /**
      * Robot persist function, storing all subsystems interopmodes data to the InterOpMode singleton
      */
     public void                         persist()
@@ -124,7 +134,11 @@ public class Robot extends Context implements Configurable {
                     String key = keys.next();
 
                     Subsystem subsystem = Subsystem.factory(key, subsystems.getJSONObject(key), mHardware, mLogger);
-                    if(!subsystem.isConfigured()) {
+                    if(subsystem == null) {
+                        mLogger.warning("Subsystem " + key + " not recognized by factory");
+                        mConfigurationValid = false;
+                    }
+                    else if(!subsystem.isConfigured()) {
                         mLogger.warning("Subsystem " + key + " configuration is invalid");
                         mConfigurationValid = false;
                     }
@@ -178,8 +192,7 @@ public class Robot extends Context implements Configurable {
         StringBuilder result = new StringBuilder();
 
         // Log Hardware
-        result.append("<p style=\"margin-left:10px; font-size: 12px; font-weight: 500\"> HARDWARE </p>")
-                        .append(mHardware.logConfigurationHTML());
+        result.append(mHardware.logConfigurationHTML());
 
         // Log subsystem
         result.append("<details style=\"margin-left:10px\">\n");

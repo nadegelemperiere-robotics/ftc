@@ -134,9 +134,26 @@ public class Actuator extends Subsystem {
                 }
             }
         }
-        if (!mHasFinished) { mLogger.metric(mName.toUpperCase(), "Reaching position " + mPosition); }
-        else { mLogger.metric(mName.toUpperCase(), "In position " + mPosition); }
     }
+
+    /**
+     * Log actuator current status
+     */
+    public void                         log() {
+        if(mMotor != null && this.hasFinished()) {
+            mLogger.info("--> " + mName + " : " + mMotor.log() + " IN POS : " + mPosition);
+        }
+        else if(mMotor != null && !this.hasFinished()) {
+            mLogger.info("--> " + mName + " : " + mMotor.log() + " REACHING POS : " + mPosition);
+        }
+        else if(mServo != null && this.hasFinished()) {
+            mLogger.info("--> " + mName + " : " + mServo.log() + " IN POS : " + mPosition);
+        }
+        else if(mServo != null && !this.hasFinished()) {
+            mLogger.info("--> " + mName + " : " + mServo.log() + " REACHING POS : " + mPosition);
+        }
+    }
+
     /**
      * Position the actuator on one of its reference positions
      *
@@ -294,21 +311,21 @@ public class Actuator extends Subsystem {
         if(mConfigurationValid) {
 
             if (mMotor != null) {
-                result.append("<li style=\"padding-left:10px; font-size: 11px\">")
-                        .append(" - MOTOR ")
+                result.append("<li style=\"padding-left:10px; font-size: 10px\">")
+                        .append(" <span style=\"font-weight: 500\"> MOTOR : </span> ")
                         .append(mHwName)
                         .append("\n");
             }
             if (mServo != null) {
-                result.append("<li style=\"padding-left:10px; font-size: 11px\">")
-                        .append(" - SERVO ")
+                result.append("<li style=\"padding-left:10px; font-size: 10px\">")
+                        .append(" <span style=\"font-weight: 500\"> SERVO : </span> ")
                         .append(mHwName)
                         .append("\n");
             }
 
             if(!mPositions.isEmpty()) {
                 result.append("<details>\n");
-                result.append("<summary style=\"font-size: 12px; font-weight: 500\"> POSITIONS </summary>\n");
+                result.append("<summary style=\"font-size: 10px; font-weight: 500\"> POSITIONS </summary>\n");
                 result.append("<ul>\n");
 
                 for (Map.Entry<String, Double> position : mPositions.entrySet()) {

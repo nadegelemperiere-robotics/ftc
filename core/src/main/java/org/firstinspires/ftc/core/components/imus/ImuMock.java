@@ -51,6 +51,8 @@
 package org.firstinspires.ftc.core.components.imus;
 
 /* JSON includes */
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.json.JSONObject;
 
 /* Tools includes */
@@ -86,6 +88,19 @@ public class ImuMock implements ImuComponent {
      * @return The name of the component.
      */
     public String                       name() { return mName; }
+
+    /**
+     * Logs the current imu yaw, pitch and roll.
+     *
+     * @return A formatted string containing imu telemetry data.
+     */
+    public String                       log() {
+        String result = "";
+        if(mConfigurationValid) {
+            result += "\n Y : " + 0 + " P : " + 0 + " R : " + 0;
+        }
+        return result;
+    }
 
     /**
      * Retrieves the current heading (yaw angle) of the robot in radians.

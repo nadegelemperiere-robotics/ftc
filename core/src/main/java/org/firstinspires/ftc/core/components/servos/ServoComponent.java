@@ -60,6 +60,7 @@ public interface ServoComponent extends Configurable {
     /* --------------------- Custom functions ---------------------- */
 
     String                      name();
+    String                      log();
 
     /* ------------------ Configurable functions ------------------- */
 

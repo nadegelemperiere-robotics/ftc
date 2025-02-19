@@ -79,6 +79,21 @@ public class ServoCoupled implements ServoComponent {
     @Override
     public String                       name() { return mName; }
 
+    /**
+     * Logs the current servo position.
+     *
+     * @return A formatted string containing servo telemetry data.
+     */
+    @Override
+    public String                       log() {
+        String result = "";
+        if (mConfigurationValid) {
+            result += "\n  First : P : " + mFirst.getPosition() ;
+            result += "\n  Second : P : " + mSecond.getPosition() ;
+        }
+        return result;
+    }
+
     /* ------------------ Configurable functions ------------------- */
 
     /**

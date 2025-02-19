@@ -9,18 +9,14 @@ package org.firstinspires.ftc.core.components.odometers;
 
 /* System includes */
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /* JSON includes */
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /* Qualcomm includes */
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 /* ACME robotics includes */
 import com.acmerobotics.roadrunner.DualNum;
@@ -32,8 +28,6 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
 import com.acmerobotics.roadrunner.ftc.Encoder;
-import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
-import com.acmerobotics.roadrunner.ftc.RawEncoder;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -82,7 +76,7 @@ public class TwoDeadWheelsOdometer implements OdometerComponent {
     double                      mLastPerpPos;
 
 
-    public  TwoDeadWheelsOdometer(String name, HardwareMap hwMap, LogManager logger) {
+    public  TwoDeadWheelsOdometer(String name, HardwareMap hwMap, Map<String, MotorComponent> motors, Map<String,ImuComponent> imus, LogManager logger) {
 
         mLogger             = logger;
         mConfigurationValid = true;
@@ -182,18 +176,20 @@ public class TwoDeadWheelsOdometer implements OdometerComponent {
     @Override
     public PoseVelocity2d   velocity() { return mCurrentVelocity;    }
 
+
     @Override
     public void             log() {
         if (mConfigurationValid) {
-            mLogger.metric("x",mCurrentPose.position.x + " inches");
-            mLogger.metric("y",mCurrentPose.position.y + " inches");
-            mLogger.metric("heading",mCurrentPose.heading.toDouble() + " rad");
+            mLogger.metric(mName + "-x", mCurrentPose.position.x + " inches");
+            mLogger.metric(mName + "-y", mCurrentPose.position.y + " inches");
+            mLogger.metric(mName + "-heading", mCurrentPose.heading.toDouble() + " rad");
 
-            mLogger.metric("vx",mCurrentVelocity.linearVel.x + " inches/s");
-            mLogger.metric("vy",mCurrentVelocity.linearVel.y + " inches/s");
-            mLogger.metric("vheading",mCurrentVelocity.angVel + " rad/s");
+            mLogger.metric(mName + "-vx",mCurrentVelocity.linearVel.x + " inches/s");
+            mLogger.metric(mName + "-vy",mCurrentVelocity.linearVel.y + " inches/s");
+            mLogger.metric(mName + "-vheading",mCurrentVelocity.angVel + " rad/s");
         }
     }
+
 
     /* ------------------ Configurable functions ------------------- */
 

@@ -57,6 +57,20 @@ public class ServoSingle implements ServoComponent {
     @Override
     public String                       name() { return mName; }
 
+    /**
+     * Logs the current servo position.
+     *
+     * @return A formatted string containing servo telemetry data.
+     */
+    @Override
+    public String                       log() {
+        String result = "";
+        if (mConfigurationValid) {
+            result += "\n  P : " + mServo.getPosition();
+        }
+        return result;
+    }
+
 
     /* ------------------ Configurable functions ------------------- */
     /**

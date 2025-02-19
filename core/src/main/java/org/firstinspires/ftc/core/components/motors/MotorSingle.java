@@ -96,7 +96,7 @@ public class MotorSingle implements MotorComponent {
      * @return A formatted string containing motor telemetry data.
      */
     @Override
-    public String                       logPositions()
+    public String                       log()
     {
         String result = "";
         if(mConfigurationValid) {

@@ -95,6 +95,7 @@ public interface ImuComponent extends Configurable {
     /* --------------------- Custom functions ---------------------- */
 
     String                      name();
+    String                      log();
 
     /* ------------------ Configurable functions ------------------- */
 

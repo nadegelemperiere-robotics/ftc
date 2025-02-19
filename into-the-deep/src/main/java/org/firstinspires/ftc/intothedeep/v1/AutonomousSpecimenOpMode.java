@@ -69,6 +69,9 @@ public class AutonomousSpecimenOpMode extends LinearOpMode {
         waitForStart();
 
         try {
+
+            mLogger.reset();
+
             // Initialize robot position with position in FIELD CENTRIC reference,
             // Meaning X is oriented towards the opponent alliance station, Y oriented to the left
             // and Z to the top. Center is the robot starting point

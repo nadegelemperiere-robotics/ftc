@@ -8,6 +8,9 @@
 
 package org.firstinspires.ftc.core.components.odometers;
 
+/* System includes */
+import java.util.Map;
+
 /* JSON includes */
 import org.json.JSONObject;
 
@@ -22,9 +25,13 @@ import org.firstinspires.ftc.core.tools.LogManager;
 /* Configuration includes */
 import org.firstinspires.ftc.core.configuration.Configurable;
 
+/* Components includes */
+import org.firstinspires.ftc.core.components.motors.MotorComponent;
+import org.firstinspires.ftc.core.components.imus.ImuComponent;
+
 public interface OdometerComponent extends Configurable {
 
-    static OdometerComponent factory(String name, JSONObject reader, HardwareMap map, LogManager logger) {
+    static OdometerComponent factory(String name, JSONObject reader, HardwareMap map, Map<String, MotorComponent> motors, Map<String,ImuComponent> imus, LogManager logger) {
 
         OdometerComponent result = null;
 
@@ -34,13 +41,13 @@ public interface OdometerComponent extends Configurable {
                 result.read(reader);
                 break;
             case "2deadwheels":
-                result = new TwoDeadWheelsOdometer(name, map, logger);
+                result = new TwoDeadWheelsOdometer(name, map, motors, imus, logger);
                 result.read(reader); break;
             case "3deadwheels":
-                result = new ThreeDeadWheelsOdometer(name, map, logger);
+                result = new ThreeDeadWheelsOdometer(name, map, motors, logger);
                 result.read(reader); break;
             case "driveencoders":
-                result = new DriveEncodersOdometer(name, map, logger);
+                result = new DriveEncodersOdometer(name, map, motors, imus, logger);
                 result.read(reader);
                 break;
             case "pinpoint":

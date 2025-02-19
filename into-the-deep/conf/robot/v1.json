@@ -4,31 +4,31 @@
         "hardware" : {
             "motors": {
                 "front-left-wheel":  [ { "hwmap": "frontLeft" } ],
-                "front-right-wheel": [ { "hwmap": "frontRight", "direction": "reverse" } ],
-                "back-left-wheel":   [ { "hwmap": "backLeft" } ],
+                "front-right-wheel": [ { "hwmap": "frontRight" } ],
+                "back-left-wheel":   [ { "hwmap": "backLeft", "direction": "reverse" } ],
                 "back-right-wheel":  [ { "hwmap": "backRight",  "direction": "reverse" } ],
                 "intake-slides": [
-                    { "hwmap": "intakeSlidesLeft" },
-                    { "hwmap": "intakeSlidesRight", "direction": "reverse"}
+                    { "hwmap": "frontLeft" },
+                    { "hwmap": "frontRight"}
                 ],
                 "outtake-slides": [
-                    { "hwmap": "outtakeSlidesLeft", "direction": "reverse" },
-                    { "hwmap": "outtakeSlidesRight" }
+                    { "hwmap": "backLeft", "direction": "reverse" },
+                    { "hwmap": "backRight", "direction": "reverse" }
                 ]
             },
             "servos" : {
-                "intake-elbow-pitch": [ { "hwmap": "intakeElbowPitch" } ],
-                "intake-wrist-roll":  [ { "hwmap": "intakeWristRoll" } ],
-                "intake-claw":        [ { "hwmap": "intakeClaw" } ],
-                "outtake-wrist-roll": [ { "hwmap": "outtakeWristRoll" } ],
-                "outtake-claw":       [ { "hwmap": "outtakeClaw" } ],
+                "intake-elbow-pitch": [ { "hwmap": "left" } ],
+                "intake-wrist-roll":  [ { "hwmap": "left" } ],
+                "intake-claw":        [ { "hwmap": "left" } ],
+                "outtake-wrist-roll": [ { "hwmap": "right" } ],
+                "outtake-claw":       [ { "hwmap": "right" } ],
                 "intake-arm-pitch": [
-                    { "hwmap": "intakeArmPitchLeft" },
-                    { "hwmap": "intakeArmPitchRight", "reverse" : true }
+                    { "hwmap": "left" },
+                    { "hwmap": "right", "reverse" : true }
                 ],
                 "outtake-elbow-pitch": [
-                    { "hwmap": "outtakeElbowPitchLeft" },
-                    { "hwmap": "outtakeElbowPitchRight", "reverse" : true }
+                    { "hwmap": "left" },
+                    { "hwmap": "right", "reverse" : true }
                 ]
             },
             "odometers": {
@@ -50,33 +50,127 @@
             }
         },
         "subsystems" : {
-            "outtake-slides" : {
-                "type" : "default-slides",
-                "motor" : "outtake-slides",
-                "positions": {
-                    "min": 0,
-                    "retracted": 1300,
-                    "max": 3726,
-                    "transfer": 0,
-                    "autonomous-sample-ascend" : 710,
-                    "autonomous-specimen-submersible-under" : 690,
-                    "autonomous-specimen-submersible-over" : 870
+            "intake-arm" : {
+                "type" : "intake-arm",
+                "claw" : {
+                    "type"      : "toggle-actuator",
+                    "toggle"    : ["open", "closed"],
+                    "servo"     : "intake-claw",
+                    "positions" : {
+                        "open"         : 1.0,
+                        "microrelease" : 0.9,
+                        "closed"       : 0.62
+                    }
+                },
+                "wrist" : {
+                    "type"      : "toggle-actuator",
+                    "toggle"    : ["0", "180"],
+                    "servo"     : "intake-wrist-roll",
+                    "positions" : {
+                        "0":    0.405,
+                        "180":  0.675
+                    }
+                },
+                "elbow" : {
+                    "type"      : "actuator",
+                    "servo"     : "intake-elbow-pitch",
+                    "positions" : {
+                        "transfer": 0.15,
+                        "grab":     0.66,
+                        "off":      0.66,
+                        "drone":    0.68,
+                        "over-sub": 0.71
+                    }
+                },
+                "arm" : {
+                    "type"      : "actuator",
+                    "servo"     : "intake-arm-pitch",
+                    "positions" : {
+                        "grab":     0.39,
+                        "drone":     0.44,
+                        "over-sub": 0.6,
+                        "transfer": 0.97,
+                        "off":      1.0
+                    }
+                }
+            },
+            "intake-slides" : {
+                "type"      : "default-slides",
+                "motor"     : "intake-slides",
+                "positions" : {
+                    "min"               : 0,
+                    "transfer-exchange" : 167,
+                    "retracted"         : 250,
+                    "autonomous-sample" : 280,
+                    "transfer-away"     : 300,
+                    "max"               : 315
                 },
                 "powers": {
                     "set-position": 1.0,
-                    "hold-position": 0.3,
-                    "stop": 0
+                    "hold-position": 0.3
+                }
+            },
+            "outtake-arm" : {
+                "type" : "outtake-arm",
+                "claw" : {
+                    "type"      : "toggle-actuator",
+                    "toggle"    : ["open", "closed"],
+                    "servo"     : "outtake-claw",
+                    "positions" : {
+                        "open"         : 0.36,
+                        "closed"       : 0.73,
+                        "ultraclosed"  : 0.75
+                    }
+                },
+                "wrist" : {
+                    "type"      : "toggle-actuator",
+                    "toggle"    : ["0", "180"],
+                    "servo"     : "outtake-wrist-roll",
+                    "positions" : {
+                        "0":    0.135,
+                        "180":  0.42
+                    }
+                },
+                "elbow" : {
+                    "type"      : "actuator",
+                    "servo"     : "outtake-elbow-pitch",
+                    "positions" : {
+                        "autonomous-specimen-behind" : 0.011,
+                        "autonomous-specimen-ahead"  : 0.025,
+                        "drop-sample"                : 0.05,
+                        "off"                        : 0.08,
+                        "vertical"                   : 0.085,
+                        "transfer"                   : 0.11
+                    }
+                }
+            },
+            "outtake-slides" : {
+                "type": "default-slides",
+                "motor": "outtake-slides",
+                "positions": {
+                    "min": 0,
+                    "transfer": 0,
+                    "autonomous-specimen-submersible-under": 690,
+                    "autonomous-specimen-submersible-over": 870,
+                    "autonomous-sample-ascend": 710,
+                    "retracted": 1300,
+                    "max": 3726
+                },
+                "powers": {
+                    "set-position": 1.0,
+                    "hold-position": 0.3
                 }
             },
             "drive-train" : {
-                "type" : "mechanum-drive",
+                "type" : "mecanum-drive",
                 "motors" : {
                     "front-left-wheel":  "front-left-wheel",
                     "front-right-wheel": "front-right-wheel",
                     "back-left-wheel":   "back-left-wheel",
                     "back-right-wheel":  "back-right-wheel"
                 },
-                "odometers" : "otos",
+                "odometer" : "otos",
+                "reference" : "robot-centric",
                 "physics" : {
                     "in-per-tick"               : 1,
                     "lat-in-per-tick"           : 0.7118231519430893,
@@ -102,7 +196,6 @@
         }
     },
     "control"   : {
-
         "controllers": {
             "drive": {
                 "axes" : {
@@ -115,36 +208,35 @@
         "commands": [
 
             {  "action": "drive",
-                "x": { "scale": 1.1, "input": "left_stick_x", "controller" : "drive" },
-                "y": { "scale": -1.0, "input": "left_stick_y", "controller" : "drive" },
-                "rotation": { "scale": 1.0, "input": "right_stick_x", "controller" : "drive" }
+                "1": { "scale": 1.1, "input": "left_stick_x", "controller" : "drive" },
+                "2": { "scale": -1.0, "input": "left_stick_y", "controller" : "drive" },
+                "3": { "scale": 1.0, "input": "right_stick_x", "controller" : "drive" }
             },
-            { "action": "tuneDriveSpeed", "multiplier": 0.45, "condition": { "button": "left_bumper", "state": "pressed", "controller" : "drive" } },
-            { "action": "tuneDriveSpeed", "multiplier": 1.0, "condition": { "button": "left_bumper", "state": "notPressed", "controller" : "drive" } },
+            { "action": "tuneDriveSpeed", "1": 0.45, "condition": { "button": "left_bumper", "state": "pressed", "controller" : "drive" } },
+            { "action": "tuneDriveSpeed", "1": 1.0, "condition": { "button": "left_bumper", "state": "notPressed", "controller" : "drive" } },
 
-            { "action": "powerOuttakeSlides", "power": 0.9,  "condition": { "button": "left_bumper", "state": "pressedOnce", "controller" : "mechanisms"} },
-            { "action": "powerOuttakeSlides", "power": -0.7, "condition": { "button": "right_bumper", "state": "pressedOnce", "controller" : "mechanisms"}},
-            { "action": "powerOuttakeSlides", "power": 0.0,  "condition": { "and": [
+            { "action": "powerOuttakeSlides", "1": 0.9,  "condition": { "button": "left_bumper", "state": "pressedOnce", "controller" : "mechanisms"} },
+            { "action": "powerOuttakeSlides", "1": -0.7, "condition": { "button": "right_bumper", "state": "pressedOnce", "controller" : "mechanisms"}},
+            { "action": "powerOuttakeSlides", "1": 0.0,  "condition": { "and": [
                 { "button": "right_bumper","state": "notPressed", "controller" : "mechanisms"},
                 { "button": "left_bumper", "state": "notPressed", "controller" : "mechanisms"}
             ]}},
-            { "action": "positionOuttakeSlides", "position": "transfer", "condition": { "button": "right_stick_button", "state": "pressedOnce", "controller" : "mechanisms" }},
+            { "action": "positionOuttakeSlides", "1": "transfer", "condition": { "button": "right_stick_button", "state": "pressedOnce", "controller" : "mechanisms" }},
 
-            { "action": "powerIntakeSlides", "power": { "scale": 0.9, "input": "left_trigger" },   "condition" : { "trigger" : "left_trigger", "threshold" : 0.01, "operation" : "greaterThan", "controller" : "mechanisms" }},
-            { "action": "powerIntakeSlides", "power": { "scale": -0.7, "input": "right_trigger" }, "condition" : { "trigger" : "right_trigger", "threshold" : 0.01, "operation" : "greaterThan", "controller" : "mechanisms" }},
-            { "action": "powerIntakeSlides", "power": { "scale": 0.0, "input": "right_trigger" },  "condition" : { "and" : [
+            { "action": "powerIntakeSlides", "1": { "scale": 0.9, "input": "left_trigger" },   "condition" : { "trigger" : "left_trigger", "threshold" : 0.01, "operation" : "greaterThan", "controller" : "mechanisms" }},
+            { "action": "powerIntakeSlides", "1": { "scale": -0.7, "input": "right_trigger" }, "condition" : { "trigger" : "right_trigger", "threshold" : 0.01, "operation" : "greaterThan", "controller" : "mechanisms" }},
+            { "action": "powerIntakeSlides", "1": { "scale": 0.0, "input": "right_trigger" },  "condition" : { "and" : [
                 { "trigger" : "right_trigger", "threshold" : 0.01, "operation" : "lesserThan", "controller" : "mechanisms" },
                 { "trigger" : "left_trigger",  "threshold" : 0.01, "operation" : "lesserThan", "controller" : "mechanisms" }
             ]}},
 
-            { "action": "toggleOuttakeClaw",                    "condition": { "button": "x", "state": "pressedOnce", "controller" : "mechanisms" } },
-            { "action": "moveOuttakeArm",  "direction": "down", "condition": { "button": "a", "state": "pressedOnce", "controller" : "mechanisms" }},
-            { "action": "moveOuttakeArm",  "direction": "up",   "condition": { "button": "y", "state": "pressedOnce", "controller" : "mechanisms" }},
+            { "action": "moveOuttakeArm",  "1": "down", "condition": { "button": "a", "state": "pressedOnce", "controller" : "mechanisms" }},
+            { "action": "moveOuttakeArm",  "1": "up",   "condition": { "button": "y", "state": "pressedOnce", "controller" : "mechanisms" }},
 
-            { "action": "toggleIntakeClaw",                     "condition": { "button": "dpad_left",  "state": "pressedOnce", "controller" : "mechanisms" } },
-            { "action": "moveIntakeArm",  "direction": "down",  "condition": { "button": "dpad_down",  "state": "pressedOnce", "controller" : "mechanisms" }},
-            { "action": "moveIntakeArm",  "direction": "up",    "condition": { "button": "dpad_up",    "state": "pressedOnce", "controller" : "mechanisms" }},
-            { "action": "toggleIntakeWrist",                    "condition": { "button": "dpad_right", "state": "pressedOnce", "controller" : "mechanisms" }},
+            { "action": "toggleIntakeClaw",                  "condition": { "button": "dpad_left",  "state": "pressedOnce", "controller" : "mechanisms" } },
+            { "action": "moveIntakeArm",  "direction": "1",  "condition": { "button": "dpad_down",  "state": "pressedOnce", "controller" : "mechanisms" }},
+            { "action": "moveIntakeArm",  "direction": "1",  "condition": { "button": "dpad_up",    "state": "pressedOnce", "controller" : "mechanisms" }},
+            { "action": "toggleIntakeWrist",                 "condition": { "button": "dpad_right", "state": "pressedOnce", "controller" : "mechanisms" }},
 
             { "action": "transfer", "condition": { "button": "b", "state": "pressedOnce", "controller" : "mechanisms" }}
 

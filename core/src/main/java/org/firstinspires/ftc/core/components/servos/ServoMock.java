@@ -61,6 +61,20 @@ public class ServoMock implements ServoComponent {
     @Override
     public String                       name() { return mName; }
 
+    /**
+     * Logs the current servo position.
+     *
+     * @return A formatted string containing servo telemetry data.
+     */
+    @Override
+    public String                       log() {
+        String result = "";
+        if (mConfigurationValid) {
+            result += "\n  P : " + mPosition;
+        }
+        return result;
+    }
+
     /* ------------------ Configurable functions ------------------- */
 
     /**
@@ -93,7 +107,7 @@ public class ServoMock implements ServoComponent {
      * @return A string containing the HTML-formatted servo configuration.
      */
     @Override
-    public String                       logConfigurationHTML() { return "<p>Mock</p>\n"; }
+    public String                       logConfigurationHTML() { return "<p style=\"padding-left:10px; font-size: 11px\">Mock</p>\n"; }
 
     /**
      * Generates a text-based representation of the servo configuration for logging.

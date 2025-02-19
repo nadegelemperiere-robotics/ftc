@@ -30,11 +30,8 @@ import com.acmerobotics.roadrunner.Twist2dDual;
 import com.acmerobotics.roadrunner.Vector2dDual;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
 import com.acmerobotics.roadrunner.ftc.Encoder;
-import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
-import com.acmerobotics.roadrunner.ftc.RawEncoder;
 
 /* FTC Controller includes */
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -85,7 +82,7 @@ public class ThreeDeadWheelsOdometer implements OdometerComponent {
     double                      mLastPar1Pos;
     double                      mLastPerpPos;
 
-    public  ThreeDeadWheelsOdometer(String name, HardwareMap hwMap, LogManager logger) {
+    public  ThreeDeadWheelsOdometer(String name, HardwareMap hwMap, Map<String, MotorComponent> motors, LogManager logger) {
 
         mLogger             = logger;
         mConfigurationValid = false;
@@ -180,15 +177,16 @@ public class ThreeDeadWheelsOdometer implements OdometerComponent {
     @Override
     public void             log() {
         if (mConfigurationValid) {
-            mLogger.metric("x",mCurrentPose.position.x + " inches");
-            mLogger.metric("y",mCurrentPose.position.y + " inches");
-            mLogger.metric("heading",mCurrentPose.heading.toDouble() + " rad");
+            mLogger.metric(mName + "-x", mCurrentPose.position.x + " inches");
+            mLogger.metric(mName + "-y", mCurrentPose.position.y + " inches");
+            mLogger.metric(mName + "-heading", mCurrentPose.heading.toDouble() + " rad");
 
-            mLogger.metric("vx",mCurrentVelocity.linearVel.x + " inches/s");
-            mLogger.metric("vy",mCurrentVelocity.linearVel.y + " inches/s");
-            mLogger.metric("vheading",mCurrentVelocity.angVel + " rad/s");
+            mLogger.metric(mName + "-vx",mCurrentVelocity.linearVel.x + " inches/s");
+            mLogger.metric(mName + "-vy",mCurrentVelocity.linearVel.y + " inches/s");
+            mLogger.metric(mName + "-vheading",mCurrentVelocity.angVel + " rad/s");
         }
     }
+
 
 
     /* ------------------ Configurable functions ------------------- */

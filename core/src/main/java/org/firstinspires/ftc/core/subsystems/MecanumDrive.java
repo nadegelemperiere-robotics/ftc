@@ -34,17 +34,13 @@ import org.firstinspires.ftc.core.components.odometers.OdometerComponent;
 import org.firstinspires.ftc.core.robot.Hardware;
 
 
-public class MecanumDrive extends Subsystem {
+public class MecanumDrive extends DriveTrain {
 
     enum Mode {
         FIELD_CENTRIC,
         ROBOT_CENTRIC
     }
 
-    static final String             sPidfKey                    = "pidf";
-    static final String             sPhysicsKey                 = "physics";
-    static final String             sMotorsKey                  = "motors";
-    static final String             sOdometerKey                = "odometer";
     static final String             sFrontLeftKey               = "front-left-wheel";
     static final String             sBackLeftKey                = "back-left-wheel";
     static final String             sFrontRightKey              = "front-right-wheel";
@@ -160,6 +156,10 @@ public class MecanumDrive extends Subsystem {
 
     }
 
+    public void                         log() {
+        mLocalizer.log();
+    }
+
     public void                         initialize(Pose2d pose) {
         if(mConfigurationValid) { mInitialPose = pose; }
     }
@@ -174,12 +174,15 @@ public class MecanumDrive extends Subsystem {
         if(mConfigurationValid) { mLocalizer.update(); }
     }
 
+    @Override
     public void                         drive(double xSpeed, double ySpeed, double headingSpeed) {
 
-        double vx = xSpeed;
-        double vy = ySpeed;
-
         if(mConfigurationValid) {
+
+            mLogger.info("START DRIVE");
+
+            double vx = xSpeed;
+            double vy = ySpeed;
 
             if (mDrivingMode == Mode.FIELD_CENTRIC) {
                 Rotation2d rotation = mLocalizer.pose().heading;
@@ -205,6 +208,9 @@ public class MecanumDrive extends Subsystem {
             mLeftBack.power(backLeftPower);
             mRightFront.power(frontRightPower);
             mRightBack.power(backRightPower);
+
+            mLogger.info("STOP DRIVE");
+
         }
     }
 
@@ -425,54 +431,54 @@ public class MecanumDrive extends Subsystem {
 
 
         String result = "<details style=\"margin-left:10px\">\n" +
-                "<summary style=\"font-size: 12px; font-weight: 500\"> MOTORS </summary>\n" +
+                "<summary style=\"font-size: 10px; font-weight: 500\"> MOTORS </summary>\n" +
                 "<ul>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Left front wheel : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Left front wheel : " +
                 mLeftFrontHwName +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Left back wheel : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Left back wheel : " +
                 mLeftBackHwName +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Right front wheel : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Right front wheel : " +
                 mRightFrontHwName +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Right back wheel : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Right back wheel : " +
                 mRightBackHwName +
                 "</li>\n" +
                 "</ul>\n" +
                 "</details>\n" +
 
                 // Log localizer
-                "<p style=\"font-size: 12px; font-weight: 500\"> ODOMETER :" +
+                "<p style=\"padding-left:10px; font-size: 10px;\"> <span style=\"font-weight: 500\"> ODOMETER : </span>" +
                 mLocalizerHwName +
                 "</p>\n" +
 
                 // Log physics
                 "<details style=\"margin-left:10px\">\n" +
-                "<summary style=\"font-size: 12px; font-weight: 500\"> PHYSICS </summary>\n" +
+                "<summary style=\"font-size: 10px; font-weight: 500\"> PHYSICS </summary>\n" +
                 "<ul>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> In per tick : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> In per tick : " +
                 mInPerTick +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Lat in per tick : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Lat in per tick : " +
                 mLatInPerTick +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Track width in ticks : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Track width in ticks : " +
                 mTrackWidthTicks +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Max wheel velocity : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Max wheel velocity : " +
                 mMaxWheelVelocity +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Min profile acceleration : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Min profile acceleration : " +
                 mMinProfileAcceleration +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Max profile acceleration : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Max profile acceleration : " +
                 mMaxProfileAcceleration +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Max heading velocity : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Max heading velocity : " +
                 mMaxHeadingVelocity +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Max heading acceleration : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Max heading acceleration : " +
                 mMaxHeadingAcceleration +
                 "</li>\n" +
                 "</ul>\n" +
@@ -481,33 +487,33 @@ public class MecanumDrive extends Subsystem {
 
                 // Log pidf
                 "<details style=\"margin-left:10px\">\n" +
-                "<summary style=\"font-size: 12px; font-weight: 500\"> PIDF </summary>\n" +
+                "<summary style=\"font-size: 10px; font-weight: 500\"> PIDF </summary>\n" +
                 "<ul>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Ks : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Ks : " +
                 mKs +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Kv : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Kv : " +
                 mKv +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Ka : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Ka : " +
                 mKa +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> X Gain : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> X Gain : " +
                 mXGain +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> X velocity gain : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> X velocity gain : " +
                 mXVelocityGain +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Y gain : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Y gain : " +
                 mYGain +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Y velocity gain : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Y velocity gain : " +
                 mYVelocityGain +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Heading gain : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Heading gain : " +
                 mHeadingGain +
                 "</li>\n" +
-                "<li style=\"padding-left:10px; font-size: 11px\"> Heading velocity gain : " +
+                "<li style=\"padding-left:10px; font-size: 10px\"> Heading velocity gain : " +
                 mHeadingVelocityGain +
                 "</li>\n" +
                 "</ul>\n" +
@@ -544,7 +550,7 @@ public class MecanumDrive extends Subsystem {
 
                 // Log localizer
                 header +
-                " ODOMETER :" +
+                " ODOMETER : " +
                 mLocalizerHwName +
                 "\n" +
 

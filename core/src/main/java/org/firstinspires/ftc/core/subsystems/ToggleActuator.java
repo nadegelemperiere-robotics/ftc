@@ -126,14 +126,14 @@ public class ToggleActuator extends Actuator {
             result.append(super.logConfigurationHTML());
 
             result.append("<details>\n");
-            result.append("<summary style=\"font-size: 12px; font-weight: 500\"> TOGGLE </summary>\n");
+            result.append("<summary style=\"padding-left:10px;font-size: 10px; font-weight: 500\"> TOGGLE </summary>\n");
             result.append("<ul>\n");
 
-            result.append("<li style=\"padding-left:10px; font-size: 11px\">")
+            result.append("<li style=\"padding-left:10px; font-size: 10px\">")
                     .append(mPosition1Name)
                     .append("</li>");
 
-            result.append("<li style=\"padding-left:10px; font-size: 11px\">")
+            result.append("<li style=\"padding-left:10px; font-size: 10px\">")
                     .append(mPosition2Name)
                     .append("</li>");
 

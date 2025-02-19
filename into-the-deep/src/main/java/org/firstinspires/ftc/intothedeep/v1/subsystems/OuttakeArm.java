@@ -422,7 +422,7 @@ public class OuttakeArm extends Subsystem {
 
             // Log claw
             result.append("<details style=\"margin-left:10px\">\n");
-            result.append("<summary style=\"font-size: 12px; font-weight: 500\"> CLAW </summary>\n");
+            result.append("<summary style=\"font-size: 10px; font-weight: 500\"> CLAW </summary>\n");
             result.append("<ul>\n");
             result.append(mClaw.logConfigurationHTML());
             result.append("</ul>\n");
@@ -430,7 +430,7 @@ public class OuttakeArm extends Subsystem {
 
             // Log wrist
             result.append("<details style=\"margin-left:10px\">\n");
-            result.append("<summary style=\"font-size: 12px; font-weight: 500\"> WRIST </summary>\n");
+            result.append("<summary style=\"font-size: 10px; font-weight: 500\"> WRIST </summary>\n");
             result.append("<ul>\n");
             result.append(mWrist.logConfigurationHTML());
             result.append("</ul>\n");
@@ -438,7 +438,7 @@ public class OuttakeArm extends Subsystem {
 
             // Log elbow
             result.append("<details style=\"margin-left:10px\">\n");
-            result.append("<summary style=\"font-size: 12px; font-weight: 500\"> ELBOW </summary>\n");
+            result.append("<summary style=\"font-size: 10px; font-weight: 500\"> ELBOW </summary>\n");
             result.append("<ul>\n");
             result.append(mElbow.logConfigurationHTML());
             result.append("</ul>\n");

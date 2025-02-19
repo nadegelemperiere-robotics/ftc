@@ -157,7 +157,7 @@ public class MotorCoupled implements MotorComponent {
      * @return A formatted string containing motor telemetry data.
      */
     @Override
-    public String                       logPositions() {
+    public String                       log() {
         String result = "";
         if (mConfigurationValid) {
             result += "\n  First : P : " + mFirst.getCurrentPosition() + " V : " + mFirst.getVelocity() + " P : " + mFirst.getPower();

@@ -55,6 +55,7 @@ public abstract class Subsystem implements Configurable {
 
     /* ----------------------- Task management --------------------- */
     public void    update() {}
+    public void    log() {}
     public boolean hasFinished() { return true; }
 
     /* ------------ Inter OpModes persistence management ----------- */

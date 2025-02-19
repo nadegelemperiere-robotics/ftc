@@ -291,10 +291,10 @@ public class Configuration {
 
         // Log to driver station
         if(mIsValid) {
-            mLogger.raw(LogManager.Target.DRIVER_STATION, "CNF " + mFilename + " is valid");
+            mLogger.raw(LogManager.Target.DRIVER_STATION, "CNF " + mFilename + " is valid\n");
         }
         else {
-            mLogger.raw(LogManager.Target.DRIVER_STATION, "CNF " + mFilename + " is not valid");
+            mLogger.raw(LogManager.Target.DRIVER_STATION, "CNF " + mFilename + " is not valid\n");
         }
 
         // Log to dashboard
