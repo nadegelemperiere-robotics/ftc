@@ -51,8 +51,6 @@
 package org.firstinspires.ftc.core.components.imus;
 
 /* JSON includes */
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.json.JSONObject;
 
 /* Tools includes */
@@ -88,6 +86,11 @@ public class ImuMock implements ImuComponent {
      * @return The name of the component.
      */
     public String                       name() { return mName; }
+
+    /**
+     * Cache current imu value to enable multiple calls in a loop without
+     */
+    public void                         update() {}
 
     /**
      * Logs the current imu yaw, pitch and roll.

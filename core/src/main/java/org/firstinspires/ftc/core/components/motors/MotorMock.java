@@ -79,9 +79,11 @@ public class MotorMock implements MotorComponent {
      * @return A formatted string containing motor telemetry data.
      */
     @Override
-    public String                       log()
+    public void                         log()
     {
-        return "\n  P : " + mPosition + " V : " + 0.0 + " P : " + mPower;
+        mLogger.metric( LogManager.Target.DASHBOARD, mName+"-pos","" + mPosition);
+        mLogger.metric( LogManager.Target.DASHBOARD, mName+"-spd","" + 0);
+        mLogger.metric( LogManager.Target.DASHBOARD, mName+"-pwr","" + mPower);
     }
 
     /* ------------------ Configurable functions ------------------- */

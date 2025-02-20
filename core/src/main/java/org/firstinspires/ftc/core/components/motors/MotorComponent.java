@@ -76,7 +76,7 @@ public interface MotorComponent extends Configurable {
     /* --------------------- Custom functions ---------------------- */
 
     String                      name();
-    String                      log();
+    void                        log();
     boolean                     encoderCorrection();
     void                        encoderCorrection(boolean value);
 

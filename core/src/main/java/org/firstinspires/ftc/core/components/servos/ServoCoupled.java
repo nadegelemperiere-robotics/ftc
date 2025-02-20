@@ -85,13 +85,11 @@ public class ServoCoupled implements ServoComponent {
      * @return A formatted string containing servo telemetry data.
      */
     @Override
-    public String                       log() {
-        String result = "";
+    public void                         log() {
         if (mConfigurationValid) {
-            result += "\n  First : P : " + mFirst.getPosition() ;
-            result += "\n  Second : P : " + mSecond.getPosition() ;
+            mLogger.metric(LogManager.Target.DASHBOARD, mName+"-1-pos","" + mFirst.getPosition());
+            mLogger.metric(LogManager.Target.DASHBOARD, mName+"-2-pos","" + mSecond.getPosition());
         }
-        return result;
     }
 
     /* ------------------ Configurable functions ------------------- */

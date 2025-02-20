@@ -92,6 +92,23 @@ public class Hardware implements Configurable {
 
     public boolean                          isConfigured() { return mConfigurationValid;}
 
+    // Manage bulkcaching on our own, since it does not work for Imu
+    public void                             update() {
+        mLogger.info(LogManager.Target.FILE, "start");
+        for (Map.Entry<String, ImuComponent> imu : mImus.entrySet()) {
+            imu.getValue().update();
+        }
+        // Call other components at least once to trigger bulk caching
+        for (Map.Entry<String, MotorComponent> motor : mMotors.entrySet()) {
+            motor.getValue().currentPosition();
+        }
+        for (Map.Entry<String, ServoComponent> servo : mServos.entrySet()) {
+            servo.getValue().position();
+        }
+        mLogger.info(LogManager.Target.FILE, "stop");
+    }
+
+
     public void                             read(JSONObject reader) {
 
         mConfigurationValid = true;

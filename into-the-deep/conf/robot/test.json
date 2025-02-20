@@ -33,9 +33,9 @@
             },
             "imus": {
                 "built-in": {
-                    "hwmap": "imu",
-                    "logo-direction": "up",
-                    "usb-direction": "right"
+                    "hwmap"             : "imu",
+                    "logo-direction"    : "up",
+                    "usb-direction"     : "right"
                 }
             }
         },
@@ -44,6 +44,7 @@
                 "type" : "intake-arm",
                 "claw" : {
                     "type"      : "toggle-actuator",
+                    "short"     : "IN CLW",
                     "toggle"    : ["open", "closed"],
                     "servo"     : "intake-claw",
                     "positions" : {
@@ -54,38 +55,42 @@
                 },
                 "wrist" : {
                     "type"      : "toggle-actuator",
+                    "short"     : "IN WRS",
                     "toggle"    : ["0", "180"],
                     "servo"     : "intake-wrist-roll",
                     "positions" : {
-                        "0":    0.405,
-                        "180":  0.675
+                        "0"     : 0.405,
+                        "180"   : 0.675
                     }
                 },
                 "elbow" : {
                     "type"      : "actuator",
+                    "short"     : "IN ELB",
                     "servo"     : "intake-elbow-pitch",
                     "positions" : {
-                        "transfer": 0.15,
-                        "grab":     0.66,
-                        "off":      0.66,
-                        "drone":    0.68,
-                        "over-sub": 0.71
+                        "transfer"  : 0.15,
+                        "grab"      : 0.66,
+                        "off"       : 0.66,
+                        "drone"     : 0.68,
+                        "over-sub"  : 0.71
                     }
                 },
                 "arm" : {
                     "type"      : "actuator",
+                    "short"     : "IN ARM",
                     "servo"     : "intake-arm-pitch",
                     "positions" : {
-                        "grab":     0.39,
-                        "drone":     0.44,
-                        "over-sub": 0.6,
-                        "transfer": 0.97,
-                        "off":      1.0
+                        "grab"      : 0.39,
+                        "drone"     : 0.44,
+                        "over-sub"  : 0.6,
+                        "transfer"  : 0.97,
+                        "off"       : 1.0
                     }
                 }
             },
             "intake-slides" : {
                 "type"      : "default-slides",
+                "short"     : "IN SLD",
                 "motor"     : "intake-slides",
                 "positions" : {
                     "min"               : 0,
@@ -96,14 +101,15 @@
                     "max"               : 315
                 },
                 "powers": {
-                    "set-position": 1.0,
-                    "hold-position": 0.3
+                    "set-position"  : 1.0,
+                    "hold-position" : 0.3
                 }
             },
             "outtake-arm" : {
                 "type" : "outtake-arm",
                 "claw" : {
                     "type"      : "toggle-actuator",
+                    "short"     : "OUT CLW",
                     "toggle"    : ["open", "closed"],
                     "servo"     : "outtake-claw",
                     "positions" : {
@@ -114,15 +120,17 @@
                 },
                 "wrist" : {
                     "type"      : "toggle-actuator",
+                    "short"     : "OUT WRS",
                     "toggle"    : ["0", "180"],
                     "servo"     : "outtake-wrist-roll",
                     "positions" : {
-                        "0":    0.135,
-                        "180":  0.42
+                        "0"     : 0.135,
+                        "180"   : 0.42
                     }
                 },
                 "elbow" : {
                     "type"      : "actuator",
+                    "short"     : "OUT ELB",
                     "servo"     : "outtake-elbow-pitch",
                     "positions" : {
                         "autonomous-specimen-behind" : 0.011,
@@ -135,33 +143,35 @@
                 }
             },
             "outtake-slides" : {
-                "type": "default-slides",
-                "motor": "outtake-slides",
+                "type"  : "default-slides",
+                "short" : "OUT SLD",
+                "motor" : "outtake-slides",
                 "positions": {
-                    "min": 0,
-                    "transfer": 0,
-                    "autonomous-specimen-submersible-under": 690,
-                    "autonomous-specimen-submersible-over": 870,
-                    "autonomous-sample-ascend": 710,
-                    "retracted": 1300,
-                    "max": 3726
+                    "min"                                   : 0,
+                    "transfer"                              : 0,
+                    "autonomous-specimen-submersible-under" : 690,
+                    "autonomous-specimen-submersible-over"  : 870,
+                    "autonomous-sample-ascend"              : 710,
+                    "retracted"                             : 1300,
+                    "max"                                   : 3726
                 },
                 "powers": {
-                    "set-position": 1.0,
-                    "hold-position": 0.3
+                    "set-position"  : 1.0,
+                    "hold-position" : 0.3
                 }
             },
             "drive-train" : {
-                "type" : "mecanum-drive",
+                "type"   : "mecanum-drive",
+                "short"  : "DRV",
                 "motors" : {
                     "front-left-wheel":  "front-left-wheel",
                     "front-right-wheel": "front-right-wheel",
                     "back-left-wheel":   "back-left-wheel",
                     "back-right-wheel":  "back-right-wheel"
                 },
-                "odometer" : "driveencoders",
+                "odometer"  : "driveencoders",
                 "reference" : "robot-centric",
-                "physics" : {
+                "physics"   : {
                     "in-per-tick"               : 1,
                     "lat-in-per-tick"           : 0.7118231519430893,
                     "track-width-ticks"         : 15.134752358682695,

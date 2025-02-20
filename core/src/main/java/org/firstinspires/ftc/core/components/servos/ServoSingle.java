@@ -63,12 +63,10 @@ public class ServoSingle implements ServoComponent {
      * @return A formatted string containing servo telemetry data.
      */
     @Override
-    public String                       log() {
-        String result = "";
+    public void                         log() {
         if (mConfigurationValid) {
-            result += "\n  P : " + mServo.getPosition();
+            mLogger.metric(LogManager.Target.DASHBOARD, mName+"-pos","" + mServo.getPosition());
         }
-        return result;
     }
 
 

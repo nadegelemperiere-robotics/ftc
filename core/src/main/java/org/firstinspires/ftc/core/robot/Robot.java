@@ -70,6 +70,7 @@ public class Robot extends Context implements Configurable {
      */
     public void                         update()
     {
+        mHardware.update();
         for (Map.Entry<String, Subsystem> subsystem : mSubsystems.entrySet()) {
             subsystem.getValue().update();
         }

@@ -177,13 +177,13 @@ public class ThreeDeadWheelsOdometer implements OdometerComponent {
     @Override
     public void             log() {
         if (mConfigurationValid) {
-            mLogger.metric(mName + "-x", mCurrentPose.position.x + " inches");
-            mLogger.metric(mName + "-y", mCurrentPose.position.y + " inches");
-            mLogger.metric(mName + "-heading", mCurrentPose.heading.toDouble() + " rad");
+            mLogger.metric(LogManager.Target.DASHBOARD,mName + "-x", mCurrentPose.position.x + " inches");
+            mLogger.metric(LogManager.Target.DASHBOARD,mName + "-y", mCurrentPose.position.y + " inches");
+            mLogger.metric(LogManager.Target.DASHBOARD,mName + "-heading", mCurrentPose.heading.toDouble() / Math.PI * 180 + " deg");
 
-            mLogger.metric(mName + "-vx",mCurrentVelocity.linearVel.x + " inches/s");
-            mLogger.metric(mName + "-vy",mCurrentVelocity.linearVel.y + " inches/s");
-            mLogger.metric(mName + "-vheading",mCurrentVelocity.angVel + " rad/s");
+            mLogger.metric(LogManager.Target.DASHBOARD,mName + "-vx",mCurrentVelocity.linearVel.x + " inches/s");
+            mLogger.metric(LogManager.Target.DASHBOARD,mName + "-vy",mCurrentVelocity.linearVel.y + " inches/s");
+            mLogger.metric(LogManager.Target.DASHBOARD,mName + "-vheading",mCurrentVelocity.angVel / Math.PI * 180 + " deg/s");
         }
     }
 

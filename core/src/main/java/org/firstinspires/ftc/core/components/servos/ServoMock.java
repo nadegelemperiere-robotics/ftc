@@ -67,12 +67,8 @@ public class ServoMock implements ServoComponent {
      * @return A formatted string containing servo telemetry data.
      */
     @Override
-    public String                       log() {
-        String result = "";
-        if (mConfigurationValid) {
-            result += "\n  P : " + mPosition;
-        }
-        return result;
+    public void                       log() {
+        mLogger.metric(LogManager.Target.DASHBOARD, mName+"-pos","" + mPosition);
     }
 
     /* ------------------ Configurable functions ------------------- */

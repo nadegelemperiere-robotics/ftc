@@ -58,11 +58,11 @@ public class Encoder {
         PositionVelocityPair result = null;
         if (mConfigurationValid) {
 
-            double deltaTime = mTimer.seconds();
-            mTimer.reset();
 
             int currentPosition = mMotor.currentPosition();
             double velocity = mMotor.velocity();
+            double deltaTime = mTimer.seconds();
+            mTimer.reset();
 
             if (mIsFirstTime) {
                 result = new PositionVelocityPair(currentPosition, 0, currentPosition, 0);
@@ -72,7 +72,7 @@ public class Encoder {
                 mHistory[2] = velocity;
                 mIsFirstTime = false;
             } else {
-                double velComputed = (double) (currentPosition - mLastPosition) / deltaTime;
+                double velComputed = (currentPosition - mLastPosition) / deltaTime;
 
                 mHistory[mCurrentIndex] = velComputed;
                 mCurrentIndex = (mCurrentIndex + 1) % 3;
@@ -89,6 +89,7 @@ public class Encoder {
 
                 result = new PositionVelocityPair(currentPosition, real, currentPosition, velocity);
             }
+
 
         }
         return result;

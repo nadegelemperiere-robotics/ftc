@@ -68,7 +68,7 @@ public class OdometerTest extends OpMode {
 
             // Log initialization
             mLogger = new LogManager(telemetry, FtcDashboard.getInstance(),"odometer");
-            mLogger.level(LogManager.Severity.TRACE);
+            mLogger.level(LogManager.Severity.INFO);
             mLogger.clear();
 
             // Configuration initialization
@@ -113,28 +113,15 @@ public class OdometerTest extends OpMode {
 
         try {
 
-            mLogger.info("1) LOOP : Begin");
-            mLogger.debug("1) LOOP : Begin");
-            telemetry.addLine("test");
-            telemetry.addLine("test");
-            telemetry.addLine("test");
-            telemetry.addLine("test");
-            FtcDashboard.getInstance().getTelemetry().addLine("test");
-            FtcDashboard.getInstance().getTelemetry().addLine("test");
-            FtcDashboard.getInstance().getTelemetry().addLine("test");
-            FtcDashboard.getInstance().getTelemetry().addLine("test");
-            mLogger.trace("1) LOOP : Begin");
-            mLogger.trace(LogManager.Target.DRIVER_STATION,"1) LOOP : Begin");
-            mLogger.trace(LogManager.Target.DRIVER_STATION,"1) LOOP : Begin");
-            mLogger.trace(LogManager.Target.DRIVER_STATION,"1) LOOP : Begin");
-            mLogger.trace("1) LOOP : Begin");
+            mLogger.info(LogManager.Target.FILE, "1- Update robot");
             mRobot.update();
+            mLogger.info(LogManager.Target.FILE, "2- Log robot");
             mRobot.log();
-            mLogger.info("2) LOOP : Updated robot");
+            mLogger.info(LogManager.Target.FILE, "3- Update dispatcher");
             mDispatcher.update();
-            mLogger.info("3) LOOP : Updated dispatcher");
+            mLogger.info(LogManager.Target.FILE, "4- Update logs");
             mLogger.update();
-            mLogger.info("4) LOOP : End");
+            mLogger.info(LogManager.Target.FILE, "5- End");
 
         }
         catch(Exception e){
@@ -206,6 +193,7 @@ class OdometerTestRobot extends Robot {
     }
 
     public void update() {
+        mHardware.update();
         for (Map.Entry<String, Subsystem> subsystem : mSubsystems.entrySet()) {
             subsystem.getValue().update();
         }

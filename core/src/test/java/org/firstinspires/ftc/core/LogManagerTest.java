@@ -57,7 +57,6 @@ public class LogManagerTest extends LinearOpMode {
 
     private void launch(Suite suite) {
         if(suite == Suite.CONSTRUCTOR) { this.constructorTest(); }
-        if(suite == Suite.CONSTRUCTOR) { this.constructorTest(); }
         else {
             telemetry.addLine("Unknown suite " + suite);
             FtcDashboard.getInstance().getTelemetry().addLine("Unknown suite " + suite);
@@ -76,7 +75,10 @@ public class LogManagerTest extends LinearOpMode {
         for (LogManager.Target target : LogManager.Target.values()) {
             mLogger.error(target, "Error shall only appear on driver station");
             mLogger.warning(target, "Warning shall only appear on driver station");
-            mLogger.metric("Target","DriverStation");
+            mLogger.metric(target, "Target","DriverStation");
+            mLogger.info(target, "Info shall only appear on driver station");
+            mLogger.debug(target, "Debug shall only appear on driver station");
+            mLogger.trace(target, "Trace shall only appear on driver station");
         }
         mLogger.stop();
 
@@ -87,18 +89,24 @@ public class LogManagerTest extends LinearOpMode {
         for (LogManager.Target target : LogManager.Target.values()) {
             mLogger.error(target, "Error line shall only appear on dashboard");
             mLogger.warning(target, "Warning shall only appear on dashboard");
-            mLogger.metric("Target","Dashboard");
+            mLogger.metric(target, "Target","Dashboard");
+            mLogger.info(target, "Info shall only appear on dashboard");
+            mLogger.debug(target, "Debug shall only appear on dashboard");
+            mLogger.trace(target, "Trace shall only appear on dashboard");
         }
         mLogger.stop();
 
         telemetry.addLine("----> File only");
         FtcDashboard.getInstance().getTelemetry().addLine("----> File only");
 
-        mLogger = new LogManager(null, null,"log-manager");
+        mLogger = new LogManager(null, null,"log-manager-only");
         for (LogManager.Target target : LogManager.Target.values()) {
             mLogger.error(target, "Error line shall only appear in file");
             mLogger.warning(target, "Warning line shall only appear in file");
-            mLogger.metric("Target","File");
+            mLogger.metric(target, "Target","File");
+            mLogger.info(target, "Info shall only appear in file");
+            mLogger.debug(target, "Debug shall only appear in file");
+            mLogger.trace(target, "Trace shall only appear in file");
         }
         mLogger.stop();
 
@@ -109,19 +117,26 @@ public class LogManagerTest extends LinearOpMode {
         for (LogManager.Target target : LogManager.Target.values()) {
             mLogger.error(target, "Error line shall not appear");
             mLogger.warning(target, "Warning line shall not appear");
-            mLogger.metric("Target","None");
+            mLogger.metric(target, "Target","None");
+            mLogger.info(target, "Info line shall not appear");
+            mLogger.debug(target, "Debug line shall not appear");
+            mLogger.trace(target, "Trace line shall not appear");
         }
         mLogger.stop();
 
         telemetry.addLine("----> Driver station, file and dashboard");
         FtcDashboard.getInstance().getTelemetry().addLine("----> Driver station and dashboard");
 
-        mLogger = new LogManager(telemetry, FtcDashboard.getInstance(),"log-manager");
+        mLogger = new LogManager(telemetry, FtcDashboard.getInstance(),"log-manager-all");
         for (LogManager.Target target : LogManager.Target.values()) {
             mLogger.error(target, "Error line shall appear on driver station, file and dashboard");
             mLogger.warning(target, "Warning line shall appear on driver station, file and dashboard");
-            mLogger.metric("Target","All");
+            mLogger.metric(target, "Target","All");
+            mLogger.info(target, "Info line shall appear on driver station, file and dashboard");
+            mLogger.debug(target, "Debug line shall appear on driver station, file and dashboard");
+            mLogger.trace(target, "Trace line shall appear on driver station, file and dashboard");
         }
+        mLogger.stop();
 
         for (LogManager.Target target : LogManager.Target.values()) {
             mLogger.update(target);

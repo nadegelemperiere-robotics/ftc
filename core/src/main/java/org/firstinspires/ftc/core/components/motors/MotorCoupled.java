@@ -157,13 +157,16 @@ public class MotorCoupled implements MotorComponent {
      * @return A formatted string containing motor telemetry data.
      */
     @Override
-    public String                       log() {
-        String result = "";
+    public void                       log() {
+
         if (mConfigurationValid) {
-            result += "\n  First : P : " + mFirst.getCurrentPosition() + " V : " + mFirst.getVelocity() + " P : " + mFirst.getPower();
-            result += "\n  Second : P : " + mSecond.getCurrentPosition() + " V : " + mSecond.getVelocity() + " P : " + mSecond.getPower();
+            mLogger.metric(LogManager.Target.DASHBOARD, mName+"-1-pos","" + mFirst.getCurrentPosition());
+            mLogger.metric(LogManager.Target.DASHBOARD, mName+"-1-spd","" + mFirst.getVelocity());
+            mLogger.metric(LogManager.Target.DASHBOARD, mName+"-1-pwr","" + mFirst.getPower());
+            mLogger.metric(LogManager.Target.DASHBOARD, mName+"-2-pos","" + mSecond.getCurrentPosition());
+            mLogger.metric(LogManager.Target.DASHBOARD, mName+"-2-spd","" + mSecond.getVelocity());
+            mLogger.metric(LogManager.Target.DASHBOARD, mName+"-2-pwr","" + mSecond.getPower());
         }
-        return result;
     }
 
     /* ------------------ Configurable functions ------------------- */

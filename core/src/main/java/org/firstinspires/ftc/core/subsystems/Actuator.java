@@ -34,12 +34,13 @@ import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 
 public class Actuator extends Subsystem {
 
-    public static final String sMotorKey = "motor";
-    public static final String sServoKey = "servo";
-    public static final String sPositionsKey = "positions";
-    public static final String sPowersKey = "powers";
-    public static final String sSetPositionKey = "set-position";
+    public static final String sMotorKey        = "motor";
+    public static final String sServoKey        = "servo";
+    public static final String sPositionsKey    = "positions";
+    public static final String sPowersKey       = "powers";
+    public static final String sSetPositionKey  = "set-position";
     public static final String sHoldPositionKey = "hold-position";
+    public static final String sShortNameKey    = "short";
 
     protected final LogManager          mLogger;
 
@@ -47,6 +48,7 @@ public class Actuator extends Subsystem {
     boolean                             mHasFinished;
 
     final String                        mName;
+    String                              mShortName;
     String                              mHwName;
 
     protected final Hardware            mHardware;
@@ -75,18 +77,19 @@ public class Actuator extends Subsystem {
         mLogger             = logger;
         mConfigurationValid = false;
 
-        mName           = name;
-        mHwName         = "";
+        mName               = name;
+        mHwName             = "";
+        mShortName          = "";
 
-        mHardware       = hardware;
-        mMotor          = null;
-        mServo          = null;
+        mHardware           = hardware;
+        mMotor              = null;
+        mServo              = null;
 
-        mPositions      = new LinkedHashMap<>();
-        mPosition       = "";
+        mPositions          = new LinkedHashMap<>();
+        mPosition           = "none";
 
-        mTimer          = new Timer(mLogger);
-        mHasFinished    = true;
+        mTimer              = new Timer(mLogger);
+        mHasFinished        = true;
 
         mSetPositionPower   = 1.0;
         mHoldPositionPower  = 0.0;
@@ -118,11 +121,11 @@ public class Actuator extends Subsystem {
         return mPosition;
     }
 
-
     /**
      * Update periodically actuator status
      */
-    public void update() {
+    public void                         update() {
+        mLogger.debug(LogManager.Target.FILE,mName + " start");
         if (mServo != null) {
             mHasFinished = !(mTimer.isArmed());
         }
@@ -134,23 +137,27 @@ public class Actuator extends Subsystem {
                 }
             }
         }
+        mLogger.debug(LogManager.Target.FILE,mName + " stop");
     }
 
     /**
      * Log actuator current status
      */
     public void                         log() {
+
         if(mMotor != null && this.hasFinished()) {
-            mLogger.info("--> " + mName + " : " + mMotor.log() + " IN POS : " + mPosition);
+            //mMotor.log();
+            mLogger.info(mShortName + " : pos = " + mPosition + " - enc : " + mMotor.currentPosition() + " - spd : " + mMotor.velocity() + " - pwr : " + mMotor.power());
         }
         else if(mMotor != null && !this.hasFinished()) {
-            mLogger.info("--> " + mName + " : " + mMotor.log() + " REACHING POS : " + mPosition);
+            //mMotor.log();
+            mLogger.info(mShortName + " : pos > " + mPosition + " - enc : " + mMotor.currentPosition() + " - spd : " + mMotor.velocity() + " - pwr : " + mMotor.power());
         }
         else if(mServo != null && this.hasFinished()) {
-            mLogger.info("--> " + mName + " : " + mServo.log() + " IN POS : " + mPosition);
+            mLogger.info(mShortName + " : pos = " + mPosition + " - srv : " + mServo.position());
         }
         else if(mServo != null && !this.hasFinished()) {
-            mLogger.info("--> " + mName + " : " + mServo.log() + " REACHING POS : " + mPosition);
+            mLogger.info(mShortName + " : pos > " + mPosition + " - srv : " + mServo.position());
         }
     }
 
@@ -251,6 +258,11 @@ public class Actuator extends Subsystem {
                 }
             }
 
+            if(reader.has(sShortNameKey)) {
+                mShortName = reader.getString(sShortNameKey);
+            }
+            if(mShortName.isEmpty()) { mShortName = mName; }
+
             if(reader.has(sPositionsKey)) {
                JSONObject positions = reader.getJSONObject(sPositionsKey);
                Iterator<String> keys = positions.keys();
@@ -310,6 +322,11 @@ public class Actuator extends Subsystem {
 
         if(mConfigurationValid) {
 
+            result.append("<li style=\"padding-left:10px; font-size: 10px\">")
+                    .append(" <span style=\"font-weight: 500\"> SHORT : </span> ")
+                    .append(mShortName)
+                    .append("\n");
+
             if (mMotor != null) {
                 result.append("<li style=\"padding-left:10px; font-size: 10px\">")
                         .append(" <span style=\"font-weight: 500\"> MOTOR : </span> ")
@@ -357,6 +374,10 @@ public class Actuator extends Subsystem {
         StringBuilder result = new StringBuilder();
 
         if(mConfigurationValid) {
+            result.append(header)
+                    .append("> SHORT : ")
+                    .append(mShortName);
+
             if (mMotor != null) {
                 result.append(header)
                         .append("> NOTOR : ")
@@ -398,6 +419,9 @@ public class Actuator extends Subsystem {
         if(mConfigurationValid) {
 
             try {
+
+                writer.put(sShortNameKey,mShortName);
+
                 if(mMotor != null) { writer.put(sMotorKey, mHwName); }
                 if(mServo != null) { writer.put(sServoKey, mHwName); }
 

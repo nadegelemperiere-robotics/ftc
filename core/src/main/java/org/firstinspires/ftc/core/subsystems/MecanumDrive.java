@@ -66,6 +66,7 @@ public class MecanumDrive extends DriveTrain {
     static final String             sReferenceKey               = "reference";
     static final String             sRobotCentricKey            = "robot-centric";
     static final String             sFieldCentricKey            = "field-centric";
+    static final String             sShortNameKey               = "short";
 
     final LogManager                mLogger;
 
@@ -73,6 +74,7 @@ public class MecanumDrive extends DriveTrain {
     boolean                         mHasFinished;
 
     final String                    mName;
+    String                          mShortName;
     String                          mLeftFrontHwName;
     String                          mLeftBackHwName;
     String                          mRightFrontHwName;
@@ -118,6 +120,7 @@ public class MecanumDrive extends DriveTrain {
         mDrivingSpeedMultiplier = 1.0;
 
         mName               = name;
+        mShortName          = "";
         mLeftFrontHwName    = "";
         mLeftBackHwName     = "";
         mRightFrontHwName   = "";
@@ -157,7 +160,22 @@ public class MecanumDrive extends DriveTrain {
     }
 
     public void                         log() {
-        mLocalizer.log();
+        if(mConfigurationValid) {
+            // mLeftFront.log();
+            // mLeftBack.log();
+            // mRightFront.log();
+            // mRightBack.log();
+            mLocalizer.log();
+
+            mLogger.info(mShortName + " POS : " +
+                            " x : " + (double)((int)(mLocalizer.pose().position.x * 100)) / 100 +
+                            " - y : " + (double)((int)(mLocalizer.pose().position.y * 100)) / 100 +
+                            " - heading : " + (int)(mLocalizer.pose().heading.toDouble() / Math.PI * 180) + " deg");
+            mLogger.info(mShortName + " SPD : " +
+                    " x : " + (double)((int)(mLocalizer.velocity().linearVel.x)*1000) / 1000 +
+                    " - y : " + (double)((int)(mLocalizer.velocity().linearVel.y)*1000) / 1000 +
+                    " - heading : " + (double)((int)(mLocalizer.velocity().angVel / Math.PI * 1800))/1000 + " deg/s");
+        }
     }
 
     public void                         initialize(Pose2d pose) {
@@ -171,7 +189,9 @@ public class MecanumDrive extends DriveTrain {
     }
 
     public void                         update() {
+        mLogger.debug(mName + " start");
         if(mConfigurationValid) { mLocalizer.update(); }
+        mLogger.debug(mName + " stop");
     }
 
     @Override
@@ -179,7 +199,7 @@ public class MecanumDrive extends DriveTrain {
 
         if(mConfigurationValid) {
 
-            mLogger.info("START DRIVE");
+            mLogger.debug(LogManager.Target.FILE,"start");
 
             double vx = xSpeed;
             double vy = ySpeed;
@@ -209,7 +229,7 @@ public class MecanumDrive extends DriveTrain {
             mRightFront.power(frontRightPower);
             mRightBack.power(backRightPower);
 
-            mLogger.info("STOP DRIVE");
+            mLogger.debug(LogManager.Target.FILE,"stop");
 
         }
     }
@@ -271,12 +291,16 @@ public class MecanumDrive extends DriveTrain {
 
         try {
 
+            if(reader.has(sShortNameKey)) {
+                mShortName = reader.getString(sShortNameKey);
+            }
+            if(mShortName.isEmpty()) { mShortName = mName; }
+
             if (reader.has(sReferenceKey)) {
                 String reference = reader.getString(sReferenceKey);
                 if(reference.equals(sFieldCentricKey)) { mDrivingMode = Mode.FIELD_CENTRIC; }
                 if(reference.equals(sRobotCentricKey)) { mDrivingMode = Mode.ROBOT_CENTRIC; }
             }
-
 
             if(reader.has(sMotorsKey)) {
                 Map<String,MotorComponent> motors = mHardware.motors();
@@ -387,6 +411,8 @@ public class MecanumDrive extends DriveTrain {
 
                 writer.put(sTypeKey, "mecanum-drive");
 
+                writer.put(sShortNameKey,mShortName);
+
                 JSONObject motors = new JSONObject();
                 motors.put(sFrontLeftKey,mLeftFrontHwName);
                 motors.put(sBackLeftKey,mLeftBackHwName);
@@ -427,10 +453,13 @@ public class MecanumDrive extends DriveTrain {
 
     public String                       logConfigurationHTML() {
 
-        // Log motors
+        // Log short name
+        String result = "<p style=\"padding-left:10px; font-size: 10px;\"> <span style=\"font-weight: 500\"> SHORT : </span>" +
+                mShortName +
+                "</p>\n" +
 
-
-        String result = "<details style=\"margin-left:10px\">\n" +
+                // Log motors
+                "<details style=\"margin-left:10px\">\n" +
                 "<summary style=\"font-size: 10px; font-weight: 500\"> MOTORS </summary>\n" +
                 "<ul>\n" +
                 "<li style=\"padding-left:10px; font-size: 10px\"> Left front wheel : " +
@@ -525,10 +554,14 @@ public class MecanumDrive extends DriveTrain {
 
     public String                       logConfigurationText(String header) {
 
-        // Log motors
-
 
         String result = header +
+                "> SHORT : " +
+                mShortName +
+                "\n" +
+
+                // Log motors
+                header +
                 "> MOTORS\n" +
                 header +
                 "--> Left front wheel : " +

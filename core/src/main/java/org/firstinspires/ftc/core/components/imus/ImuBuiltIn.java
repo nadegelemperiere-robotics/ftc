@@ -65,14 +65,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /* FTC Controller */
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
-/* Configuration includes */
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
-
-
 
 public class ImuBuiltIn implements ImuComponent {
 
@@ -125,7 +121,9 @@ public class ImuBuiltIn implements ImuComponent {
     RevHubOrientationOnRobot.LogoFacingDirection    mLogo;
     RevHubOrientationOnRobot.UsbFacingDirection     mUsb;
 
-    double                                          mHeadingOffset;
+    AngularVelocity                                 mVelocity;
+    YawPitchRollAngles                              mPosition;
+
 
     /* ----------------------- Constructors ------------------------ */
     /**
@@ -136,13 +134,14 @@ public class ImuBuiltIn implements ImuComponent {
      * @param logger The logging manager to handle system logs.
      */
     public ImuBuiltIn(String name, HardwareMap hwMap, LogManager logger) {
-        mConfigurationValid  = false;
-        mLogger = logger;
-        mName   = name;
-        mHwName = "";
-        mMap    = hwMap;
-        mImu = null;
-        mHeadingOffset = 0;
+        mConfigurationValid = false;
+        mLogger             = logger;
+        mName               = name;
+        mHwName             = "";
+        mMap                = hwMap;
+        mImu                = null;
+        mVelocity           = null;
+        mPosition           = null;
     }
 
 
@@ -161,10 +160,20 @@ public class ImuBuiltIn implements ImuComponent {
     public String                       log() {
         String result = "";
         if(mConfigurationValid) {
-            YawPitchRollAngles orientation = mImu.getRobotYawPitchRollAngles();
-            result += "\n Y : " + orientation.getYaw(AngleUnit.DEGREES) + " P : " + orientation.getPitch(AngleUnit.DEGREES) + " R : " + orientation.getRoll(AngleUnit.DEGREES);
+            result += "\n Y : " + mPosition.getYaw(AngleUnit.DEGREES) + " P : " + mPosition.getPitch(AngleUnit.DEGREES) + " R : " + mPosition.getRoll(AngleUnit.DEGREES);
         }
         return result;
+    }
+
+    /**
+     * Cache current imu value to enable multiple calls in a loop without
+     */
+    public void                         update()
+    {
+        if(mConfigurationValid) {
+            mPosition = mImu.getRobotYawPitchRollAngles();
+            mVelocity = mImu.getRobotAngularVelocity(AngleUnit.RADIANS);
+        }
     }
 
     /**
@@ -173,8 +182,10 @@ public class ImuBuiltIn implements ImuComponent {
      * @return The heading in radians, adjusted with the configured offset.
      */
     public double                       heading() {
-        double result = mImu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-        result += mHeadingOffset;
+        double result = 0;
+        if(mConfigurationValid && mPosition != null) {
+            result = mPosition.getYaw(AngleUnit.RADIANS);
+        }
         return result;
     }
 
@@ -184,8 +195,11 @@ public class ImuBuiltIn implements ImuComponent {
      * @return The IMU's angular velocity in radians per second.
      */
     public double                       headingVelocity() {
-        AngularVelocity velocity = mImu.getRobotAngularVelocity(AngleUnit.RADIANS);
-        return velocity.zRotationRate;
+        double result = 0;
+        if(mConfigurationValid && mVelocity != null) {
+            result = mVelocity.zRotationRate;
+        }
+        return result;
     }
 
     /* ------------------ Configurable functions ------------------- */

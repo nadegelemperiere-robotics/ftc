@@ -8,18 +8,14 @@
 package org.firstinspires.ftc.core.tools;
 
 /* System includes */
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Objects;
-import java.util.Date;
-import java.util.logging.Handler;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 
 /* Android includes */
 import android.os.Environment;
@@ -27,6 +23,9 @@ import android.os.Environment;
 /* Json includes */
 import org.json.JSONException;
 import org.json.JSONObject;
+
+/* Qualcomm includes */
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 /* FTC Controller includes */
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -39,12 +38,12 @@ import org.firstinspires.ftc.core.configuration.Configurable;
 
 public class LogManager implements Configurable {
 
-    static final int  sStackLevel = 4;
+    static final int  sStackLevel = 3;
 
     public enum Target {
-        DRIVER_STATION,
+        FILE,
         DASHBOARD,
-        FILE
+        DRIVER_STATION
     }
 
     public enum Severity  {
@@ -104,8 +103,9 @@ public class LogManager implements Configurable {
     // Loggers
     Telemetry                               mDriverStation;
     FtcDashboard                            mDashboard;
-    Logger                                  mFile;
+    BufferedWriter                          mFile;
     final String                            mFilename;
+    final ElapsedTime                       mTimer;
 
     // Persistence
     final Map<Target,StringBuilder>         mErrors;
@@ -116,6 +116,9 @@ public class LogManager implements Configurable {
     final Map<Target,StringBuilder>         mInfos;
     final Map<Target,StringBuilder>         mDebugs;
     final Map<Target,StringBuilder>         mTraces;
+
+    // Ordered by time
+    StringBuilder                           mFileData;
 
     /**
      * Builds a log manager from parameters
@@ -156,6 +159,10 @@ public class LogManager implements Configurable {
             mTraces.put(target,new StringBuilder());
             mMetrics.put(target, new LinkedHashMap<>());
         }
+        mFileData = new StringBuilder();
+
+        mTimer = new ElapsedTime();
+        mTimer.reset();
 
         mDriverStation = station;
         if(mDriverStation != null) {
@@ -169,17 +176,19 @@ public class LogManager implements Configurable {
 
         mFile = null;
         mFilename = filename;
-        try {
-            mFile = this.initializeFileLogger(mFilename);
+        if(!mFilename.isEmpty()) {
+            String filepath = Environment.getExternalStorageDirectory().getPath()
+                    + "/FIRST/"
+                    + mFilename
+                    + ".log";
+            try {
+                mFile = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filepath), StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                mFile = null;
+                mConfigurationValid = false;
+                this.warning("Unable to open log file " + filepath);
+            }
         }
-        catch(IOException e)
-        {
-            mFile = null;
-            mConfigurationValid = false;
-            this.warning("Unable to open log file " + Environment.getExternalStorageDirectory().getPath() + "/FIRST/" + mFilename + ".log");
-        }
-
-
     }
 
 
@@ -371,7 +380,8 @@ public class LogManager implements Configurable {
      * @param message the error message
      */
     public void error(Target target, String message) {
-        this.error(target, message, mStackLevel);
+        StackTraceElement element = Thread.currentThread().getStackTrace()[mStackLevel];
+        this.error(target, message, element.getFileName().substring(0, element.getFileName().lastIndexOf(".")), element.getMethodName(), element.getLineNumber());
     }
 
     /**
@@ -380,8 +390,9 @@ public class LogManager implements Configurable {
      * @param message the error message
      */
     public void error(String message) {
+        StackTraceElement element = Thread.currentThread().getStackTrace()[mStackLevel];
         for(Target target : Target.values()) {
-            this.error(target, message, mStackLevel);
+            this.error(target, message, element.getFileName().substring(0, element.getFileName().lastIndexOf(".")), element.getMethodName(), element.getLineNumber());
         }
     }
 
@@ -392,7 +403,8 @@ public class LogManager implements Configurable {
      * @param message the warning message
      */
     public void warning(Target target, String message) {
-        this.warning(target, message, mStackLevel);
+        StackTraceElement element = Thread.currentThread().getStackTrace()[mStackLevel];
+        this.warning(target, message, element.getFileName().substring(0, element.getFileName().lastIndexOf(".")), element.getMethodName(), element.getLineNumber());
     }
 
     /**
@@ -401,8 +413,9 @@ public class LogManager implements Configurable {
      * @param message the warning message
      */
     public void warning(String message) {
+        StackTraceElement element = Thread.currentThread().getStackTrace()[mStackLevel];
         for(Target target : Target.values()) {
-            this.warning(target, message, mStackLevel);
+            this.warning(target, message, element.getFileName().substring(0, element.getFileName().lastIndexOf(".")), element.getMethodName(), element.getLineNumber());
         }
     }
 
@@ -413,8 +426,9 @@ public class LogManager implements Configurable {
      * @param value the metric value
      */
     public void metric(String metric, String value) {
+        StackTraceElement element = Thread.currentThread().getStackTrace()[mStackLevel];
         for(Target target : Target.values()) {
-            this.metric(target, metric, value, mStackLevel);
+            this.metric(target, metric, value, element.getFileName().substring(0, element.getFileName().lastIndexOf(".")), element.getMethodName(), element.getLineNumber());
         }
     }
 
@@ -426,7 +440,8 @@ public class LogManager implements Configurable {
      * @param value the metric value
      */
     public void metric(Target target, String metric, String value) {
-        this.metric(target, metric, value, mStackLevel);
+        StackTraceElement element = Thread.currentThread().getStackTrace()[mStackLevel];
+        this.metric(target, metric, value, element.getFileName().substring(0, element.getFileName().lastIndexOf(".")), element.getMethodName(), element.getLineNumber());
     }
 
     /**
@@ -435,8 +450,9 @@ public class LogManager implements Configurable {
      * @param message the info message
      */
     public void info(String message) {
+        StackTraceElement element = Thread.currentThread().getStackTrace()[mStackLevel];
         for(Target target : Target.values()) {
-            this.info(target, message, mStackLevel);
+            this.info(target, message, element.getFileName().substring(0, element.getFileName().lastIndexOf(".")), element.getMethodName(), element.getLineNumber());
         }
     }
 
@@ -447,7 +463,8 @@ public class LogManager implements Configurable {
      * @param message the info message
      */
     public void info(Target target, String message) {
-        this.info(target, message, mStackLevel);
+        StackTraceElement element = Thread.currentThread().getStackTrace()[mStackLevel];
+        this.info(target, message, element.getFileName().substring(0, element.getFileName().lastIndexOf(".")), element.getMethodName(), element.getLineNumber());
     }
 
     /**
@@ -456,8 +473,9 @@ public class LogManager implements Configurable {
      * @param message the debug message
      */
     public void debug(String message) {
+        StackTraceElement element = Thread.currentThread().getStackTrace()[mStackLevel];
         for(Target target : Target.values()) {
-            this.debug(target, message, mStackLevel);
+            this.debug(target, message, element.getFileName().substring(0, element.getFileName().lastIndexOf(".")), element.getMethodName(), element.getLineNumber());
         }
     }
 
@@ -468,7 +486,8 @@ public class LogManager implements Configurable {
      * @param message the debug message
      */
     public void debug(Target target, String message) {
-        this.debug(target, message, mStackLevel);
+        StackTraceElement element = Thread.currentThread().getStackTrace()[mStackLevel];
+        this.debug(target, message, element.getFileName().substring(0, element.getFileName().lastIndexOf(".")), element.getMethodName(), element.getLineNumber());
     }
 
     /**
@@ -477,8 +496,9 @@ public class LogManager implements Configurable {
      * @param message the trace message
      */
     public void trace(String message) {
+        StackTraceElement element = Thread.currentThread().getStackTrace()[mStackLevel];
         for(Target target : Target.values()) {
-            this.trace(target, message, mStackLevel);
+            this.trace(target, message, element.getFileName().substring(0, element.getFileName().lastIndexOf(".")), element.getMethodName(), element.getLineNumber());
         }
     }
 
@@ -489,7 +509,8 @@ public class LogManager implements Configurable {
      * @param message the trace message
      */
     public void trace(Target target, String message) {
-        this.trace(target, message, mStackLevel);
+        StackTraceElement element = Thread.currentThread().getStackTrace()[mStackLevel];
+        this.trace(target, message, element.getFileName().substring(0, element.getFileName().lastIndexOf(".")), element.getMethodName(), element.getLineNumber());
     }
 
     /**
@@ -507,14 +528,13 @@ public class LogManager implements Configurable {
             for (Map.Entry<String, String> metric : Objects.requireNonNull(mMetrics.get(target)).entrySet()) {
                 mDriverStation.addLine(metric.getKey() + " : " + metric.getValue());
             }
-            if(mMetrics.get(target).isEmpty()) { mDriverStation.addLine(""); }
+            mDriverStation.addLine("");
             mDriverStation.addLine("---------- INFOS ----------");
             mDriverStation.addLine(Objects.requireNonNull(mInfos.get(Target.DRIVER_STATION)).toString());
             mDriverStation.addLine("---------- DEBUGS ---------");
             mDriverStation.addLine(Objects.requireNonNull(mDebugs.get(Target.DRIVER_STATION)).toString());
             mDriverStation.addLine("---------- TRACES ----------");
             mDriverStation.addLine(Objects.requireNonNull(mTraces.get(Target.DRIVER_STATION)).toString());
-
 
         } else if (target == Target.DASHBOARD && mDashboard != null) {
             StringBuilder persistent = new StringBuilder();
@@ -534,24 +554,6 @@ public class LogManager implements Configurable {
             persistent.append("px; font-weight: 500\"> WARNINGS </summary>\n");
             persistent.append("<ul>\n");
             persistent.append(Objects.requireNonNull(mWarnings.get(Target.DASHBOARD)));
-            persistent.append("</ul>\n");
-            persistent.append("</details>\n");
-
-            persistent.append("<details open>\n");
-            persistent.append("<summary style=\"font-size:");
-            persistent.append(sEntryFontSize);
-            persistent.append("px; font-weight: 500\"> METRICS </summary>\n");
-            persistent.append("<ul>\n");
-            for (Map.Entry<String, String> metric : Objects.requireNonNull(mMetrics.get(target)).entrySet()) {
-                persistent.append("<li style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
-                        .append(sMetricFontSize)
-                        .append("px\">")
-                        .append(metric.getKey())
-                        .append(" : ")
-                        .append(metric.getValue())
-                        .append("</li>")
-                        .append("\n");
-            }
             persistent.append("</ul>\n");
             persistent.append("</details>\n");
 
@@ -584,6 +586,13 @@ public class LogManager implements Configurable {
 
             mDashboard.getTelemetry().addLine(persistent.toString());
         }
+        else if(target == Target.FILE && mFile != null) {
+            try {
+                mFile.write(mFileData.toString());
+                mFileData = new StringBuilder();
+            }
+            catch(IOException e) { this.warning(e.getMessage()); }
+        }
     }
 
     public void raw(Target target, String raw) {
@@ -592,7 +601,7 @@ public class LogManager implements Configurable {
         } else if (target == Target.DASHBOARD && mDashboard != null) {
             Objects.requireNonNull(mInfos.get(target)).append(raw);
         } else if (target == Target.FILE && mFile != null) {
-            mFile.info(raw);
+            mFileData.append(raw);
         }
     }
 
@@ -608,6 +617,8 @@ public class LogManager implements Configurable {
         } else if (target == Target.DASHBOARD && mDashboard != null) {
             this.write(target);
             mDashboard.getTelemetry().update();
+        } else if (target == Target.FILE && mFile != null) {
+            this.write(target);
         }
         mInfos.put(target,new StringBuilder());
         mDebugs.put(target,new StringBuilder());
@@ -657,6 +668,7 @@ public class LogManager implements Configurable {
         mDebugs.put(target,new StringBuilder());
         mTraces.put(target,new StringBuilder());
         mMetrics.put(target, new LinkedHashMap<>());
+        mFileData = new StringBuilder();
     }
 
     /**
@@ -676,106 +688,75 @@ public class LogManager implements Configurable {
         for(Target target : Target.values()) {
             this.write(target);
         }
-        for (Handler handler : mFile.getHandlers()) {
-            handler.flush();
-            handler.close();
+        if(mFile != null) {
+            try {
+                mFile.flush();
+                mFile.close();
+            }
+            catch(IOException e) { this.warning(e.getMessage()); }
         }
     }
-
-    /**
-     * initialize logger from filename
-     *
-     * @param filename The logging filename (without path and extension)
-     * @return the initialized logger
-     */
-    private Logger initializeFileLogger(String filename) throws IOException {
-        Logger result = null;
-        String filepath = Environment.getExternalStorageDirectory().getPath()
-                + "/FIRST/"
-                + filename
-                + ".log";
-
-        if(!filename.isEmpty()) {
-
-            StackTraceElement element = Thread.currentThread().getStackTrace()[3]; // Get caller
-
-            result = Logger.getLogger(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")));
-            FileHandler fileHandler = new FileHandler(filepath+".%g",1000000,2, true); // Append mode
-            SimpleFormatter formatter = new SimpleFormatter() {
-                private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
-                @Override
-                public synchronized String format(LogRecord record) {
-                    return String.format("[%s] [%s] %s - %s%n",
-                            dateFormat.format(new Date(record.getMillis())),  // Timestamp with milliseconds
-                            record.getLevel(),  // Log level (INFO, WARNING, SEVERE, etc.)
-                            record.getLoggerName(),  // Logger name
-                            record.getMessage());  // Log message
-                }
-            };
-            fileHandler.setFormatter(formatter);
-            result.setLevel(Level.ALL);
-            result.addHandler(fileHandler);
-            result.setUseParentHandlers(false);
-            result.info("------------------------------------------------------");
-        }
-
-        return result;
-    }
-
 
     /**
      * Add an error to a log sink
      *
      * @param target the log sink
      * @param message the error description
-     * @param source the stack level from which the error was issued
+     * @param className the name of the class from which log is issued
+     * @param methodName the name of the method issuing the log
+     * @param line the line from which log is issued
      */
-    private void error(Target target, String message, int source) {
+    private void error(Target target, String message, String className, String methodName, int line) {
 
         Integer errorPriority = sLevelToPriority.get(Severity.ERROR);
         Integer filterPriority = sLevelToPriority.get(mLevel);
         if( filterPriority != null && errorPriority != null && filterPriority >= errorPriority) {
 
-            StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
             switch (target) {
                 case DASHBOARD:
-                    Objects.requireNonNull(mErrors.get(target))
-                            .append("<li style=\"color: red; margin-left:30px; list-style-type: square; font-size: ")
-                            .append(sErrorFontSize)
-                            .append("px\">")
-                            .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
-                            .append(".")
-                            .append(element.getMethodName())
-                            .append(":")
-                            .append(String.format("%04d", element.getLineNumber()))
-                            .append(" - error - ")
-                            .append(message)
-                            .append("</li>")
-                            .append("\n");
+                    if (mDashboard != null) {
+                        Objects.requireNonNull(mErrors.get(target))
+                                .append("<li style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
+                                .append(sErrorFontSize)
+                                .append("px\">")
+                                .append(className)
+                                .append(".")
+                                .append(methodName)
+                                .append(":")
+                                .append(line < 1000 ? (line < 100 ? (line < 10 ? "000" : "00") : "0") : "").append(line) // Avoid String.format()
+                                .append(" - ")
+                                .append(message)
+                                .append("</li>\n");
+                    }
                     break;
                 case DRIVER_STATION:
-                    Objects.requireNonNull(mErrors.get(target))
-                            .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
-                            .append(".")
-                            .append(element.getMethodName())
-                            .append(":")
-                            .append(String.format("%04d", element.getLineNumber()))
-                            .append(" - error - ")
-                            .append(message)
-                            .append("\n");
+                    if (mDriverStation != null) {
+                        Objects.requireNonNull(mErrors.get(target))
+                                .append(className)
+                                .append(".")
+                                .append(methodName)
+                                .append(":")
+                                .append(line < 1000 ? (line < 100 ? (line < 10 ? "000" : "00") : "0") : "").append(line) // Avoid String.format()
+                                .append(" - ")
+                                .append(message)
+                                .append("\n");
+                    }
                     break;
                 case FILE:
-                    if (mFile != null) {
-                        String local = element.getFileName().substring(0, element.getFileName().lastIndexOf(".")) +
-                                "." +
-                                element.getMethodName() +
-                                " : " +
-                                String.format("%04d", element.getLineNumber()) +
-                                " - error - " +
-                                message;
-                        mFile.log(Level.SEVERE, local);
-                    }
+                    double elapsedTime = mTimer.seconds(); // Get elapsed time in seconds
+                    int minutes = (int)(elapsedTime / 60);
+                    int hours = (int)(elapsedTime / 3600);
+                    double seconds = (double)((int)((elapsedTime - 60 * minutes - 3600 * hours) * 1000)) / 1000.0;
+                    mFileData.append("[")
+                            .append(minutes).append(':') // Manually format two-digit minutes
+                            .append(seconds)  // Format only when necessary
+                            .append("] [ERROR] - ")
+                            .append(className).append('.')
+                            .append(methodName).append(':')
+                            .append(line < 1000 ? (line < 100 ? (line < 10 ? "000" : "00") : "0") : "").append(line) // Avoid String.format()
+                            .append(" - ")
+                            .append(message)
+                            .append('\n');
                     break;
             }
         }
@@ -786,54 +767,62 @@ public class LogManager implements Configurable {
      * Add a warning to a log sink
      *
      * @param target the log sink
-     * @param message the error description
-     * @param source the stack level from which the warning was issued
+     * @param message the warning description
+     * @param className the name of the class from which log is issued
+     * @param methodName the name of the method issuing the log
+     * @param line the line from which log is issued
      */
-    private void warning(Target target, String message, int source) {
 
+    private void warning(Target target, String message, String className, String methodName, int line) {
         Integer warningPriority = sLevelToPriority.get(Severity.WARNING);
         Integer filterPriority = sLevelToPriority.get(mLevel);
         if( filterPriority != null && warningPriority != null && filterPriority >= warningPriority) {
 
-            StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
             switch (target) {
                 case DASHBOARD:
-                    Objects.requireNonNull(mWarnings.get(target))
-                            .append("<li style=\"color: orange; margin-left:30px; list-style-type: square; font-size: ")
-                            .append(sWarningFontSize)
-                            .append("px\">")
-                            .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
-                            .append(".")
-                            .append(element.getMethodName())
-                            .append(":")
-                            .append(String.format("%04d", element.getLineNumber()))
-                            .append(" - ")
-                            .append(message)
-                            .append("</li>")
-                            .append("\n");
+                    if (mDashboard != null) {
+                        Objects.requireNonNull(mWarnings.get(target))
+                                .append("<li style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
+                                .append(sWarningFontSize)
+                                .append("px\">")
+                                .append(className)
+                                .append(".")
+                                .append(methodName)
+                                .append(":")
+                                .append(line < 1000 ? (line < 100 ? (line < 10 ? "000" : "00") : "0") : "").append(line) // Avoid String.format()
+                                .append(" - ")
+                                .append(message)
+                                .append("</li>\n");
+                    }
                     break;
                 case DRIVER_STATION:
-                    Objects.requireNonNull(mWarnings.get(target))
-                            .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
-                            .append(".")
-                            .append(element.getMethodName())
-                            .append(":")
-                            .append(String.format("%04d", element.getLineNumber()))
-                            .append(" - warn - ")
-                            .append(message)
-                            .append("\n");
+                    if (mDriverStation != null) {
+                        Objects.requireNonNull(mWarnings.get(target))
+                                .append(className)
+                                .append(".")
+                                .append(methodName)
+                                .append(":")
+                                .append(line < 1000 ? (line < 100 ? (line < 10 ? "000" : "00") : "0") : "").append(line) // Avoid String.format()
+                                .append(" - ")
+                                .append(message)
+                                .append("\n");
+                    }
                     break;
                 case FILE:
-                    if (mFile != null) {
-                        String local = element.getFileName().substring(0, element.getFileName().lastIndexOf(".")) +
-                                "." +
-                                element.getMethodName() +
-                                ":" +
-                                String.format("%04d", element.getLineNumber()) +
-                                " - " +
-                                message;
-                        mFile.log(Level.WARNING, local);
-                    }
+                    double elapsedTime = mTimer.seconds(); // Get elapsed time in seconds
+                    int minutes = (int)(elapsedTime / 60);
+                    int hours = (int)(elapsedTime / 3600);
+                    double seconds = (double)((int)((elapsedTime - 60 * minutes - 3600 * hours) * 1000)) / 1000.0;
+                    mFileData.append("[")
+                            .append(minutes).append(':') // Manually format two-digit minutes
+                            .append(seconds)  // Format only when necessary
+                            .append("] [WARNING] - ")
+                            .append(className).append('.')
+                            .append(methodName).append(':')
+                            .append(line < 1000 ? (line < 100 ? (line < 10 ? "000" : "00") : "0") : "").append(line) // Avoid String.format()
+                            .append(" - ")
+                            .append(message)
+                            .append('\n');
                     break;
             }
         }
@@ -846,15 +835,17 @@ public class LogManager implements Configurable {
      * @param target the log sink
      * @param metric the metric topic
      * @param value the metric value
-     * @param source the stack level from which the metric was issued
+     * @param className the name of the class from which log is issued
+     * @param methodName the name of the method issuing the log
+     * @param line the line from which log is issued
      */
-    private void metric(Target target, String metric, String value, int source) {
+
+    private void metric(Target target, String metric, String value, String className, String methodName, int line) {
 
         Integer metricPriority = sLevelToPriority.get(Severity.METRIC);
         Integer filterPriority = sLevelToPriority.get(mLevel);
         if( filterPriority != null && metricPriority != null && filterPriority >= metricPriority) {
 
-            StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
             switch (target) {
                 case DASHBOARD:
                     Objects.requireNonNull(mMetrics.get(target)).put(metric, value);
@@ -866,17 +857,24 @@ public class LogManager implements Configurable {
                 case DRIVER_STATION:
                     Objects.requireNonNull(mMetrics.get(target)).put(metric, value);
                     break;
+
                 case FILE:
-                    if (mFile != null) {
-                        String local = element.getFileName().substring(0, element.getFileName().lastIndexOf(".")) +
-                                "." +
-                                element.getMethodName() +
-                                " : " +
-                                String.format("%04d", element.getLineNumber()) +
-                                " - metric - " +
-                                metric + " : " + value;
-                        mFile.log(Level.INFO, local);
-                    }
+                    double elapsedTime = mTimer.seconds(); // Get elapsed time in seconds
+                    int minutes = (int)(elapsedTime / 60);
+                    int hours = (int)(elapsedTime / 3600);
+                    double seconds = (double)((int)((elapsedTime - 60 * minutes - 3600 * hours) * 1000)) / 1000.0;
+                    mFileData.append("[")
+                            .append(minutes).append(':') // Manually format two-digit minutes
+                            .append(seconds)  // Format only when necessary
+                            .append("] [METRIC] - ")
+                            .append(className).append('.')
+                            .append(methodName).append(':')
+                            .append(line < 1000 ? (line < 100 ? (line < 10 ? "000" : "00") : "0") : "").append(line) // Avoid String.format()
+                            .append(" - ")
+                            .append(metric)
+                            .append(" : ")
+                            .append(value)
+                            .append('\n');
                     break;
             }
         }
@@ -887,15 +885,15 @@ public class LogManager implements Configurable {
      *
      * @param target the log sink
      * @param message the info message
-     * @param source the stack level from which the metric was issued
+     * @param className the name of the class from which log is issued
+     * @param methodName the name of the method issuing the log
+     * @param line the line from which log is issued
      */
-    private void info(Target target, String message, int source) {
+    private void info(Target target, String message, String className, String methodName, int line) {
 
         Integer infoPriority = sLevelToPriority.get(Severity.INFO);
         Integer filterPriority = sLevelToPriority.get(mLevel);
         if( filterPriority != null && infoPriority != null && filterPriority >= infoPriority) {
-
-            StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
             switch (target) {
                 case DASHBOARD:
                     if (mDashboard != null) {
@@ -903,41 +901,32 @@ public class LogManager implements Configurable {
                                 .append("<li style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
                                 .append(sInfoFontSize)
                                 .append("px\">")
-                                .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
-                                .append(".")
-                                .append(element.getMethodName())
-                                .append(":")
-                                .append(String.format("%04d", element.getLineNumber()))
-                                .append(" - ")
                                 .append(message)
-                                .append("</li>")
-                                .append("\n");
+                                .append("</li>\n");
                     }
                     break;
                 case DRIVER_STATION:
                     if (mDriverStation != null) {
                         Objects.requireNonNull(mInfos.get(target))
-                                .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
-                                .append(".")
-                                .append(element.getMethodName())
-                                .append(":")
-                                .append(String.format("%04d", element.getLineNumber()))
-                                .append(" - info - ")
                                 .append(message)
                                 .append("\n");
                     }
                     break;
                 case FILE:
-                    if (mFile != null) {
-                        String local = element.getFileName().substring(0, element.getFileName().lastIndexOf(".")) +
-                                "." +
-                                element.getMethodName() +
-                                ":" +
-                                String.format("%04d", element.getLineNumber()) +
-                                " - info - " +
-                                message;
-                        mFile.log(Level.INFO, local);
-                    }
+                    double elapsedTime = mTimer.seconds(); // Get elapsed time in seconds
+                    int minutes = (int)(elapsedTime / 60);
+                    int hours = (int)(elapsedTime / 3600);
+                    double seconds = (double)((int)((elapsedTime - 60 * minutes - 3600 * hours) * 1000)) / 1000.0;
+                    mFileData.append("[")
+                            .append(minutes).append(':') // Manually format two-digit minutes
+                            .append(seconds)  // Format only when necessary
+                            .append("] [INFO] - ")
+                            .append(className).append('.')
+                            .append(methodName).append(':')
+                            .append(line < 1000 ? (line < 100 ? (line < 10 ? "000" : "00") : "0") : "").append(line) // Avoid String.format()
+                            .append(" - ")
+                            .append(message)
+                            .append('\n');
                     break;
             }
         }
@@ -948,15 +937,16 @@ public class LogManager implements Configurable {
      *
      * @param target the log sink
      * @param message the info message
-     * @param source the stack level from which the metric was issued
+     * @param className the name of the class from which log is issued
+     * @param methodName the name of the method issuing the log
+     * @param line the line from which log is issued
      */
-    private void debug(Target target, String message, int source) {
+    private void debug(Target target, String message, String className, String methodName, int line) {
 
         Integer debugPriority = sLevelToPriority.get(Severity.DEBUG);
         Integer filterPriority = sLevelToPriority.get(mLevel);
         if( filterPriority != null && debugPriority != null && filterPriority >= debugPriority) {
 
-            StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
             switch (target) {
                 case DASHBOARD:
                     if (mDashboard != null) {
@@ -964,41 +954,32 @@ public class LogManager implements Configurable {
                                 .append("<li style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
                                 .append(sInfoFontSize)
                                 .append("px\">")
-                                .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
-                                .append(".")
-                                .append(element.getMethodName())
-                                .append(":")
-                                .append(String.format("%04d", element.getLineNumber()))
-                                .append(" - ")
                                 .append(message)
-                                .append("</li>")
-                                .append("\n");
+                                .append("</li>\n");
                     }
                     break;
                 case DRIVER_STATION:
                     if (mDriverStation != null) {
                         Objects.requireNonNull(mDebugs.get(target))
-                                .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
-                                .append(".")
-                                .append(element.getMethodName())
-                                .append(":")
-                                .append(String.format("%04d", element.getLineNumber()))
-                                .append(" - debug - ")
                                 .append(message)
                                 .append("\n");
                     }
                     break;
                 case FILE:
-                    if (mFile != null) {
-                        String local = element.getFileName().substring(0, element.getFileName().lastIndexOf(".")) +
-                                "." +
-                                element.getMethodName() +
-                                ":" +
-                                String.format("%04d", element.getLineNumber()) +
-                                " - debug - " +
-                                message;
-                        mFile.log(Level.INFO, local);
-                    }
+                    double elapsedTime = mTimer.seconds(); // Get elapsed time in seconds
+                    int minutes = (int)(elapsedTime / 60);
+                    int hours = (int)(elapsedTime / 3600);
+                    double seconds = (double)((int)((elapsedTime - 60 * minutes - 3600 * hours) * 1000)) / 1000.0;
+                    mFileData.append("[")
+                            .append(minutes).append(':') // Manually format two-digit minutes
+                            .append(seconds)  // Format only when necessary
+                            .append("] [DEBUG] - ")
+                            .append(className).append('.')
+                            .append(methodName).append(':')
+                            .append(line < 1000 ? (line < 100 ? (line < 10 ? "000" : "00") : "0") : "").append(line) // Avoid String.format()
+                            .append(" - ")
+                            .append(message)
+                            .append('\n');
                     break;
             }
         }
@@ -1009,15 +990,16 @@ public class LogManager implements Configurable {
      *
      * @param target the log sink
      * @param message the info message
-     * @param source the stack level from which the metric was issued
+     * @param className the name of the class from which log is issued
+     * @param methodName the name of the method issuing the log
+     * @param line the line from which log is issued
      */
-    private void trace(Target target, String message, int source) {
+    private void trace(Target target, String message, String className, String methodName, int line) {
 
         Integer tracePriority = sLevelToPriority.get(Severity.TRACE);
         Integer filterPriority = sLevelToPriority.get(mLevel);
         if( filterPriority != null && tracePriority != null && filterPriority >= tracePriority) {
 
-            StackTraceElement element = Thread.currentThread().getStackTrace()[source]; // Get caller
             switch (target) {
                 case DASHBOARD:
                     if (mDashboard != null) {
@@ -1025,41 +1007,32 @@ public class LogManager implements Configurable {
                                 .append("<li style=\"color: black; margin-left:30px; list-style-type: square; font-size: ")
                                 .append(sInfoFontSize)
                                 .append("px\">")
-                                .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
-                                .append(".")
-                                .append(element.getMethodName())
-                                .append(":")
-                                .append(String.format("%04d", element.getLineNumber()))
-                                .append(" - ")
                                 .append(message)
-                                .append("</li>")
-                                .append("\n");
+                                .append("</li>\n");
                     }
                     break;
                 case DRIVER_STATION:
                     if (mDriverStation != null) {
                         Objects.requireNonNull(mTraces.get(target))
-                                .append(element.getFileName().substring(0, element.getFileName().lastIndexOf(".")))
-                                .append(".")
-                                .append(element.getMethodName())
-                                .append(":")
-                                .append(String.format("%04d", element.getLineNumber()))
-                                .append(" - trace - ")
                                 .append(message)
                                 .append("\n");
                     }
                     break;
                 case FILE:
-                    if (mFile != null) {
-                        String local = element.getFileName().substring(0, element.getFileName().lastIndexOf(".")) +
-                                "." +
-                                element.getMethodName() +
-                                ":" +
-                                String.format("%04d", element.getLineNumber()) +
-                                " - trace - " +
-                                message;
-                        mFile.log(Level.INFO, local);
-                    }
+                    double elapsedTime = mTimer.seconds(); // Get elapsed time in seconds
+                    int minutes = (int)(elapsedTime / 60);
+                    int hours = (int)(elapsedTime / 3600);
+                    double seconds = (double)((int)((elapsedTime - 60 * minutes - 3600 * hours) * 1000)) / 1000.0;
+                    mFileData.append("[")
+                            .append(minutes).append(':') // Manually format two-digit minutes
+                            .append(seconds)  // Format only when necessary
+                            .append("] [TRACE] - ")
+                            .append(className).append('.')
+                            .append(methodName).append(':')
+                            .append(line < 1000 ? (line < 100 ? (line < 10 ? "000" : "00") : "0") : "").append(line) // Avoid String.format()
+                            .append(" - ")
+                            .append(message)
+                            .append('\n');
                     break;
             }
         }

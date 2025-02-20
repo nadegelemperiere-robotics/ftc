@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 /* JSON object */
-import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -35,6 +34,8 @@ import org.firstinspires.ftc.core.components.odometers.OdometerComponent;
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;
 
+/* Orchestration includes */
+import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 
 public class TankDrive extends DriveTrain {
 
@@ -54,6 +55,7 @@ public class TankDrive extends DriveTrain {
     static final String sRamseteBBArKey             = "ramsete-bbar";
     static final String sTurnGainKey                = "turn-gain";
     static final String sTurnVelocityGainKey        = "turn-velocity-gain";
+    static final String sShortNameKey               = "short";
 
     final LogManager        mLogger;
 
@@ -61,6 +63,7 @@ public class TankDrive extends DriveTrain {
     boolean                 mHasFinished;
 
     final String            mName;
+    String                  mShortName;
 
     List<String>            mLeftHwName;
     List<String>            mRightHwName;
@@ -98,6 +101,7 @@ public class TankDrive extends DriveTrain {
         mDrivingSpeedMultiplier = 1.0;
 
         mName = name;
+        mShortName = "";
         mLeftHwName = new ArrayList<>();
         mRightHwName = new ArrayList<>();
         mLocalizerHwName = "";
@@ -150,7 +154,9 @@ public class TankDrive extends DriveTrain {
     }
 
     public void update() {
+        mLogger.debug(mName + " start");
         if(mConfigurationValid) { mLocalizer.update(); }
+        mLogger.debug(mName + " stop");
     }
 
     @Override
@@ -229,6 +235,11 @@ public class TankDrive extends DriveTrain {
         mTurnVelocityGain = 0;
 
         try {
+
+            if(reader.has(sShortNameKey)) {
+                mShortName = reader.getString(sShortNameKey);
+            }
+            if(mShortName.isEmpty()) { mShortName = mName; }
 
             if (reader.has(sMotorsKey)) {
                 Map<String, MotorComponent> motors = mHardware.motors();
@@ -355,6 +366,8 @@ public class TankDrive extends DriveTrain {
 
                 writer.put(sTypeKey, "tank-drive");
 
+                writer.put(sShortNameKey,mShortName);
+
                 JSONObject motors = new JSONObject();
                 JSONArray lefts = new JSONArray();
                 for (int i_left = 0; i_left < mLeftHwName.size(); i_left++) {
@@ -399,6 +412,11 @@ public class TankDrive extends DriveTrain {
     public String logConfigurationHTML() {
 
         StringBuilder result = new StringBuilder();
+
+        // Log short name
+        result.append("<p style=\"padding-left:10px; font-size: 10px;\"> <span style=\"font-weight: 500\"> SHORT : </span>")
+                .append(mShortName)
+                .append("</p>\n");
 
         // Log motors
         result.append("<details style=\"margin-left:10px\">\n")
@@ -498,6 +516,11 @@ public class TankDrive extends DriveTrain {
     public String logConfigurationText(String header) {
 
         StringBuilder result = new StringBuilder();
+
+        result.append(header)
+                .append("> SHORT : ")
+                .append(mShortName)
+                .append("\n");
 
         // Log motors
         result.append(header)

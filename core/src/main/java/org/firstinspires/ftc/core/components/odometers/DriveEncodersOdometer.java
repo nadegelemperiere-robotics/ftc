@@ -84,7 +84,6 @@ public class DriveEncodersOdometer implements OdometerComponent {
 
     MecanumKinematics                   mKinematics;
 
-    final ElapsedTime                   mTimer;
 
     public  DriveEncodersOdometer(String name, HardwareMap hwMap, Map<String, MotorComponent> motors, Map<String,ImuComponent> imus,LogManager logger) {
 
@@ -112,8 +111,6 @@ public class DriveEncodersOdometer implements OdometerComponent {
         mRightBack  = null;
         mImu        = null;
 
-        mTimer = new ElapsedTime();
-
     }
 
     @Override
@@ -126,6 +123,7 @@ public class DriveEncodersOdometer implements OdometerComponent {
 
     @Override
     public void         update() {
+
         if (mConfigurationValid) {
 
             Twist2dDual<Time> twist;
@@ -137,8 +135,8 @@ public class DriveEncodersOdometer implements OdometerComponent {
 
             double heading = mImu.heading();
 
-            if (!mIsFirstTime) {
-                mIsFirstTime = true;
+            if (mIsFirstTime) {
+                mIsFirstTime = false;
 
                 twist = new Twist2dDual<>(
                         Vector2dDual.constant(new Vector2d(0.0, 0.0), 2),
@@ -179,8 +177,6 @@ public class DriveEncodersOdometer implements OdometerComponent {
             mLastRightFrontPos = rightFrontPosVel.position;
             mLastHeading = heading;
 
-            mTimer.reset();
-
             mCurrentPose = mCurrentPose.plus(twist.value());
             mCurrentVelocity = twist.velocity().value();
 
@@ -199,13 +195,13 @@ public class DriveEncodersOdometer implements OdometerComponent {
     public void             log() {
         if (mConfigurationValid) {
 
-            mLogger.metric("x", mCurrentPose.position.x + " inches");
-            mLogger.metric("y", mCurrentPose.position.y + " inches");
-            mLogger.metric("heading", mCurrentPose.heading.toDouble() + " rad");
+            mLogger.metric(LogManager.Target.DASHBOARD,"x", mCurrentPose.position.x + " inches");
+            mLogger.metric(LogManager.Target.DASHBOARD,"y", mCurrentPose.position.y + " inches");
+            mLogger.metric(LogManager.Target.DASHBOARD,"heading", mCurrentPose.heading.toDouble() / Math.PI * 180 + " deg");
 
-            mLogger.metric("vx",mCurrentVelocity.linearVel.x + " inches/s");
-            mLogger.metric("vy",mCurrentVelocity.linearVel.y + " inches/s");
-            mLogger.metric("vheading",mCurrentVelocity.angVel + " rad/s");
+            mLogger.metric(LogManager.Target.DASHBOARD,"vx",mCurrentVelocity.linearVel.x + " inches/s");
+            mLogger.metric(LogManager.Target.DASHBOARD,"vy",mCurrentVelocity.linearVel.y + " inches/s");
+            mLogger.metric(LogManager.Target.DASHBOARD,"vheading",mCurrentVelocity.angVel  / Math.PI * 180 + " deg/s");
         }
     }
 

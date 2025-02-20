@@ -96,13 +96,13 @@ public class MotorSingle implements MotorComponent {
      * @return A formatted string containing motor telemetry data.
      */
     @Override
-    public String                       log()
+    public void                         log()
     {
-        String result = "";
         if(mConfigurationValid) {
-            result += "\n  P : " + mMotor.getCurrentPosition() + " V : " + mMotor.getVelocity() + " P : " + mMotor.getPower();
+            mLogger.metric(LogManager.Target.DASHBOARD, mName+"-pos","" + mMotor.getCurrentPosition());
+            mLogger.metric(LogManager.Target.DASHBOARD, mName+"-spd","" + mMotor.getVelocity());
+            mLogger.metric(LogManager.Target.DASHBOARD, mName+"-pwr","" + mMotor.getPower());
         }
-        return result;
     }
 
     /* ------------------ Configurable functions ------------------- */
