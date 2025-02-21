@@ -10,6 +10,7 @@ package org.firstinspires.ftc.core.components.odometers;
 
 /* System includes */
 import java.util.Map;
+import java.util.List;
 
 /* JSON includes */
 import org.json.JSONObject;
@@ -65,20 +66,23 @@ public interface OdometerComponent extends Configurable {
     }
 
     /* ------------------------- Accessors ------------------------- */
-    void            pose(Pose2d current);
-    Pose2d          pose();
-    PoseVelocity2d  velocity();
-    void            log();
+    void                    pose(Pose2d current);
+    Pose2d                  pose();
+    PoseVelocity2d          velocity();
+    void                    log();
 
     /* ------------------ Configurable functions ------------------- */
 
-    void            read(JSONObject reader);
-    void            write(JSONObject writer);
-    boolean         isConfigured();
-    String          logConfigurationHTML();
-    String          logConfigurationText(String header);
+    void                    read(JSONObject reader);
+    void                    write(JSONObject writer);
+    boolean                 isConfigured();
+    String                  logConfigurationHTML();
+    String                  logConfigurationText(String header);
 
     /* ------------------------ Localization ----------------------- */
-    void            update();
+    void                    update();
 
+    /* --------------------------- Tuning -------------------------- */
+    List<Encoder>           forward();
+    List<Encoder>           lateral();
 }

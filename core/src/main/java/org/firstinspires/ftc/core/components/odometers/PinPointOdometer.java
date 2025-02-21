@@ -26,6 +26,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PinPointOdometer implements OdometerComponent {
 
     static  final public    String sHwMapKey                = "hwmap";
@@ -69,14 +72,14 @@ public class PinPointOdometer implements OdometerComponent {
 
 
     @Override
-    public void     pose(Pose2d current) {
+    public void                         pose(Pose2d current) {
         if(mConfigurationValid) {
             mPinPoint.setPosition(current);
         }
     }
 
     @Override
-    public void     update() {
+    public void                         update() {
         if(mConfigurationValid) {
 
             mPinPoint.update();
@@ -88,10 +91,10 @@ public class PinPointOdometer implements OdometerComponent {
     }
 
     @Override
-    public Pose2d           pose() { return mCurrentPose; }
+    public Pose2d                       pose() { return mCurrentPose; }
 
     @Override
-    public PoseVelocity2d   velocity() { return mCurrentVelocity;    }
+    public PoseVelocity2d               velocity() { return mCurrentVelocity;    }
     
     @Override
     public void             log() {
@@ -250,6 +253,29 @@ public class PinPointOdometer implements OdometerComponent {
 
         return result.toString();
 
+    }
+
+
+    /* -------------------- Accessors for tuning ------------------- */
+
+    /**
+     * List of encoders measuring forward displacement for tuning
+     *
+     * @return A list of encoders measuring forward displacement
+     */
+    public List<Encoder> forward(){
+        List<org.firstinspires.ftc.core.components.odometers.Encoder> result = new ArrayList<>();
+        return result;
+    }
+
+    /**
+     * List of encoders measuring lateral displacement for tuning
+     *
+     * @return A list of encoders measuring lateral displacement
+     */
+    public List<Encoder>     lateral(){
+        List<Encoder> result = new ArrayList<>();
+        return result;
     }
 
 }

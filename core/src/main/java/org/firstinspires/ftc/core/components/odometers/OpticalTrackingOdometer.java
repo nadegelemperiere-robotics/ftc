@@ -26,6 +26,9 @@ import org.firstinspires.ftc.core.tools.LogManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class OpticalTrackingOdometer implements OdometerComponent {
 
@@ -49,13 +52,20 @@ public class OpticalTrackingOdometer implements OdometerComponent {
     Pose2d                      mCurrentPose;
     PoseVelocity2d              mCurrentVelocity;
 
-    public  OpticalTrackingOdometer(String name, HardwareMap hwMap, LogManager logger) {
+    /**
+     * Constructor
+     *
+     * @param name The localizer name
+     * @param map The hardare map to get sensors from
+     * @param logger The logger to use for traces
+     */
+    public  OpticalTrackingOdometer(String name, HardwareMap map, LogManager logger) {
 
         mLogger             = logger;
         mConfigurationValid = false;
         mName               = name;
 
-        mMap                = hwMap;
+        mMap                = map;
 
         mCurrentPose        = new Pose2d(new Vector2d(0,0),0);
         mCurrentVelocity    = new PoseVelocity2d(new Vector2d(0, 0), 0);
@@ -63,6 +73,11 @@ public class OpticalTrackingOdometer implements OdometerComponent {
         mOtos               = null;
     }
 
+    /**
+     * Pose reinitialization function
+     *
+     * @param current : The current localization
+     */
     @Override
     public void                         pose(Pose2d current) {
         if(mConfigurationValid) {
@@ -70,6 +85,9 @@ public class OpticalTrackingOdometer implements OdometerComponent {
         }
     }
 
+    /**
+     * Update function to update localization measurements
+     */
     @Override
     public void                         update() {
         if(mConfigurationValid) {
@@ -88,14 +106,28 @@ public class OpticalTrackingOdometer implements OdometerComponent {
             mCurrentVelocity = new PoseVelocity2d(robotVel, otosVel.h);
         }
     }
+
+    /**
+     * Current measured position
+     *
+     * @return The position in x,y and heading
+     */
     @Override
     public Pose2d                       pose() { return mCurrentPose; }
 
+    /**
+     * Current measured velocity
+     *
+     * @return The velocity in x,y and heading
+     */
     @Override
     public PoseVelocity2d               velocity() { return mCurrentVelocity;    }
 
+    /**
+     * Localization logging function
+     */
     @Override
-    public void             log() {
+    public void                         log() {
         if (mConfigurationValid) {
             mLogger.metric(LogManager.Target.DASHBOARD,mName + "-x", mCurrentPose.position.x + " inches");
             mLogger.metric(LogManager.Target.DASHBOARD,mName + "-y", mCurrentPose.position.y + " inches");
@@ -271,30 +303,76 @@ public class OpticalTrackingOdometer implements OdometerComponent {
 
     /* -------------------- Accessors for tuning ------------------- */
 
+    /**
+     * heading ratio setting function
+     *
+     * @param ratio the heading ratio value
+     */
     public void                         headingRatio(double ratio) {
         if(mConfigurationValid) { mOtos.setAngularScalar(ratio); }
     }
 
+    /**
+     * position ratio setting function
+     *
+     * @param ratio the position ratio value
+     */
     public void                         positionRatio(double ratio) {
         if(mConfigurationValid) { mOtos.setLinearScalar(ratio); }
     }
 
+    /**
+     * x offset setting function
+     *
+     * @param offset The offset value in inches
+     */
     public void                         xOffset(double offset) {
         SparkFunOTOS.Pose2D newOffset = new SparkFunOTOS.Pose2D(
                 offset, mOtos.getOffset().y, mOtos.getOffset().h);
         if(mConfigurationValid) { mOtos.setOffset(newOffset); }
     }
 
+    /**
+     * y offset setting function
+     *
+     * @param offset The offset value in inches
+     */
     public void                         yOffset(double offset) {
         SparkFunOTOS.Pose2D newOffset = new SparkFunOTOS.Pose2D(
                 mOtos.getOffset().x, offset, mOtos.getOffset().h);
         if(mConfigurationValid) { mOtos.setOffset(newOffset); }
     }
 
+    /**
+     * heading offset setting function
+     *
+     * @param offset The offset value in radians
+     */
     public void                         headingOffset(double offset) {
         SparkFunOTOS.Pose2D newOffset = new SparkFunOTOS.Pose2D(
                 mOtos.getOffset().x, mOtos.getOffset().y, offset);
         if(mConfigurationValid) { mOtos.setOffset(newOffset); }
     }
+
+    /**
+     * List of encoders measuring forward displacement for tuning
+     *
+     * @return A list of encoders measuring forward displacement
+     */
+    public List<Encoder> forward(){
+        List<org.firstinspires.ftc.core.components.odometers.Encoder> result = new ArrayList<>();
+        return result;
+    }
+
+    /**
+     * List of encoders measuring lateral displacement for tuning
+     *
+     * @return A list of encoders measuring lateral displacement
+     */
+    public List<Encoder>     lateral(){
+        List<Encoder> result = new ArrayList<>();
+        return result;
+    }
+
 
 }

@@ -21,6 +21,7 @@ import org.json.JSONArray;
 
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -38,6 +39,15 @@ public class Tuning extends Hardware {
     final Map<String, ServoComponent> mSingleServos;
     final Map<String, List<String>>   mServoMapping;
 
+    VoltageSensor                     mVoltageSensor;
+
+    /**
+     * Constructor
+     *
+     * @param map hardware map to retrieve hardware from
+     * @param logger logger to use for trace
+     */
+
     public Tuning(HardwareMap map, LogManager logger) {
         super(map, logger);
 
@@ -47,6 +57,8 @@ public class Tuning extends Hardware {
         mSingleServos = new LinkedHashMap<>();
         mServoMapping = new LinkedHashMap<>();
 
+        mVoltageSensor  = null;
+
     }
 
     public Map<String, MotorComponent>  singleMotors()  { return mSingleMotors; }
@@ -55,6 +67,15 @@ public class Tuning extends Hardware {
     public Map<String, ServoComponent>  singleServos()  { return mSingleServos; }
     public Map<String, List<String>>    mappingServos() { return mServoMapping; }
 
+    public VoltageSensor                voltageSensor() { return mVoltageSensor; }
+
+    /**
+     * Extended configuration reading where each coupled servos and motors
+     * are added to single servos and motors list as a single servo or motor
+     * for separate tuning
+     *
+     * @param reader JSON object containing configuration to read
+     */
     @Override
     public void                         read(JSONObject reader) {
         super.read(reader);
@@ -121,6 +142,12 @@ public class Tuning extends Hardware {
         }
 
 
+        // Read voltage sensor
+        mVoltageSensor = mMap.voltageSensor.iterator().next();
+        if(mVoltageSensor == null) {
+            mLogger.warning("Voltage sensor not found");
+            mConfigurationValid = false;
+        }
 
     }
 

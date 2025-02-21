@@ -45,10 +45,12 @@ public class Configuration {
 
     // Registered configurables to read and write configuration
     final Map<String, Configurable> mConfigRegistry;
+    JSONObject                      mContent;
 
     // Loggers
     LogManager                      mLogger;
     String                          mFilename;
+
 
     /**
      * Configuration singleton access
@@ -67,6 +69,7 @@ public class Configuration {
 
         mConfigRegistry = new LinkedHashMap<>();
         mIsValid        = false;
+        mContent        = null;
 
     }
 
@@ -80,6 +83,7 @@ public class Configuration {
         mLogger         = logger;
         mConfigRegistry = new LinkedHashMap<>();
         mIsValid        = false;
+        mContent        = null;
 
     }
 
@@ -146,9 +150,9 @@ public class Configuration {
         }
 
         // Parse JSON content
-        JSONObject configuration = null;
+        mContent = null;
         try {
-            configuration = new JSONObject(content.toString());
+            mContent = new JSONObject(content.toString());
         }
         catch(JSONException e) {
             mLogger.error("Configuration file " + filename + " is not json formatted");
@@ -164,7 +168,7 @@ public class Configuration {
 
                     // Split key between keys and indexes
                     String[] keys = configurable.getKey().split("[.\\[\\]]");
-                    Object data = configuration;
+                    Object data = mContent;
                     for (String key : keys) {
 
                         if (!key.isEmpty()) {
@@ -202,9 +206,9 @@ public class Configuration {
     }
 
     /**
-     * Reads configuration from a given configuration file
+     * Writes configuration to a given configuration file
      *
-     * @param filename : filename containing configuration
+     * @param filename : name of the file to write
      */
     public void write(String filename) {
 
@@ -286,7 +290,9 @@ public class Configuration {
         catch(JSONException | IOException e) { mLogger.error("Unable to write json file"); }
     }
 
-
+    /**
+     * Log configuration content
+     */
     public void log() {
 
         // Log to driver station
@@ -353,7 +359,52 @@ public class Configuration {
         mLogger.raw(LogManager.Target.FILE,confstring.toString());
     }
 
-    private static String getRawFilename(String filename) {
+    /**
+     * Look for a configuration topic
+     *
+     * @param topic Topic to look for
+     * @return Topic content
+     */
+    public JSONObject                   search(String topic){
+
+        JSONObject result = null;
+        if(mIsValid) {
+            try{
+
+                // Split topic between keys and indexes
+                String[] keys = topic.split("[.\\[\\]]");
+                Object data = mContent;
+                for (String key : keys) {
+
+                    if (!key.isEmpty()) {
+
+                        if (data instanceof JSONObject) {
+                            data = ((JSONObject) data).get(key);
+                        } else if (data instanceof JSONArray) {
+                            int index = Integer.parseInt(key);
+                            data = ((JSONArray) data).get(index);
+                        }
+                    }
+                }
+
+                result = (JSONObject) data;
+
+            }
+            catch (JSONException | NumberFormatException e) {
+                mLogger.error("Configuration " + topic + " can not be read" );
+                mIsValid = false;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Extract the raw filename, without path or extension
+     *
+     * @param filename The input filename
+     * @return The extracted filename
+     */
+    private static String               getRawFilename(String filename) {
         String result;
 
         File file = new File(filename);
@@ -365,7 +416,16 @@ public class Configuration {
         return result;
     }
 
-    private static String getKeyAndIndexes(String key, List<Integer> indexes, LogManager logger) {
+    /**
+     * Separate a JSON entry between keys (JSONObjects) and indexes (JSONArrays)
+     * ex : data[0][1][4] will return data and update indexes with 0,1 and 4
+     *
+     * @param key The input entry
+     * @param indexes The list of indexes to update
+     * @param logger the logger to use for error logging
+     * @return The extracted entry topic
+     */
+    private static String                  getKeyAndIndexes(String key, List<Integer> indexes, LogManager logger) {
 
         String result = key;
         indexes.clear();

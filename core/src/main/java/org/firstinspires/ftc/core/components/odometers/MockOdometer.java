@@ -18,6 +18,9 @@ import com.acmerobotics.roadrunner.Vector2d;
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MockOdometer implements OdometerComponent {
 
     final LogManager            mLogger;
@@ -121,5 +124,27 @@ public class MockOdometer implements OdometerComponent {
      */
     @Override
     public String                       logConfigurationText(String header) {  return header + "> Mock\n"; }
+
+
+    /**
+     * List of encoders measuring forward displacement for tuning
+     *
+     * @return A list of encoders measuring forward displacement
+     */
+    public List<Encoder> forward(){
+        List<org.firstinspires.ftc.core.components.odometers.Encoder> result = new ArrayList<>();
+        return result;
+    }
+
+    /**
+     * List of encoders measuring lateral displacement for tuning
+     *
+     * @return A list of encoders measuring lateral displacement
+     */
+    public List<Encoder>     lateral(){
+        List<Encoder> result = new ArrayList<>();
+        return result;
+    }
+
 
 }

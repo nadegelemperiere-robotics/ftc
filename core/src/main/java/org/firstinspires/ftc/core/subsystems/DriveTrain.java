@@ -7,8 +7,14 @@
 
 package org.firstinspires.ftc.core.subsystems;
 
+/* System includes */
+import java.util.List;
+
 /* ACME robotics includes */
 import com.acmerobotics.roadrunner.Pose2d;
+
+/* Component includes */
+import org.firstinspires.ftc.core.components.motors.MotorComponent;
 
 public abstract class DriveTrain extends Subsystem {
 
@@ -22,11 +28,15 @@ public abstract class DriveTrain extends Subsystem {
     protected static final String       sMotorsKey                  = "motors";
     protected static final String       sOdometerKey                = "odometer";
 
+    /* ---------------------- Drive functions ---------------------- */
 
-    public void                         initialize(Pose2d pose) {}
+    public abstract void                    initialize(Pose2d pose);
+    public abstract void                    driveSpeedMultiplier(double multiplier);
+    public abstract void                    drive(double xSpeed, double ySpeed, double headingSpeed);
 
-    public void                         driveSpeedMultiplier(double multiplier) { }
+    /* --------------------- Tuning functions ---------------------- */
 
-    public void                         drive(double xSpeed, double ySpeed, double headingSpeed) {}
+    public abstract List<MotorComponent>    left();
+    public abstract List<MotorComponent>    right();
 
 }

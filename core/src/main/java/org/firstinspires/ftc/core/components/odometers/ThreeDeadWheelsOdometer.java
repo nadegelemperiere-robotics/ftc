@@ -8,6 +8,7 @@
 package org.firstinspires.ftc.core.components.odometers;
 
 /* System includes */
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,6 @@ import com.acmerobotics.roadrunner.Vector2dDual;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
-import com.acmerobotics.roadrunner.ftc.Encoder;
 
 /* FTC Controller includes */
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -116,9 +116,9 @@ public class ThreeDeadWheelsOdometer implements OdometerComponent {
 
             Twist2dDual<Time> twist;
 
-            PositionVelocityPair par0PosVel = mPar0.getPositionAndVelocity();
-            PositionVelocityPair par1PosVel = mPar1.getPositionAndVelocity();
-            PositionVelocityPair perpPosVel = mPerp.getPositionAndVelocity();
+            PositionVelocityPair par0PosVel = mPar0.update();
+            PositionVelocityPair par1PosVel = mPar1.update();
+            PositionVelocityPair perpPosVel = mPerp.update();
 
             if (mIsFirstTime) {
                 mIsFirstTime = false;
@@ -357,4 +357,34 @@ public class ThreeDeadWheelsOdometer implements OdometerComponent {
         return result.toString();
 
     }
+
+    /* -------------------- Accessors for tuning ------------------- */
+
+    /**
+     * List of encoders measuring forward displacement for tuning
+     *
+     * @return A list of encoders measuring forward displacement
+     */
+    public List<org.firstinspires.ftc.core.components.odometers.Encoder>     forward(){
+        List<org.firstinspires.ftc.core.components.odometers.Encoder> result = new ArrayList<>();
+        if(mConfigurationValid) {
+            result.add(mPar0);
+            result.add(mPar1);
+        }
+        return result;
+    }
+
+    /**
+     * List of encoders measuring lateral displacement for tuning
+     *
+     * @return A list of encoders measuring lateral displacement
+     */
+    public List<Encoder>     lateral(){
+        List<Encoder> result = new ArrayList<>();
+        if(mConfigurationValid) {
+            result.add(mPerp);
+        }
+        return result;
+    }
+
 }

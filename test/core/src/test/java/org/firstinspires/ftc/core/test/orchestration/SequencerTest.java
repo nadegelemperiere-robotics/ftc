@@ -52,7 +52,7 @@ public class SequencerTest {
     public void setUp() {
         try (MockedStatic<Environment> mockedEnvironment = Mockito.mockStatic(Environment.class)) {
             mockedEnvironment.when(Environment::getExternalStorageDirectory).thenReturn(new File(getClass().getClassLoader().getResource("results").getFile()));
-            mLogger = new LogManager(null, null, "sequencer-test",3);
+            mLogger = new LogManager(null, null, "sequencer-test",2);
             mLogger.level(LogManager.Severity.INFO);
             mLogger.info("Setting it up!");
         }

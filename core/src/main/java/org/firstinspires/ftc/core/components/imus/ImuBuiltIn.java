@@ -60,8 +60,10 @@ import org.json.JSONObject;
 
 /* Qualcomm includes */
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+/* ACME includes */
+import com.acmerobotics.roadrunner.ftc.LazyImu;
 
 /* FTC Controller */
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -117,7 +119,7 @@ public class ImuBuiltIn implements ImuComponent {
     String                                          mHwName;
 
     final HardwareMap                               mMap;
-    IMU                                             mImu;
+    LazyImu                                         mImu;
     RevHubOrientationOnRobot.LogoFacingDirection    mLogo;
     RevHubOrientationOnRobot.UsbFacingDirection     mUsb;
 
@@ -171,8 +173,8 @@ public class ImuBuiltIn implements ImuComponent {
     public void                         update()
     {
         if(mConfigurationValid) {
-            mPosition = mImu.getRobotYawPitchRollAngles();
-            mVelocity = mImu.getRobotAngularVelocity(AngleUnit.RADIANS);
+            mPosition = mImu.get().getRobotYawPitchRollAngles();
+            mVelocity = mImu.get().getRobotAngularVelocity(AngleUnit.RADIANS);
         }
     }
 
@@ -219,16 +221,17 @@ public class ImuBuiltIn implements ImuComponent {
      */
     @Override
     public void                         read(JSONObject reader) {
-        mConfigurationValid = false;
+        mConfigurationValid = true;
         mImu = null;
+        mHwName = "";
 
         try {
-            if(mMap != null && reader.has(sHwMapKey)) {
+            if(reader.has(sHwMapKey)) {
                 mHwName = reader.getString(sHwMapKey);
-                mImu = mMap.tryGet(IMU.class, mHwName);
             }
 
-            if(mImu != null && reader.has(sLogoDirectionKey) && reader.has(sUsbDirectionKey)) {
+            RevHubOrientationOnRobot orientation = null;
+            if(reader.has(sLogoDirectionKey) && reader.has(sUsbDirectionKey)) {
                 if(sString2LogoFacing.containsKey(reader.getString(sLogoDirectionKey))) {
                     mLogo = sString2LogoFacing.get(reader.getString(sLogoDirectionKey));
                 }
@@ -236,12 +239,14 @@ public class ImuBuiltIn implements ImuComponent {
                     mUsb = sString2UsbFacing.get(reader.getString(sUsbDirectionKey));
                 }
 
-                RevHubOrientationOnRobot orientation = new RevHubOrientationOnRobot(mLogo, mUsb);
-                mImu.initialize(new IMU.Parameters(orientation));
-                mImu.resetYaw();
-
-                mConfigurationValid = true;
+                orientation = new RevHubOrientationOnRobot(mLogo, mUsb);
             }
+
+            if(mMap != null && orientation != null && !mHwName.isEmpty())
+            {
+                mImu = new LazyImu(mMap, mHwName, orientation);
+            }
+
         } catch(JSONException e) {
             mLogger.error(e.getMessage());
         }

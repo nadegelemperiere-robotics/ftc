@@ -33,6 +33,10 @@ public abstract class Subsystem implements Configurable {
                         result = new MecanumDrive(name,hardware,logger);
                         result.read(reader);
                         break;
+                    case "tank-drive" :
+                        result = new TankDrive(name,hardware,logger);
+                        result.read(reader);
+                        break;
                     case "actuator" :
                         result = new Actuator(name,hardware,logger);
                         result.read(reader);

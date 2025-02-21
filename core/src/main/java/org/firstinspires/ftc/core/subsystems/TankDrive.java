@@ -613,4 +613,30 @@ public class TankDrive extends DriveTrain {
         return result.toString();
 
     }
+
+    /**
+     * List of left motors  for tuning
+     *
+     * @return A list of the left motors
+     */
+    public List<MotorComponent>         left(){
+        List<MotorComponent> result = new ArrayList<>();
+        if(mConfigurationValid) {
+            result = mLeft;
+        }
+        return result;
+    }
+
+    /**
+     * List of right motors  for tuning
+     *
+     * @return A list of the right motors
+     */
+    public List<MotorComponent>         right(){
+        List<MotorComponent> result = new ArrayList<>();
+        if(mConfigurationValid) {
+            result = mRight;
+        }
+        return result;
+    }
 }

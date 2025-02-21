@@ -27,6 +27,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.config.ValueProvider;
 
 /* Tools includes */
+import org.firstinspires.ftc.core.components.motors.MotorComponent;
 import org.firstinspires.ftc.core.tools.LogManager;
 
 /* Configuration includes */
@@ -34,20 +35,32 @@ import org.firstinspires.ftc.core.configuration.Configuration;
 
 /* Components includes */
 import org.firstinspires.ftc.core.components.odometers.OdometerComponent;
-import org.firstinspires.ftc.core.components.odometers.OpticalTrackingOdometer;
+import org.firstinspires.ftc.core.components.odometers.DriveEncodersOdometer;
+import org.firstinspires.ftc.core.components.imus.ImuBuiltIn;
+import org.firstinspires.ftc.core.components.imus.ImuComponent;
+
+/* Subsystem includes */
+import org.firstinspires.ftc.core.subsystems.DriveTrain;
+import org.firstinspires.ftc.core.subsystems.Subsystem;
 
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Tuning;
+
+/* Tuning includes */
+import org.firstinspires.ftc.core.tuning.InPerTick;
+import org.firstinspires.ftc.core.tuning.TrackWidthTicks;
 
 @Config
 @TeleOp(name = "DriveEncoderTuning", group = "Tuning")
 public class DriveEncoderTuning extends LinearOpMode {
 
     public enum Param {
-        HEADING_RATIO,
-        HEADING_OFFSET,
-        POSITION_RATIO,
-        POSITION_OFFSET
+        FWD_IN_PER_TICK,
+        LAT_IN_PER_TICK,
+        TRACK_WIDTH_TICKS,
+        KS_KV_KA,
+        PIDF,
+        VALIDATE
     }
 
     public enum Step {
@@ -59,7 +72,7 @@ public class DriveEncoderTuning extends LinearOpMode {
 
     /* -------- Configuration variables -------- */
     public static Step                  STEP    = Step.STOP;
-    public static Param                 TUNING  = Param.HEADING_RATIO;
+    public static Param                 TUNING  = Param.FWD_IN_PER_TICK;
     public static String                CONFIGURATION   = "test";
 
     /* ---------------- Members ---------------- */
@@ -70,25 +83,42 @@ public class DriveEncoderTuning extends LinearOpMode {
     private String                      mConfigurationName;
     private Tuning                      mHardware;
 
-    private OpticalTrackingOdometer     mOdometer;
+    private DriveEncodersOdometer       mOdometer;
+    private DriveTrain                  mDriveTrain;
+    private ImuBuiltIn                  mImu;
 
-    private double                      mHeadingRatioRadTurned;
-    private Rotation2d                  mHeadingRatioLastHeading;
-    private DistanceProvider            mPositionRatioDistance;
+    private InPerTick                   mFwdInPerTick;
+    private InPerTick                   mLatInPerTick;
+    private TrackWidthTicks             mTrackWidthTicks;
+
+    private DistanceProvider            mInPerTickDistance;
+    private PowerProvider               mPowerPerSecond;
+    private PowerProvider               mMaximalPower;
+    private StartProvider               mShallStart;
+
+
+    private boolean                     mFirstTimeCalled;
+    private boolean                     mFirstTimeStopped;
+    private boolean                     mShallSave;
 
     @Override
     public void runOpMode() {
 
         try {
 
-            mLogger = new LogManager(null,FtcDashboard.getInstance(),"otos-tuning");
+            mLogger = new LogManager(null,FtcDashboard.getInstance(),"drive-encoders-tuning",2);
             mLogger.level(LogManager.Severity.TRACE);
 
             mHardware = new Tuning(hardwareMap, mLogger);
+            mDriveTrain = null;
 
-            mPositionRatioDistance  = new DistanceProvider();
-
-
+            mInPerTickDistance  = new DistanceProvider();
+            mPowerPerSecond     = new PowerProvider();
+            mMaximalPower       = new PowerProvider();
+            mShallStart         = new StartProvider();
+            mMaximalPower.set(1.0);
+            mPowerPerSecond.set(0.1);
+            mInPerTickDistance.set(64.0);
             mPreviousTuning = TUNING;
 
             mConfigurationName = CONFIGURATION;
@@ -97,14 +127,25 @@ public class DriveEncoderTuning extends LinearOpMode {
             mConfiguration.read(Environment.getExternalStorageDirectory().getPath()
                     + "/FIRST/" + mConfigurationName + ".json");
             mConfiguration.log();
+            mDriveTrain = (DriveTrain)Subsystem.factory("drive-train",mConfiguration.search("robot.subsystems.drive-train"),mHardware,mLogger);
 
             Map<String,OdometerComponent>    odometers = mHardware.odometers();
 
             mOdometer = null;
-            if(odometers.containsKey("otos")) {
-                mOdometer = ((OpticalTrackingOdometer) odometers.get("otos"));
+            if(odometers.containsKey("driveencoders")) {
+                mOdometer = ((DriveEncodersOdometer) odometers.get("driveencoders"));
             }
-            if(mOdometer == null) throw new InvalidParameterException("Not otos based odometer found in configuration");
+            if(mOdometer == null) throw new InvalidParameterException("No drive encoders based odometer found in configuration");
+
+            mImu = null;
+            Map<String,ImuComponent> imus = mHardware.imus();
+            if(imus.containsKey(ImuComponent.sBuiltInKey)) { mImu = (ImuBuiltIn)imus.get(ImuComponent.sBuiltInKey); }
+            if(mImu == null) throw new InvalidParameterException("No built in imu found in configuration");
+
+
+            mFwdInPerTick = null;
+            mLatInPerTick = null;
+            mTrackWidthTicks = null;
 
             FtcDashboard.getInstance().updateConfig();
             mLogger.update();
@@ -124,43 +165,45 @@ public class DriveEncoderTuning extends LinearOpMode {
                 // Manage step change
                 String description;
                 switch (TUNING) {
-                    case HEADING_RATIO:
+                    case FWD_IN_PER_TICK:
                         description = "<p style=\"font-weight: bold; font-size: 14px\"> ------------------------- </p>" +
-                                "<p style=\"font-weight: bold; font-size: 14px\"> OTOS HEADING RATIO TUNER </p>" +
-                                "<p style=\"font-size: 12px\"> Switch to PROCESSING and rotate the robot on the ground 10 times. </p>" +
-                                "<p style=\"font-size: 12px\"> Make sure you mark the starting orientation precisely. </p>"+
-                                "<p style=\"font-size: 12px\"> Make sure you fit exactly to this orientation at the end of your test. </p>" +
-                                "<p style=\"font-size: 12px\"> Finally step to the UPDATE step to update the configuration with the value. </p>";
-                        mLogger.info(LogManager.Target.DASHBOARD,description);
-                        FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"DISTANCE");
-                        this.processHeadingRatio(); break;
-                    case HEADING_OFFSET:
-                        description = "<p style=\"font-weight: bold; font-size: 14px\"> ------------------------- </p>" +
-                                "<p style=\"font-weight: bold; font-size: 14px\"> OTOS HEADING OFFSET TUNER </p>" +
-                                "<p style=\"font-size: 12px\"> Line the side of the robot against a wall and switch to PROCESSING </p>" +
-                                "<p style=\"font-size: 12px\"> Then push the robot forward some distance. </p>"+
-                                "<p style=\"font-size: 12px\"> Finally step to the UPDATE step to update the configuration with the value. </p>";
-                        mLogger.info(LogManager.Target.DASHBOARD,description);
-                        FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"DISTANCE");
-                        this.processHeadingOffset(); break;
-                    case POSITION_RATIO:
-                        description = "<p style=\"font-weight: bold; font-size: 14px\"> ------------------------- </p>" +
-                                "<p style=\"font-weight: bold; font-size: 14px\"> OTOS POSITION RATIO TUNER </p>" +
-                                "<p style=\"font-size: 12px\"> Set the distance your about to move in the Tuning parameters and switch to PROCESSING </p>" +
+                                "<p style=\"font-weight: bold; font-size: 14px\"> FORWARD INCHES PER TICK TUNER </p>" +
+                                "<p style=\"font-size: 12px\"> Set the distance you'er about to move in the Tuning parameters and switch to PROCESSING </p>" +
                                 "<p style=\"font-size: 12px\"> Then push the robot forward this same distance (make sure you measure it precisely). </p>" +
                                 "<p style=\"font-size: 12px\"> Finally, step to the UPDATE step to update the configuration with the value. </p>";
                         mLogger.info(LogManager.Target.DASHBOARD,description);
-                        FtcDashboard.getInstance().addConfigVariable(this.getClass().getSimpleName(),"DISTANCE",mPositionRatioDistance);
-                        this.processPositionRatio(); break;
-                    case POSITION_OFFSET:
+                        FtcDashboard.getInstance().addConfigVariable(this.getClass().getSimpleName(),"DISTANCE",mInPerTickDistance);
+                        FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"START");
+                        FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"POWER_PER_SECOND");
+                        FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"MAXIMAL_POWER");
+                        this.processFwdInPerTick();
+                        break;
+                    case LAT_IN_PER_TICK:
                         description = "<p style=\"font-weight: bold; font-size: 14px\"> ------------------------- </p>" +
-                                "<p style=\"font-weight: bold; font-size: 14px\"> OTOS POSITION OFFSET TUNER </p>" +
-                                "<p style=\"font-size: 12px\"> Line the robot against the corner of two walls facing forward and switch to PROCESSING </p>" +
-                                "<p style=\"font-size: 12px\"> Then rotate the robot exactly 180 degrees and press it back into the corner. </p>" +
+                                "<p style=\"font-size: 12px\"> LATERAL INCHES PER TICK TUNER <span style=\"font-color:orange\">MECANUM DRIVE ONLY</span> </p>" +
+                                "<p style=\"font-size: 12px\"> Set the distance you're about to move in the Tuning parameters and switch to PROCESSING </p>" +
+                                "<p style=\"font-size: 12px\"> Then push the robot laterally this same distance (make sure you measure it precisely). </p>" +
+                                "<p style=\"font-size: 12px\"> Finally, step to the UPDATE step to update the configuration with the value. </p>";
+                        mLogger.info(LogManager.Target.DASHBOARD,description);
+                        FtcDashboard.getInstance().addConfigVariable(this.getClass().getSimpleName(),"DISTANCE",mInPerTickDistance);
+                        FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"START");
+                        FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"POWER_PER_SECOND");
+                        FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"MAXIMAL_POWER");
+                        this.processLatInPerTick();
+                        break;
+                    case TRACK_WIDTH_TICKS :
+                        description = "<p style=\"font-weight: bold; font-size: 14px\"> ------------------------- </p>" +
+                                "<p style=\"font-size: 12px\"> TRACK WIDTH TUNER </p>" +
+                                "<p style=\"font-size: 12px\"> The robot will rotate on itself once you step into processing</p>" +
+                                "<p style=\"font-size: 12px\"> Stop it at any point keeping in mind that longer runs will collect more data. </p>" +
+                                "<p style=\"font-size: 12px\"> All data collected is saved to a file for further analysis. <?p>" +
                                 "<p style=\"font-size: 12px\"> Finally, step to the UPDATE step to update the configuration with the value. </p>";
                         mLogger.info(LogManager.Target.DASHBOARD,description);
                         FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"DISTANCE");
-                        this.processPositionOffset(); break;
+                        FtcDashboard.getInstance().addConfigVariable(this.getClass().getSimpleName(),"POWER_PER_SECOND",mPowerPerSecond);
+                        FtcDashboard.getInstance().addConfigVariable(this.getClass().getSimpleName(),"MAXIMAL_POWER",mMaximalPower);
+                        this.processTrackWidthTicks();
+                        break;
                 }
 
 
@@ -172,9 +215,9 @@ public class DriveEncoderTuning extends LinearOpMode {
                 mLogger.update();
             }
 
-           mConfiguration.write(Environment.getExternalStorageDirectory().getPath()
-                    + "/FIRST/otos-tuning.json");
-            mLogger.info("Updated configuration saved. You may retrieve it using <b>adb pull /sdcard/FIRST/otos-tuning.json</b>");
+            mConfiguration.write(Environment.getExternalStorageDirectory().getPath()
+                    + "/FIRST/drive-encoder-tuning.json");
+            mLogger.info("Updated configuration saved. You may retrieve it using <b>adb pull /sdcard/FIRST/drive-encoder-tuning.json</b>");
             mLogger.update();
         }
         catch(Exception e) {
@@ -183,116 +226,101 @@ public class DriveEncoderTuning extends LinearOpMode {
         }
     }
 
-    void processHeadingRatio() {
+    void processFwdInPerTick() {
 
         switch(STEP) {
             case INIT:
-                mHeadingRatioRadTurned = 0;
-                mHeadingRatioLastHeading = Rotation2d.fromDouble(0);
+                mFwdInPerTick = new InPerTick(mOdometer.forward());
+                mFwdInPerTick.init();
                 mOdometer.pose(new Pose2d(new Vector2d(0, 0), 0));
-
                 break;
 
             case PROCESSING:
-                Pose2d pose = mOdometer.pose();
-                mHeadingRatioRadTurned += pose.heading.minus(mHeadingRatioLastHeading);
-                mHeadingRatioLastHeading = pose.heading;
-                mLogger.info("Uncorrected Degrees Turned " +  Math.round(Math.toDegrees(mHeadingRatioRadTurned)));
-                mLogger.info("Calculated Heading Ratio " + 3600 / Math.toDegrees(mHeadingRatioRadTurned));
+                mFwdInPerTick.update();
+                double ticks = mFwdInPerTick.ticks();
+                mLogger.info("Ticks travelled " + ticks);
+                mLogger.info("Calculated Forward In Per Ticks" + mInPerTickDistance.get() / ticks);
+
                 break;
 
             case UPDATE :
-                mLogger.info("Uncorrected Degrees Turned " +  Math.round(Math.toDegrees(mHeadingRatioRadTurned)));
-                mLogger.info("Calculated Heading Ratio " + 3600 / Math.toDegrees(mHeadingRatioRadTurned));
-                mOdometer.headingRatio(3600 / Math.toDegrees(mHeadingRatioRadTurned));
+                double final_ticks = mFwdInPerTick.ticks();
+                mLogger.info("Ticks travelled " + final_ticks);
+                mLogger.info("Calculated Forward In Per Ticks" + mInPerTickDistance.get()  / final_ticks);
+                mOdometer.forwardInPerTick(mInPerTickDistance.get()  / final_ticks);
                 break;
         }
 
     }
 
-    void processHeadingOffset() {
-
-        Pose2d pose;
-        double offset;
+    void processLatInPerTick() {
 
         switch(STEP) {
-            case INIT :
-                mOdometer.pose(new Pose2d(new Vector2d(0,0),0));
+            case INIT:
+                mLatInPerTick = new InPerTick(mOdometer.lateral());
+                mLatInPerTick.init();
+                mOdometer.pose(new Pose2d(new Vector2d(0, 0), 0));
                 break;
-            case PROCESSING :
-                pose = mOdometer.pose();
-                offset = Math.atan2(pose.position.y,pose.position.x);
-                mLogger.info("Heading Offset (radians, enter this one into SparkFunOTOSDrive!) " + offset);
-                mLogger.info("Heading Offset (degrees) "+ Math.toDegrees(offset));
+
+            case PROCESSING:
+                mLatInPerTick.update();
+                double ticks = mLatInPerTick.ticks();
+                mLogger.info("Ticks travelled " + ticks);
+                mLogger.info("Calculated Lateral In Per Ticks" + mInPerTickDistance.get() / ticks);
                 break;
+
             case UPDATE :
-                pose = mOdometer.pose();
-                offset = Math.atan2(pose.position.y,pose.position.x);
-                mLogger.info("Heading Offset (radians, enter this one into SparkFunOTOSDrive!) " + offset);
-                mLogger.info("Heading Offset (degrees) "+ Math.toDegrees(offset));
-                mOdometer.headingOffset(Math.atan2(pose.position.y,pose.position.x));
+                double final_ticks = mLatInPerTick.ticks();
+                mLogger.info("Ticks travelled " + final_ticks);
+                mLogger.info("Calculated Lateral In Per Ticks" + mInPerTickDistance.get()  / final_ticks);
+                mOdometer.lateralInPerTick(mInPerTickDistance.get()  / final_ticks);
                 break;
         }
 
     }
 
-    void processPositionRatio() {
-
-        Pose2d pose;
-        double distance;
+    void processTrackWidthTicks() {
 
         switch(STEP) {
             case INIT:
-
+                mTrackWidthTicks = new TrackWidthTicks(mDriveTrain, mImu, mHardware.voltageSensor(), mLogger);
+                mTrackWidthTicks.power(mPowerPerSecond.get(), mMaximalPower.get());
                 mOdometer.pose(new Pose2d(new Vector2d(0, 0), 0));
+                mFirstTimeCalled = true;
+                mShallSave = true;
+                FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"START");
                 break;
+
             case PROCESSING:
-                pose = mOdometer.pose();
-                distance = Math.sqrt(pose.position.x * pose.position.x + pose.position.y * pose.position.y);
-                mLogger.info("Uncorrected Inches Moved " + distance);
-                mLogger.info("Calculated Position Ratio " + mPositionRatioDistance.get() / distance);
-                break;
-            case UPDATE:
-                pose = mOdometer.pose();
-                distance = Math.sqrt(pose.position.x * pose.position.x + pose.position.y * pose.position.y);
-                mLogger.info("Uncorrected Inches Moved " + distance);
-                mLogger.info("Calculated Position Ratio " + mPositionRatioDistance.get() / distance);
-                mOdometer.positionRatio(mPositionRatioDistance.get() / distance);
-                break;
-        }
-
-    }
-
-    void processPositionOffset() {
-
-        Pose2d pose;
-
-        switch(STEP) {
-            case STOP:
-                break;
-            case INIT:
-                mOdometer.pose(new Pose2d(new Vector2d(0, 0), 0));
-                break;
-            case PROCESSING:
-                pose = mOdometer.pose();
-                if (Math.abs(Math.toDegrees(pose.heading.toDouble())) > 175) {
-                    mLogger.info("X Offset " + -0.5 * pose.position.x);
-                    mLogger.info("Y Offset " + -0.5 * pose.position.y);
+                mShallSave = true;
+                FtcDashboard.getInstance().addConfigVariable(this.getClass().getSimpleName(),"START",mShallStart);
+                if(mFirstTimeCalled) {
+                    mTrackWidthTicks.start();
+                    mFirstTimeCalled = false;
                 }
+                if(mShallStart.get()) {
+                    mFirstTimeStopped = true;
+                    mTrackWidthTicks.update(); }
                 else {
-                    mLogger.info( LogManager.Target.DASHBOARD,"<p style=\"font-size: 12px\">Rotate the robot 180 degrees and align it to the corner again.</p>");
+                    if(mFirstTimeStopped) { mTrackWidthTicks.stop(); }
+                    mFirstTimeCalled = false;
                 }
+                mLogger.info("Data collected " + mTrackWidthTicks.data());
                 break;
-            case UPDATE:
-                pose = mOdometer.pose();
-                mLogger.info("X Offset " + -0.5 * pose.position.x);
-                mLogger.info("Y Offset " + -0.5 * pose.position.y);
-                mOdometer.xOffset(-0.5 * pose.position.x);
-                mOdometer.yOffset( -0.5 * pose.position.y);
+
+            case UPDATE :
+                mFirstTimeCalled = true;
+                if(mShallSave) {
+                    mShallSave = false;
+                    mTrackWidthTicks.process();
+                }
+                mLogger.info("Data collected " + mTrackWidthTicks.data());
+                FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"START");
                 break;
         }
 
     }
+
 
     // Since double is a simple type, even with the appropriate constructor,
     // mDistance will only be updated locally by the dashboard.
@@ -304,5 +332,29 @@ public class DriveEncoderTuning extends LinearOpMode {
         public Double   get()                { return mDistance;  }
         @Override
         public void     set(Double Value)    { mDistance = Value; }
+    }
+
+    // Since double is a simple type, even with the appropriate constructor,
+    // mDistance will only be updated locally by the dashboard.
+    // We'll have to make sure the code access the mode from the provider using the get
+    // Method, since it's the only place the updated information can be found
+    static class PowerProvider implements ValueProvider<Double> {
+        double mPower;
+        @Override
+        public Double   get()                { return mPower;  }
+        @Override
+        public void     set(Double Value)    { mPower = Value; }
+    }
+
+    // ReverseProvider updates the controller reverse configuration
+    // Since ConfMotor.Controller is not a simple type, it's managed as
+    // pointer, when we change it in the provider, it's changed in the
+    // global configuration
+    static class StartProvider implements ValueProvider<Boolean> {
+        boolean mStart;
+        @Override
+        public Boolean get()           { return mStart; }
+        @Override
+        public void set(Boolean Value) { mStart = Value;   }
     }
 }

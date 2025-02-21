@@ -49,7 +49,7 @@ public class ConfigurationTest {
     public void setUp() {
         try (MockedStatic<Environment> mockedEnvironment = Mockito.mockStatic(Environment.class)) {
             mockedEnvironment.when(Environment::getExternalStorageDirectory).thenReturn(new File(getClass().getClassLoader().getResource("results").getFile()));
-            mLogger = new LogManager(null, null, "configuration-test",3);
+            mLogger = new LogManager(null, null, "configuration-test",2);
             mLogger.level(LogManager.Severity.INFO);
             mLogger.info("Setting it up!");
         }

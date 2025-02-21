@@ -9,8 +9,11 @@ package org.firstinspires.ftc.core.subsystems;
 
 /* System includes */
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 /* JSON object */
+import org.firstinspires.ftc.core.components.odometers.Encoder;
 import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -110,6 +113,12 @@ public class MecanumDrive extends DriveTrain {
     Mode                            mDrivingMode;
     Pose2d                          mInitialPose;
 
+    /**
+     * Constructor
+     * @param name Name of the drive train
+     * @param hardware List of registered hardware to use
+     * @param logger Logger for trace
+     */
     public  MecanumDrive(String name, Hardware hardware, LogManager logger) {
 
         mLogger                 = logger;
@@ -159,6 +168,9 @@ public class MecanumDrive extends DriveTrain {
 
     }
 
+    /**
+     * Current state logging function
+     */
     public void                         log() {
         if(mConfigurationValid) {
             // mLeftFront.log();
@@ -178,22 +190,43 @@ public class MecanumDrive extends DriveTrain {
         }
     }
 
+    /**
+     * Position reset function
+     * @param pose Current position
+     */
     public void                         initialize(Pose2d pose) {
         if(mConfigurationValid) { mInitialPose = pose; }
     }
 
+    /**
+     * Current task status
+     * @return true if the train is available, false if busy
+     */
     public boolean                      hasFinished() { return mHasFinished; }
 
+    /**
+     * Change the power multiplier when driving
+     * @param multiplier a small number for precision, a greater for speed
+     */
     public void                         driveSpeedMultiplier(double multiplier) {
         if(mConfigurationValid) { mDrivingSpeedMultiplier = multiplier; }
     }
 
+    /**
+     * Update the current drive train with new data
+     */
     public void                         update() {
         mLogger.debug(mName + " start");
         if(mConfigurationValid) { mLocalizer.update(); }
         mLogger.debug(mName + " stop");
     }
 
+    /**
+     * Change the motor speed according to controller command
+     * @param xSpeed x direction speed for field centric, forward for robot centric
+     * @param ySpeed y direction speed for field centric, lateral for robot centric
+     * @param headingSpeed rotation speed
+     */
     @Override
     public void                         drive(double xSpeed, double ySpeed, double headingSpeed) {
 
@@ -451,6 +484,11 @@ public class MecanumDrive extends DriveTrain {
         }
     }
 
+    /**
+     * Generates an HTML representation of the drive train configuration for logging purposes.
+     *
+     * @return A string containing the HTML-formatted drive train configuration.
+     */
     public String                       logConfigurationHTML() {
 
         // Log short name
@@ -552,6 +590,12 @@ public class MecanumDrive extends DriveTrain {
 
     }
 
+    /**
+     * Generates a text-based representation of the drive train configuration for logging.
+     *
+     * @param header A string to prepend to the configuration log.
+     * @return A string containing the formatted drive train configuration details.
+     */
     public String                       logConfigurationText(String header) {
 
 
@@ -665,6 +709,34 @@ public class MecanumDrive extends DriveTrain {
 
         return result;
 
+    }
+
+    /**
+     * List of left motors  for tuning
+     *
+     * @return A list of the left motors
+     */
+    public List<MotorComponent>         left(){
+        List<MotorComponent> result = new ArrayList<>();
+        if(mConfigurationValid) {
+            result.add(mLeftFront);
+            result.add(mLeftBack);
+        }
+        return result;
+    }
+
+    /**
+     * List of right motors  for tuning
+     *
+     * @return A list of the right motors
+     */
+    public List<MotorComponent>         right(){
+        List<MotorComponent> result = new ArrayList<>();
+        if(mConfigurationValid) {
+            result.add(mRightFront);
+            result.add(mRightBack);
+        }
+        return result;
     }
 
 

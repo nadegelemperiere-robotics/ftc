@@ -8,7 +8,9 @@
 package org.firstinspires.ftc.core.components.odometers;
 
 /* System includes */
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /* JSON includes */
@@ -27,7 +29,6 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
-import com.acmerobotics.roadrunner.ftc.Encoder;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -112,8 +113,8 @@ public class TwoDeadWheelsOdometer implements OdometerComponent {
 
             Twist2dDual<Time> twist;
 
-            PositionVelocityPair parPosVel = mPar.getPositionAndVelocity();
-            PositionVelocityPair perpPosVel = mPerp.getPositionAndVelocity();
+            PositionVelocityPair parPosVel = mPar.update();
+            PositionVelocityPair perpPosVel = mPerp.update();
 
             double heading = mImu.heading();
             double headingVelocity = mImu.headingVelocity();
@@ -350,5 +351,34 @@ public class TwoDeadWheelsOdometer implements OdometerComponent {
         return result.toString();
 
     }
+
+    /* -------------------- Accessors for tuning ------------------- */
+
+    /**
+     * List of encoders measuring forward displacement for tuning
+     *
+     * @return A list of encoders measuring forward displacement
+     */
+    public List<Encoder> forward(){
+        List<org.firstinspires.ftc.core.components.odometers.Encoder> result = new ArrayList<>();
+        if(mConfigurationValid) {
+            result.add(mPar);
+        }
+        return result;
+    }
+
+    /**
+     * List of encoders measuring lateral displacement for tuning
+     *
+     * @return A list of encoders measuring lateral displacement
+     */
+    public List<Encoder>     lateral(){
+        List<org.firstinspires.ftc.core.components.odometers.Encoder> result = new ArrayList<>();
+        if(mConfigurationValid) {
+            result.add(mPerp);
+        }
+        return result;
+    }
+
 
 }

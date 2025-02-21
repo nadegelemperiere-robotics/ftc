@@ -9,6 +9,8 @@ package org.firstinspires.ftc.core.components.odometers;
 
 /* System includes */
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 /* JSON includes */
 import org.json.JSONException;
@@ -16,7 +18,6 @@ import org.json.JSONObject;
 
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 /* ACME robotics includes */
 import com.acmerobotics.roadrunner.MecanumKinematics;
@@ -394,6 +395,58 @@ public class DriveEncodersOdometer implements OdometerComponent {
 
         return result.toString();
 
+    }
+
+    /* -------------------- Accessors for tuning ------------------- */
+
+    /**
+     * Forward In Per Tick setting function
+     *
+     * @param value the Inches Per Tick value of the wheel encoders moving forward
+     */
+    public  void                        forwardInPerTick(double value) {
+        if(mConfigurationValid) { mInPerTick = value; }
+    }
+
+    /**
+     * Lateral In Per Tick setting function
+     *
+     * @param value the Inches Per Tick value of the wheel encoders moving laterally
+     */
+    public  void                        lateralInPerTick(double value) {
+        if(mConfigurationValid) { mLateralInPerTick = value; }
+    }
+
+    /**
+     * List of encoders measuring forward displacement for tuning
+     *
+     * @return A list of encoders measuring forward displacement
+     */
+    public List<Encoder>                forward(){
+        List<Encoder> result = new ArrayList<>();
+        if(mConfigurationValid) {
+            result.add(mLeftFront);
+            result.add(mLeftBack);
+            result.add(mRightFront);
+            result.add(mRightBack);
+        }
+        return result;
+    }
+
+    /**
+     * List of encoders measuring lateral displacement for tuning
+     *
+     * @return A list of encoders measuring lateral displacement
+     */
+    public List<Encoder>     lateral(){
+        List<Encoder> result = new ArrayList<>();
+        if(mConfigurationValid) {
+            result.add(mLeftFront);
+            result.add(mLeftBack);
+            result.add(mRightFront);
+            result.add(mRightBack);
+        }
+        return result;
     }
 
 }

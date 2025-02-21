@@ -53,7 +53,7 @@ public class RobotV1Test {
     public void setUp() {
         try (MockedStatic<Environment> mockedEnvironment = Mockito.mockStatic(Environment.class)) {
             mockedEnvironment.when(Environment::getExternalStorageDirectory).thenReturn(new File(getClass().getClassLoader().getResource("results").getFile()));
-            mLogger = new LogManager(null, null, "robot-v1-test",3);
+            mLogger = new LogManager(null, null, "robot-v1-test",2);
             mLogger.level(LogManager.Severity.TRACE);
             mLogger.info("Setting it up!");
         }
