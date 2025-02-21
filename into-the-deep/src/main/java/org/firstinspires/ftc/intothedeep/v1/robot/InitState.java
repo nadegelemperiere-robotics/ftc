@@ -64,7 +64,10 @@ public class InitState extends RobotState {
      * Update sequencer periodically to switch between tasks
      */
     @Override
-    public void         update() { mSequencer.update(); }
+    public void         update() {
+        mLogger.info("STATE : Init");
+        mSequencer.update();
+    }
 
     /**
      * Transfer is not allowed until init is over
@@ -96,7 +99,7 @@ public class InitState extends RobotState {
      */
     @Override
     public  State       next() {
-        mLogger.metric("STATE","INIT -> DEFAULT");
+        mLogger.info("TRANSITION : Init -> Default");
         return new DefaultState(((SharedData)mData), mLogger);
     }
 

@@ -194,7 +194,7 @@ public class TrackWidthTicks {
     public double power() {
         return Math.min(mTimer.seconds() * mPowerPerSecond, mMaxPower);
     }
-    
+
     public void update() {
 
 

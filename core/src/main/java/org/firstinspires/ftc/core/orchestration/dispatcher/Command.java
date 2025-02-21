@@ -53,6 +53,8 @@ public class Command implements Configurable {
 
     boolean                         mConfigurationValid;
 
+    String                          mName;
+
     final Map<String,Controller>    mControllers;
 
     final Robot                     mRobot;
@@ -73,6 +75,7 @@ public class Command implements Configurable {
         mControllers    = controllers;
         mRobot          = robot;
         mCondition      = new Condition(() -> true);
+        mName           = "";
 
         mConfigurationValid = false;
     }
@@ -90,6 +93,7 @@ public class Command implements Configurable {
         mControllers    = new LinkedHashMap<>();
         mRobot          = null;
         mAction         = action;
+        mName           = "";
 
         mConfigurationValid = true;
     }
@@ -119,6 +123,7 @@ public class Command implements Configurable {
             try {
                 nbParams --;
                 String action = reader.getString(sActionKey);
+                mName = action;
                 if(nbParams == 0) {
                     Method method = mRobot.getClass().getMethod(action);
                     mAction = () -> {
@@ -138,6 +143,10 @@ public class Command implements Configurable {
                     }
                     Method method = temp;
                     ParamEvaluator evaluator = new ParamEvaluator(reader, mControllers, mLogger);
+                    if(!evaluator.isConfigured()) {
+                        mLogger.error("Failed to configure parameters for action " + mName);
+                        mConfigurationValid = false;
+                    }
 
                     mAction = () -> {
                         try {
@@ -149,7 +158,7 @@ public class Command implements Configurable {
                     };
                 }
 
-            } catch(JSONException | NoSuchMethodException e) {
+            } catch(JSONException | NoSuchMethodException  | InvalidParameterException e) {
                 mLogger.error(e.getMessage());
                 mConfigurationValid = false;
             }
@@ -183,7 +192,7 @@ public class Command implements Configurable {
      */
     public String  logConfigurationHTML() {
 
-        return "";
+        return "<p style=\"padding-left:10px; margin-left:10px; font-size: 10px\">" + mName + "</p>";
     }
 
     /**
@@ -193,7 +202,7 @@ public class Command implements Configurable {
      */
     public String  logConfigurationText(String header) {
 
-        return "";
+        return header + "> " + mName;
     }
 
     /**
@@ -328,6 +337,8 @@ class ParamEvaluator {
 
     final LogManager                mLogger;
 
+    boolean                         mConfigurationValid;
+
     final List<Object>              mParameters;
     final List<Runnable>            mProcessors;
     final Map<String,Controller>    mControllers;
@@ -340,11 +351,21 @@ class ParamEvaluator {
      * @param logger : logger
      */
     public ParamEvaluator(JSONObject object, Map<String,Controller> controllers, LogManager logger) {
-        mParameters     = new ArrayList<>();
-        mProcessors     = new ArrayList<>();
-        mControllers    = controllers;
-        mLogger         = logger;
+        mParameters         = new ArrayList<>();
+        mProcessors         = new ArrayList<>();
+        mControllers        = controllers;
+        mLogger             = logger;
+        mConfigurationValid = false;
         this.read(object);
+    }
+
+    /**
+     * Configuration checking
+     *
+     * @return true if object is correctly configured, false otherwise
+     */
+    public boolean isConfigured() {
+        return mConfigurationValid;
     }
 
     /**
@@ -353,6 +374,8 @@ class ParamEvaluator {
      * @param object : JSON object to read parameters from
      */
     public void read(JSONObject object) {
+
+        mConfigurationValid = true;
 
         Iterator<String> keys = object.keys();
         List<String> sortedKeys = new ArrayList<>();
@@ -374,32 +397,55 @@ class ParamEvaluator {
                     found = true;
                 } catch (JSONException ignored) {
                 }
+
                 if(!found) {
                     try {
                         JSONObject parameter = object.getJSONObject(key);
+                        if(parameter.length() > 0) {
 
-                        if (!parameter.has(sControllerKey))
-                            throw new InvalidParameterException("Missing controller for condition leaf");
-                        Controller controller = mControllers.get(parameter.getString(sControllerKey));
-                        if (controller == null)
-                            throw new InvalidParameterException("Controller not found for condition leaf");
+                            if (!parameter.has(sControllerKey))
+                                throw new InvalidParameterException("Missing controller for action leaf " + key);
+                            Controller controller = mControllers.get(parameter.getString(sControllerKey));
+                            if (controller == null)
+                                throw new InvalidParameterException("Controller not found for action leaf " + key);
 
-                        if (!parameter.has(sInputKey))
-                            throw new InvalidParameterException("Missing controller for condition leaf");
+                            if (!parameter.has(sInputKey))
+                                throw new InvalidParameterException("Missing input for action leaf " + key);
 
-                        double scale = parameter.has(sScaleKey) ? parameter.getDouble(sScaleKey) : 1.0;
+                            double scale = parameter.has(sScaleKey) ? parameter.getDouble(sScaleKey) : 1.0;
 
-                        Field field = controller.axes.getClass().getField(parameter.getString(sInputKey));
-                        Object axis = field.get(controller.axes);
-                        if (axis == null)
-                            throw new InvalidParameterException("Trigger " + parameter.getString(sInputKey) + " not found in controller axes");
-                        Axis trigger = ((Axis) axis);
+                            Field field = controller.axes.getClass().getField(parameter.getString(sInputKey));
+                            Object axis = field.get(controller.axes);
+                            if (axis == null)
+                                throw new InvalidParameterException("Trigger " + parameter.getString(sInputKey) + " not found in controller axes");
+                            Axis trigger = ((Axis) axis);
 
-                        mProcessors.add(() -> mParameters.add(scale * trigger.value()));
+                            mProcessors.add(() -> mParameters.add(scale * trigger.value()));
 
-                    } catch (JSONException | NoSuchFieldException | IllegalAccessException e) {
+                            found = true;
+                        }
+
+                    }
+                    catch (JSONException ignored) { }
+                    catch ( NoSuchFieldException | IllegalAccessException e) {
+                        mConfigurationValid = false;
                         mLogger.error(e.getMessage());
                     }
+                }
+
+                if(!found) {
+                    try {
+                        String parameter = object.getString(key);
+
+                        mProcessors.add(() -> mParameters.add(parameter));
+                        found = true;
+                    } catch (JSONException ignored) {
+                    }
+                }
+
+                if(!found) {
+                    mConfigurationValid = false;
+                    mLogger.error("Could not parse arg " + key);
                 }
 
             }

@@ -100,7 +100,7 @@ public class DispatcherTest {
         mGamepad.a              = true;
         mDispatcher.update();
 
-        assertTrue(mRobot.test1Check(), "Scheduler should not have called test1");
+        assertTrue(mRobot.test1Check(), "Scheduler should have called test1");
         assertEquals(0.9,mRobot.test2Value1(), 0.0000001,"Scheduler should have called test2 with parameter 0.9");
         assertEquals(0.4,mRobot.test2Value2(), 0.0000001,"Scheduler should have called test2 with parameter 0.4");
         assertEquals(0.7,mRobot.commandValue3(), 0.0000001,"Scheduler should have called command with parameter 0.7");
@@ -163,6 +163,7 @@ public class DispatcherTest {
         assertTrue(mRobot.test1Check(), "Scheduler should not have called test1");
         assertEquals(-10000,mRobot.test2Value1(), 0.0000001,"Scheduler should not have called test2");
         assertEquals(-10000,mRobot.test2Value2(), 0.0000001,"Scheduler should not have called test2");
+        assertEquals("",mRobot.test2Value3(),"Scheduler should not have called test2");
         assertEquals(-10000,mRobot.commandValue3(), 0.0000001,"Scheduler should not have called command");
         assertEquals(-10000,mRobot.commandValue4(), 0.0000001,"Scheduler should not have called command");
         assertEquals(-0.55,mRobot.x(), 0.0000001,"Scheduler should have called test2 with parameter -0.55");
@@ -177,7 +178,9 @@ public class DispatcherTest {
         mGamepad.left_trigger   = 0.6f;
         mGamepad.left_bumper    = true;
         mDispatcher.update();
+        assertEquals(0.9,mRobot.test2Value1(), 0.0000001,"Scheduler should have called test2 with parameter 0.6");
         assertEquals(0.6,mRobot.test2Value2(), 0.0000001,"Scheduler should have called test2 with parameter 0.4");
+        assertEquals("toto",mRobot.test2Value3(), "Scheduler should have called test2 with parameter toto");
         mRobot.reset();
 
 
@@ -196,7 +199,7 @@ class DispatcherImpl extends Dispatcher {
 
         registerCommand(
                 new Condition(() -> mControllers.get("1").buttons.left_bumper.pressedOnce()),
-                () -> ((RobotTest)mRobot).test2(0.9,mControllers.get("1").axes.left_trigger.value()));
+                () -> ((RobotTest)mRobot).test2(0.9,mControllers.get("1").axes.left_trigger.value(),"toto"));
 
 
 

@@ -75,7 +75,10 @@ public class PickState extends RobotState {
      * Update sequencer periodically to switch between tasks
      */
     @Override
-    public void         update() { mSequencer.update(); }
+    public void         update() {
+        mLogger.info("STATE : Tranfer");
+        mSequencer.update();
+    }
 
     /**
      * Tramsfer is not allowed until picking is over
@@ -108,7 +111,7 @@ public class PickState extends RobotState {
      */
     @Override
     public State        next() {
-        mLogger.metric("STATE","PICK -> DEFAULT");
+        mLogger.info("TRANSITION : Pick -> Default");
         return new DefaultState(((SharedData)mData), mLogger);
     }
 

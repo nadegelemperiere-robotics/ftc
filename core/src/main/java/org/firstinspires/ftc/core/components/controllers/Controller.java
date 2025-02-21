@@ -183,11 +183,12 @@ public class Controller implements Configurable {
 
         StringBuilder result = new StringBuilder();
 
-        result.append("<details>\n")
+        result.append("<details style=\"margin-left:10px\">\n")
                 .append("<summary style=\"font-size: 12px; font-weight: 500\"> AXES </summary>\n")
                 .append("<ul>\n");
 
         result.append("<li>\n")
+                .append("<details style=\"margin-left:10px\">\n")
                 .append("<summary style=\"font-size: 12px; font-weight: 500\"> LEFT STICK X </summary>\n")
                 .append("<ul>\n")
                 .append(this.axes.left_stick_x.logConfigurationHTML())
@@ -196,6 +197,7 @@ public class Controller implements Configurable {
                 .append("</li>\n");
 
         result.append("<li>\n")
+                .append("<details style=\"margin-left:10px\">\n")
                 .append("<summary style=\"font-size: 12px; font-weight: 500\"> LEFT STICK Y </summary>\n")
                 .append("<ul>\n")
                 .append(this.axes.left_stick_y.logConfigurationHTML())
@@ -204,6 +206,7 @@ public class Controller implements Configurable {
                 .append("</li>\n");
 
         result.append("<li>\n")
+                .append("<details style=\"margin-left:10px\">\n")
                 .append("<summary style=\"font-size: 12px; font-weight: 500\"> LEFT TRIGGER </summary>\n")
                 .append("<ul>\n")
                 .append(this.axes.left_trigger.logConfigurationHTML())
@@ -212,6 +215,7 @@ public class Controller implements Configurable {
                 .append("</li>\n");
 
         result.append("<li>\n")
+                .append("<details style=\"margin-left:10px\">\n")
                 .append("<summary style=\"font-size: 12px; font-weight: 500\"> RIGHT STICK X </summary>\n")
                 .append("<ul>\n")
                 .append(this.axes.right_stick_x.logConfigurationHTML())
@@ -220,6 +224,7 @@ public class Controller implements Configurable {
                 .append("</li>\n");
 
         result.append("<li>\n")
+                .append("<details style=\"margin-left:10px\">\n")
                 .append("<summary style=\"font-size: 12px; font-weight: 500\"> RIGHT STICK Y </summary>\n")
                 .append("<ul>\n")
                 .append(this.axes.right_stick_y.logConfigurationHTML())
@@ -228,6 +233,7 @@ public class Controller implements Configurable {
                 .append("</li>\n");
 
         result.append("<li>\n")
+                .append("<details style=\"margin-left:10px\">\n")
                 .append("<summary style=\"font-size: 12px; font-weight: 500\"> RIGHT TRIGGER </summary>\n")
                 .append("<ul>\n")
                 .append(this.axes.right_trigger.logConfigurationHTML())

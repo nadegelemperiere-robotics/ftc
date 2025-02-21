@@ -168,6 +168,7 @@ public class CommandTest {
         mCommand.execute();
         assertEquals(0.9,mRobot.test2Value1(), 0.0000001,"Command should have called test2 with parameter 0.9");
         assertEquals(0.5*0.4,mRobot.test2Value2(), 0.0000001,"Command should have called test2 with parameter 0.5*0.4");
+        assertEquals("toto",mRobot.test2Value3(), "Command should have called test2 with parameter string 3");
         mRobot.reset();
     }
 

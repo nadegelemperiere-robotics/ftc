@@ -300,9 +300,6 @@ public class OuttakeArm extends Subsystem {
             mElbow.update();
             mSequencer.update();
         }
-        if(!mSequencer.hasFinished()) { mLogger.metric(mName.toUpperCase(), "Reaching position " + mPosition); }
-        else { mLogger.metric(mName.toUpperCase(), "In position " + mPosition); }
-
     }
 
     /**
@@ -483,6 +480,18 @@ public class OuttakeArm extends Subsystem {
 
         return result.toString();
 
+    }
+
+    /**
+     * Current state logging function
+     */
+    @Override
+    public void                         log() {
+        if(this.hasFinished()) { mLogger.info(mName + " : pos = " + mPosition); }
+        else { mLogger.info(mName + " : pos > " + mPosition); }
+        mElbow.log();
+        mWrist.log();
+        mClaw.log();
     }
 
 

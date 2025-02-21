@@ -92,7 +92,8 @@ public class Dispatcher implements Configurable {
                 for (int i_command = 0; i_command < commands.length(); i_command ++) {
                     Command command = new Command(mControllers, mRobot, mLogger);
                     command.read((JSONObject) commands.get(i_command));
-                    mCommands.add(command);
+                    if(!command.isConfigured()) { mConfigurationValid = false; }
+                    else { mCommands.add(command); }
                 }
             } catch(JSONException e) {
                 mLogger.error("Error in configuration reading");
@@ -148,13 +149,14 @@ public class Dispatcher implements Configurable {
 
         StringBuilder result = new StringBuilder();
 
-        result.append("<details>\n")
+        result.append("<details style=\"margin-left:10px\">\n")
                 .append("<summary style=\"font-size: 12px; font-weight: 500\"> CONTROLLERS </summary>\n")
                 .append("<ul>\n");
 
         for (Map.Entry<String, Controller> controller : mControllers.entrySet()) {
 
             result.append("<li>\n")
+                    .append("<details style=\"margin-left:10px\">\n")
                     .append("<summary style=\"font-size: 12px; font-weight: 500\">")
                     .append(controller.getKey().toUpperCase())
                     .append("</summary>\n")
@@ -162,6 +164,20 @@ public class Dispatcher implements Configurable {
                     .append(controller.getValue().logConfigurationHTML())
                     .append("</ul>\n")
                     .append("</details>\n")
+                    .append("</li>\n");
+        }
+
+        result.append("</ul>\n")
+                .append("</details>\n");
+
+        result.append("<details style=\"margin-left:10px\">\n")
+                .append("<summary style=\"font-size: 12px; font-weight: 500\"> COMMANDS </summary>\n")
+                .append("<ul>\n");
+
+        for(int i_command =0; i_command < mCommands.size(); i_command ++) {
+
+            result.append("<li>\n")
+                    .append(mCommands.get(i_command).logConfigurationHTML())
                     .append("</li>\n");
         }
 
@@ -188,6 +204,14 @@ public class Dispatcher implements Configurable {
                     .append(controller.getKey())
                     .append("\n")
                     .append(controller.getValue().logConfigurationText(header + "--"));
+        }
+
+        result.append("> commands : \n");
+
+        for(int i_command =0; i_command < mCommands.size(); i_command ++) {
+
+            result.append(mCommands.get(i_command).logConfigurationText("--"))
+                    .append("\n");
         }
 
         return result.toString();

@@ -235,7 +235,7 @@ public class Robot extends Context implements Configurable {
                 .append("> SUBSYSTEMS\n");
         mSubsystems.forEach((key, value) -> result.append(header)
                 .append("--> ")
-                .append(key)
+                .append(key.toUpperCase())
                 .append("\n")
                 .append(value.logConfigurationText(header + "----")));
 

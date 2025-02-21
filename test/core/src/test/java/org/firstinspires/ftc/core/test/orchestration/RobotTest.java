@@ -23,6 +23,7 @@ public class RobotTest extends Robot {
     private double      mValue2;
     private double      mValue3;
     private double      mValue4;
+    private String      mValue5;
 
     private double      mX;
     private double      mY;
@@ -37,9 +38,10 @@ public class RobotTest extends Robot {
         mHasTest1BeenCalled = true;
     }
 
-    public void test2(double value1, double value2) {
+    public void test2(double value1, double value2, String value3) {
         mValue1 = value1;
         mValue2 = value2;
+        mValue5 = value3;
     }
 
     public void drive(double x, double y, double heading) {
@@ -57,6 +59,7 @@ public class RobotTest extends Robot {
 
     public double  test2Value1() { return mValue1; }
     public double  test2Value2() { return mValue2; }
+    public String  test2Value3() { return mValue5; }
 
     public double  x()           { return mX; }
     public double  y()           { return mY; }
@@ -71,6 +74,7 @@ public class RobotTest extends Robot {
         mValue2     = -10000.0f;
         mValue3     = -10000.0f;
         mValue4     = -10000.0f;
+        mValue5     = "";
         mX          = -10000.0f;
         mY          = -10000.0f;
         mHeading    = -10000.0f;

@@ -83,7 +83,7 @@ public class LogManager implements Configurable {
     );
 
     // Json keys
-    static  final   String          sFilenameKey       = "filename";
+    static  final   String          sFilenameKey       = "file";
     static  final   String          sDriverStationKey  = "driver-station";
     static  final   String          sDashboardKey      = "dashboard";
     static  final   String          sLevelKey          = "level";
@@ -289,7 +289,15 @@ public class LogManager implements Configurable {
                     this.warning("File not provided so can't log to file");
                     mConfigurationValid = false;
                 }
-                if(!shallUseFile) { mFile = null; }
+                if(!shallUseFile) {
+                    if(mFile != null) {
+                        try {
+                            mFile.flush();
+                            mFile.close();
+                        }
+                        catch (IOException ignored) {}
+                    }
+                    mFile = null; }
             }
             catch(JSONException  e) {
                 this.error("Error in file logging configuration");

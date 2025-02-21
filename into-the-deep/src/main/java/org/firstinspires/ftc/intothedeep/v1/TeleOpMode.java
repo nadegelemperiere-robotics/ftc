@@ -18,7 +18,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 /* ACME robotics includes */
 import com.acmerobotics.dashboard.FtcDashboard;
 
-
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
@@ -75,12 +74,12 @@ public class TeleOpMode extends OpMode {
             mConfiguration.read();
             mConfiguration.log();
 
-            mLogger.update();
-
         }
         catch(Exception e){
             mLogger.error(e.getMessage());
         }
+
+        mLogger.update();
 
     }
 
@@ -97,16 +96,18 @@ public class TeleOpMode extends OpMode {
 
         try {
 
-            mLogger.info("START LOOP");
+            mLogger.info(LogManager.Target.FILE,"start");
             mRobot.update();
+            mRobot.log();
             mDispatcher.update();
-            mLogger.info("END LOOP");
-            mLogger.update();
+            mLogger.info(LogManager.Target.FILE,"end");
 
         }
         catch(Exception e){
             mLogger.error(e.getMessage());
         }
+
+        mLogger.update();
         
     }
 

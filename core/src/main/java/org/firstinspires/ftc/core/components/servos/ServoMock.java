@@ -49,6 +49,8 @@ public class ServoMock implements ServoComponent {
 
         mDirection              = Servo.Direction.FORWARD;
         mPosition               = 0;
+        mMin                    = 0.0;
+        mMax                    = 1.0;
     }
 
     /* --------------------- Custom functions ---------------------- */
@@ -67,7 +69,7 @@ public class ServoMock implements ServoComponent {
      * @return A formatted string containing servo telemetry data.
      */
     @Override
-    public void                       log() {
+    public void                         log() {
         mLogger.metric(LogManager.Target.DASHBOARD, mName+"-pos","" + mPosition);
     }
 

@@ -325,8 +325,6 @@ public class IntakeArm extends Subsystem {
             mArm.update();
             mSequencer.update();
         }
-        if(!mSequencer.hasFinished()) { mLogger.metric(mName.toUpperCase(), "Reaching position " + mPosition); }
-        else { mLogger.metric(mName.toUpperCase(), "In position " + mPosition); }
 
     }
 
@@ -536,6 +534,20 @@ public class IntakeArm extends Subsystem {
 
         return result.toString();
 
+    }
+    
+    /**
+     * Current state logging function
+     */
+    @Override
+    public void                         log() {
+
+        if(this.hasFinished()) { mLogger.info(mName + " : pos = " + mPosition); }
+        else { mLogger.info(mName + " : pos > " + mPosition); }
+        mArm.log();
+        mElbow.log();
+        mWrist.log();
+        mClaw.log();
     }
 
 

@@ -147,11 +147,11 @@ public class Actuator extends Subsystem {
 
         if(mMotor != null && this.hasFinished()) {
             //mMotor.log();
-            mLogger.info(mShortName + " : pos = " + mPosition + " - enc : " + mMotor.currentPosition() + " - spd : " + mMotor.velocity() + " - pwr : " + mMotor.power());
+            mLogger.info(mShortName + " : pos = " + mPosition + " - enc : " + mMotor.currentPosition() + " - spd : " + mMotor.velocity() + " - pwr : " + mMotor.power() + " - mode : " + mMotor.mode());
         }
         else if(mMotor != null && !this.hasFinished()) {
             //mMotor.log();
-            mLogger.info(mShortName + " : pos > " + mPosition + " - enc : " + mMotor.currentPosition() + " - spd : " + mMotor.velocity() + " - pwr : " + mMotor.power());
+            mLogger.info(mShortName + " : pos > " + mPosition + " - enc : " + mMotor.currentPosition() + " - spd : " + mMotor.velocity() + " - pwr : " + mMotor.power() + " - mode : " + mMotor.mode());
         }
         else if(mServo != null && this.hasFinished()) {
             mLogger.info(mShortName + " : pos = " + mPosition + " - srv : " + mServo.position());
@@ -376,11 +376,12 @@ public class Actuator extends Subsystem {
         if(mConfigurationValid) {
             result.append(header)
                     .append("> SHORT : ")
-                    .append(mShortName);
+                    .append(mShortName)
+                    .append("\n");
 
             if (mMotor != null) {
                 result.append(header)
-                        .append("> NOTOR : ")
+                        .append("> MOTOR : ")
                         .append(mHwName)
                         .append("\n");
             }

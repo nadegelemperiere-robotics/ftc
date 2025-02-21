@@ -136,7 +136,9 @@ public class TransferState extends RobotState {
      * Update sequencer periodically to switch between tasks
      */
     @Override
-    public void         update() { mSequencer.update(); }
+    public void         update() {
+        mLogger.info("STATE : Transfer");
+        mSequencer.update(); }
 
     /**
      * Transfer restart is not allowed until current is over
@@ -167,7 +169,7 @@ public class TransferState extends RobotState {
      */
     @Override
     public  State       next() {
-        mLogger.metric("STATE","TRANSFER -> DEFAULT");
+        mLogger.info("TRANSITION : Transfer -> Default");
         return new DefaultState(((SharedData)mData), mLogger);
     }
 

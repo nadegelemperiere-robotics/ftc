@@ -72,8 +72,8 @@ public class Sequencer {
             mHasFinished = false;
             Task current = mTasks.getFirst();
 
-            if(!mName.isEmpty()) { mLogger.metric(mName, "Start"); }
-            if(!mName.isEmpty()) { mLogger.metric(mName, current.name()); }
+            if(!mName.isEmpty()) { mLogger.info (mName + " : Start"); }
+            if(!mName.isEmpty()) { mLogger.info( mName + " : " + current.name()); }
             current.run();
         }
 
@@ -93,11 +93,11 @@ public class Sequencer {
 
                 if(!mTasks.isEmpty()) {
                     current = mTasks.getFirst();
-                    if(!mName.isEmpty()) { mLogger.metric(mName, current.name()); }
+                    if(!mName.isEmpty()) { mLogger.info(mName + " : " + current.name()); }
                     current.run();
                 }
                 else {
-                    if(!mName.isEmpty()) { mLogger.metric(mName, "Stop"); }
+                    if(!mName.isEmpty()) { mLogger.info(mName + " : Stop"); }
                 }
 
             }

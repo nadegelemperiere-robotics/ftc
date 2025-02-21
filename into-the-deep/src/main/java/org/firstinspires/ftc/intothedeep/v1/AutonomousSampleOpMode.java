@@ -59,11 +59,13 @@ public class AutonomousSampleOpMode extends LinearOpMode {
             mConfiguration.read();
             mConfiguration.log();
 
-            mLogger.update();
 
         } catch (Exception e) {
             mLogger.error(e.getMessage());
         }
+
+        mLogger.update();
+
 
         waitForStart();
 
@@ -83,10 +85,13 @@ public class AutonomousSampleOpMode extends LinearOpMode {
 
             mRobot.persist();
             InterOpMode.instance().log(mLogger);
-            mLogger.stop();
 
         } catch (Exception e) {
             mLogger.error(e.getMessage());
         }
+
+        mLogger.update();
+        mLogger.stop();
+
     }
 }

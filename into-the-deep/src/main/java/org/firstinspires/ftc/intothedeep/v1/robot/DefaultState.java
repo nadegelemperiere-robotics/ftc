@@ -54,14 +54,25 @@ public class DefaultState extends RobotState {
     @Override
     public  void    toggleIntakeWrist() { ((SharedData)mData).intakeArm.rotate(); }
 
+    /* --------------------- States management --------------------- */
+
+    /**
+     * Update sequencer periodically to switch between tasks
+     */
+    @Override
+    public void         update() {
+        mLogger.info("STATE : Default");
+    }
 
     @Override
     public  RobotState  toTransfer() {
+        mLogger.info("TRANSITION : Default -> Transfer");
         return new TransferState(((SharedData)mData),mLogger);
     }
 
     @Override
     public  RobotState  toPick() {
+        mLogger.info("TRANSITION : Default -> Pick");
         return new PickState(((SharedData)mData),mLogger);
     }
 

@@ -60,12 +60,12 @@ public class AutonomousSpecimenOpMode extends LinearOpMode {
             mConfiguration.read();
             mConfiguration.log();
 
-            mLogger.update();
 
         } catch (Exception e) {
             mLogger.error(e.getMessage());
         }
 
+        mLogger.update();
         waitForStart();
 
         try {
@@ -85,10 +85,12 @@ public class AutonomousSpecimenOpMode extends LinearOpMode {
 
             mRobot.persist();
             InterOpMode.instance().log(mLogger);
-            mLogger.stop();
 
         } catch (Exception e) {
             mLogger.error(e.getMessage());
         }
+
+        mLogger.update();
+        mLogger.stop();
     }
 }

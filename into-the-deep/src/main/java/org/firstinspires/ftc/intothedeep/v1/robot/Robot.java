@@ -133,6 +133,10 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
                     String key = keys.next();
 
                     org.firstinspires.ftc.core.subsystems.Subsystem subsystem = Subsystem.factory(key, subsystems.getJSONObject(key), mHardware, mLogger);
+                    if(subsystem == null) {
+                        mLogger.warning("Subsystem " + key + " not recognized by factory");
+                        mConfigurationValid = false;
+                    }
                     if(!subsystem.isConfigured()) {
                         mLogger.warning("Subsystem " + key + " configuration is invalid");
                         mConfigurationValid = false;

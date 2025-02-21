@@ -33,16 +33,18 @@ public class EndState extends RobotState {
     /* --------------------- States management --------------------- */
 
     /**
+     * Update sequencer periodically to switch between tasks
+     */
+    @Override
+    public void         update() {
+        mLogger.info("STATE : End");
+    }
+
+    /**
      * Declare the state finished once transfer sequence is over
      */
     @Override
     public boolean      hasFinished() { return true; }
-
-    /**
-     * Update sequencer periodically to switch between tasks
-     */
-    @Override
-    public void         update() {  }
 
     /**
      * Transfer restart is not allowed until current is over

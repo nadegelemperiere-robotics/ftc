@@ -16,7 +16,7 @@ public class Configuration extends org.firstinspires.ftc.core.configuration.Conf
     static protected Configuration  sInstance = null;
 
     static {
-        sDefaultConfiguration = "v1";
+        sDefaultConfiguration = "test";
     }
 
     public  static  Configuration getInstance() {
