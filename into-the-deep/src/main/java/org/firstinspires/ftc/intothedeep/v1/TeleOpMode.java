@@ -50,6 +50,8 @@ public class TeleOpMode extends OpMode {
 
         try {
 
+            InterOpMode.instance().clear();
+
             // Log initialization
             mLogger = new LogManager(telemetry, FtcDashboard.getInstance(),"teleop-v1");
             mLogger.clear();

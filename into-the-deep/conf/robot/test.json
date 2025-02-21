@@ -3,12 +3,18 @@
     "robot"     : {
         "hardware" : {
             "motors": {
-                "front-left-wheel":  [ { "hwmap": "frontLeft" } ],
-                "front-right-wheel": [ { "hwmap": "frontRight" } ],
-                "back-left-wheel":   [ { "hwmap": "backLeft", "direction": "reverse" } ],
-                "back-right-wheel":  [ { "hwmap": "backRight",  "direction": "reverse" } ],
-                "intake-slides": [ ],
-                "outtake-slides": [ ]
+                "front-left-wheel":  [ ],
+                "front-right-wheel": [ ],
+                "back-left-wheel":   [ ],
+                "back-right-wheel":  [ ],
+                "intake-slides": [
+                    { "hwmap": "frontLeft" },
+                    { "hwmap": "frontRight" }
+                ],
+                "outtake-slides": [
+                    { "hwmap": "backLeft", "direction": "reverse" },
+                    { "hwmap": "backRight",  "direction": "reverse" }
+                ]
             },
             "servos" : {
                 "intake-elbow-pitch": [ ],
@@ -214,8 +220,8 @@
             { "action": "tuneDriveSpeed", "1": 0.45, "condition": { "button": "left_bumper", "state": "pressed", "controller" : "drive" } },
             { "action": "tuneDriveSpeed", "1": 1.0, "condition": { "button": "left_bumper", "state": "notPressed", "controller" : "drive" } },
 
-            { "action": "powerOuttakeSlides", "1": 0.9,  "condition": { "button": "left_bumper", "state": "pressedOnce", "controller" : "mechanisms"} },
-            { "action": "powerOuttakeSlides", "1": -0.7, "condition": { "button": "right_bumper", "state": "pressedOnce", "controller" : "mechanisms"}},
+            { "action": "powerOuttakeSlides", "1": 0.9,  "condition": { "button": "left_bumper", "state": "pressed", "controller" : "mechanisms"} },
+            { "action": "powerOuttakeSlides", "1": -0.7, "condition": { "button": "right_bumper", "state": "pressed", "controller" : "mechanisms"}},
             { "action": "powerOuttakeSlides", "1": 0.0,  "condition": { "and": [
                 { "button": "right_bumper","state": "notPressed", "controller" : "mechanisms"},
                 { "button": "left_bumper", "state": "notPressed", "controller" : "mechanisms"}

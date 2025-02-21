@@ -222,8 +222,8 @@
             { "action": "tuneDriveSpeed", "1": 0.45, "condition": { "button": "left_bumper", "state": "pressed", "controller" : "drive" } },
             { "action": "tuneDriveSpeed", "1": 1.0, "condition": { "button": "left_bumper", "state": "notPressed", "controller" : "drive" } },
 
-            { "action": "powerOuttakeSlides", "1": 0.9,  "condition": { "button": "left_bumper", "state": "pressedOnce", "controller" : "mechanisms"} },
-            { "action": "powerOuttakeSlides", "1": -0.7, "condition": { "button": "right_bumper", "state": "pressedOnce", "controller" : "mechanisms"}},
+            { "action": "powerOuttakeSlides", "1": 0.9,  "condition": { "button": "left_bumper", "state": "pressed", "controller" : "mechanisms"} },
+            { "action": "powerOuttakeSlides", "1": -0.7, "condition": { "button": "right_bumper", "state": "pressed", "controller" : "mechanisms"}},
             { "action": "powerOuttakeSlides", "1": 0.0,  "condition": { "and": [
                 { "button": "right_bumper","state": "notPressed", "controller" : "mechanisms"},
                 { "button": "left_bumper", "state": "notPressed", "controller" : "mechanisms"}

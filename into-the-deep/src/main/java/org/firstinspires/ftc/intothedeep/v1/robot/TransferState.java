@@ -47,8 +47,8 @@ public class TransferState extends RobotState {
                 new Task(
                         "Move slides",
                         () -> {
-                            ((SharedData)mData).intakeSlides.position("transfer-away", 40,2000);
-                            ((SharedData)mData).outtakeSlides.position("transfer",5, 5000);
+                            ((SharedData)mData).intakeSlides.position("transfer-away", 2,2000);
+                            ((SharedData)mData).outtakeSlides.position("transfer",2, 5000);
                         },
                         Condition.and(
                                 new Condition(() -> ((SharedData)mData).intakeSlides.hasFinished()),
@@ -83,7 +83,7 @@ public class TransferState extends RobotState {
                 new Task(
                         "Move intake slides to exchange position",
                         () -> {
-                            ((SharedData)mData).intakeSlides.position("transfer-exchange", 40,2000);
+                            ((SharedData)mData).intakeSlides.position("transfer-exchange", 2,2000);
                         },
                         new Condition(() -> ((SharedData)mData).intakeSlides.hasFinished())
                 ),

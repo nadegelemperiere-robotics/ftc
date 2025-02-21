@@ -132,8 +132,12 @@ public class Actuator extends Subsystem {
         if (mMotor != null) {
             if (!mHasFinished) {
                 mHasFinished = !(mMotor.isBusy()) || !(mTimer.isArmed());
+                if(!mTimer.isArmed() && mMotor.isBusy()) { mLogger.warning(mName + " timeouted"); }
                 if (mHasFinished) {
                     mMotor.power(mHoldPositionPower);
+                    double error = Math.abs(mMotor.currentPosition() - mMotor.targetPosition());
+                    mLogger.info(mName + " finished with error " + error + " for tolerance " + mMotor.targetPositionTolerance() );
+                    mMotor.log();
                 }
             }
         }
