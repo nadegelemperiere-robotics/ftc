@@ -409,7 +409,7 @@ public class MotorCoupled implements MotorComponent {
     {
         double result = -1;
         if(mConfigurationValid) {
-            result = (int) (0.5 * Math.abs(mFirst.getPower()) + 0.5 * Math.abs(mSecond.getPower()));
+            result = (0.5 * mFirst.getPower() + 0.5 * mSecond.getPower());
         }
         return result;
     }

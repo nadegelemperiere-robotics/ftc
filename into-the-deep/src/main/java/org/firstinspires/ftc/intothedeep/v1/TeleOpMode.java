@@ -12,8 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /* Qualcomm includes */
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 /* ACME robotics includes */
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -35,7 +35,7 @@ import org.firstinspires.ftc.intothedeep.v1.orchestration.Dispatcher;
 import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 
 @TeleOp(name = "Robot V1 Teleop", group = "V1")
-public class TeleOpMode extends OpMode {
+public class TeleOpMode extends LinearOpMode {
 
     LogManager              mLogger;
 
@@ -46,15 +46,18 @@ public class TeleOpMode extends OpMode {
     Dispatcher              mDispatcher;
     
     @Override
-    public void init(){
+    public void runOpMode() {
 
         try {
 
-            InterOpMode.instance().clear();
+
 
             // Log initialization
             mLogger = new LogManager(telemetry, FtcDashboard.getInstance(),"teleop-v1");
             mLogger.clear();
+
+            InterOpMode.instance().clear();
+            InterOpMode.instance().log(mLogger);
 
             // Configuration initialization
             mConfiguration = Configuration.getInstance();
@@ -83,39 +86,35 @@ public class TeleOpMode extends OpMode {
 
         mLogger.update();
 
-    }
+        waitForStart();
 
-    @Override
-    public void start() {
+
         mLogger.reset();
         // Starting position is not specified, then it will become
         // (0,0,0) if no data from previous OpMode, or the last OpMode pose if data from previous OpMode
         mRobot.start(Robot.Mode.TELEOP,null);
-    }
 
-    @Override
-    public void loop (){
+        while(opModeIsActive()) {
 
-        try {
+            try {
 
-            mLogger.info(LogManager.Target.FILE,"start");
-            mRobot.update();
-            mRobot.log();
-            mDispatcher.update();
-            mLogger.info(LogManager.Target.FILE,"end");
+                mLogger.info(LogManager.Target.FILE, "loop start");
+                mRobot.update();
+                mRobot.log();
+                mDispatcher.update();
+                mLogger.info(LogManager.Target.FILE, "loop end");
 
+            } catch (Exception e) {
+                mLogger.error(e.getMessage());
+            }
+
+            mLogger.update();
+
+            // Persist data if opmode is not stopped, or else motor may have reset
+            if(!isStopRequested()) { mRobot.persist(); }
         }
-        catch(Exception e){
-            mLogger.error(e.getMessage());
-        }
-
-        mLogger.update();
         
-    }
 
-    @Override
-    public void stop() {
-        mRobot.persist();
         InterOpMode.instance().log(mLogger);
         mLogger.stop();
     }

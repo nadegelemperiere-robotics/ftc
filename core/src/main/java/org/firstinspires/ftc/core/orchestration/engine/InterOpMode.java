@@ -66,7 +66,7 @@ public class InterOpMode {
      */
     public void                         log(LogManager logger) {
         for (Map.Entry<String, Object> values : mData.entrySet()) {
-            logger.trace(values.getKey().toUpperCase() + " : " + values.getValue().toString());
+            logger.info(values.getKey().toUpperCase() + " : " + values.getValue().toString());
         }
     }
 

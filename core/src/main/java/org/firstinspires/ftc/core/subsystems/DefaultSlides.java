@@ -48,8 +48,6 @@ public class DefaultSlides extends Actuator {
         if(mMotor != null && this.hasFinished()) {
             mMotor.mode(DcMotor.RunMode.RUN_USING_ENCODER);
             mPosition = "none";
-            mLogger.info(mMotor.currentPosition());
-            mLogger.info(mOffset);
             if(power < 0 && (mMotor.currentPosition() + mOffset) > mMinPosition) {
                 mMotor.power(power);
             }
