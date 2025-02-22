@@ -7,6 +7,12 @@
 
 package org.firstinspires.ftc.intothedeep.v1.robot;
 
+/* Roadrunner includes */
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 import org.firstinspires.ftc.core.tools.Condition;
@@ -33,7 +39,34 @@ public class AutonomousSampleState extends RobotState {
     public  AutonomousSampleState(SharedData data, LogManager logger) {
         super(data,logger);
 
+        mLogger.info("start");
+
         mSequencer = new Sequencer(mLogger);
+
+        TelemetryPacket telemetry = new TelemetryPacket();
+
+        Action trajectory1 = ((SharedData)mData).chassis.trajectory(new Pose2d(new Vector2d(0,0),0))
+                .setTangent(Math.PI)
+                .splineTo(new Vector2d(-10.75,-11.25),5*Math.PI/4)
+                .build();
+
+        Action trajectory2 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
+                .lineToXConstantHeading(-11.5)
+                .turn(Math.PI/4)
+                .lineToXConstantHeading(-14)
+                .build();
+
+        Action trajectory3 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
+                .lineToXConstantHeading(-11)
+                .turn(-7 * Math.PI/24)
+                .build();
+
+        Action trajectory4 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
+                .splineTo(new Vector2d(-51,-10),-Math.PI/2)
+                .lineToYConstantHeading(14.5)
+                .build();
+
+
         mSequencer.sequence(
                 "AUTONOMOUS SAMPLE",
                 new Task(
@@ -51,9 +84,14 @@ public class AutonomousSampleState extends RobotState {
                         )
                 ),
                 new Task(
-                        "Move to basket with initial sample",
-                        () -> {},
-                        new Condition(() -> true)
+                        "Move to basket with initial sample while raising the slides",
+                        () -> {
+                            ((SharedData)mData).outtakeSlides.position("max",25,5000);
+                        },
+                        Condition.and(
+                            new Condition(() -> ((SharedData)mData).outtakeSlides.hasFinished()),
+                            new Condition(() -> trajectory1.run(telemetry))
+                        )
                 ),
                 new Task(
                         "Elevate outtake slides",
@@ -86,7 +124,7 @@ public class AutonomousSampleState extends RobotState {
                 new Task(
                         "Move to first sample",
                         () -> {},
-                        new Condition(() -> true)
+                        new Condition(() -> trajectory2.run(telemetry))
                 ),
                 new Task("Extend slides",
                         () -> {
@@ -168,7 +206,10 @@ public class AutonomousSampleState extends RobotState {
                         () -> {
                             ((SharedData)mData).intakeArm.position(IntakeArm.Position.INIT);
                         },
-                        new Condition(() -> true)
+                        Condition.and(
+                            new Condition(() -> trajectory3.run(telemetry)),
+                            new Condition(() -> ((SharedData)mData).intakeArm.hasFinished())
+                        )
                 ),
                 new Task(
                         "Elevate outtake slides",
@@ -201,11 +242,13 @@ public class AutonomousSampleState extends RobotState {
                 new Task(
                         "Move to ascend area",
                         () -> {},
-                        new Condition(() -> true)
+                        new Condition(() -> trajectory4.run(telemetry))
                 )
         );
 
         mSequencer.run();
+
+        mLogger.info("stop");
 
     }
 

@@ -11,20 +11,46 @@ package org.firstinspires.ftc.core.subsystems;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+
+/* Android includes */
+import androidx.annotation.NonNull;
 
 /* JSON object */
-import org.firstinspires.ftc.core.components.odometers.Encoder;
-import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 /* ACME robotics includes */
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.PoseVelocity2dDual;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.Pose2dDual;
+import com.acmerobotics.roadrunner.MecanumKinematics;
+import com.acmerobotics.roadrunner.HolonomicController;
+import com.acmerobotics.roadrunner.MotorFeedforward;
+import com.acmerobotics.roadrunner.TurnConstraints;
+import com.acmerobotics.roadrunner.AngularVelConstraint;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
+import com.acmerobotics.roadrunner.AccelConstraint;
+import com.acmerobotics.roadrunner.VelConstraint;
+import com.acmerobotics.roadrunner.MinVelConstraint;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.TrajectoryBuilderParams;
+import com.acmerobotics.roadrunner.Time;
+import com.acmerobotics.roadrunner.TimeTurn;
+import com.acmerobotics.roadrunner.TimeTrajectory;
+import com.acmerobotics.roadrunner.ProfileParams;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Actions;
+
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -36,12 +62,165 @@ import org.firstinspires.ftc.core.components.odometers.OdometerComponent;
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;
 
+/* Orchestration includes */
+import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 
 public class MecanumDrive extends DriveTrain {
 
     enum Mode {
         FIELD_CENTRIC,
         ROBOT_CENTRIC
+    }
+
+    public final class FollowTrajectoryAction implements Action {
+
+        public  final   TimeTrajectory  mTrajectory;
+        private         double          mStartTime;
+
+        public FollowTrajectoryAction(TimeTrajectory t) {
+            mTrajectory = t;
+            mStartTime = -1;
+
+            mPlannedFinalPose = mTrajectory.get(mTrajectory.duration).value();
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket p) {
+            boolean result = true;
+
+            double t;
+            if (mStartTime < 0) {
+                mStartTime = Actions.now();
+                t = 0;
+            } else {
+                t = Actions.now() - mStartTime;
+            }
+
+            if (t >= mTrajectory.duration) {
+                mLeftFront.power(0);
+                mLeftBack.power(0);
+                mRightBack.power(0);
+                mRightFront.power(0);
+
+                result = false;
+            }
+            else {
+                Pose2dDual<Time> txWorldTarget = mTrajectory.get(t);
+                mLocalizer.update();
+                PoseVelocity2d robotVelRobot = mLocalizer.velocity();
+                PoseVelocity2dDual<Time> command = new HolonomicController(
+                       mXGain, mYGain, mHeadingGain, mXVelocityGain, mYVelocityGain, mHeadingVelocityGain
+                ).compute(txWorldTarget,mLocalizer.pose(),robotVelRobot);
+
+                MecanumKinematics.WheelVelocities<Time> wheelVels = mKinematics.inverse(command);
+                double voltage = mVoltageSensor.getVoltage();
+                MotorFeedforward feedforward = new MotorFeedforward(mKs, mKv / mInPerTick, mKa / mInPerTick);
+
+                double leftFrontPower = feedforward.compute(wheelVels.leftFront) / voltage;
+                double leftBackPower = feedforward.compute(wheelVels.leftBack) / voltage;
+                double rightBackPower = feedforward.compute(wheelVels.rightBack) / voltage;
+                double rightFrontPower = feedforward.compute(wheelVels.rightFront) / voltage;
+
+                mLeftFront.power(leftFrontPower);
+                mLeftBack.power(leftBackPower);
+                mRightBack.power(rightBackPower);
+                mRightFront.power(rightFrontPower);
+
+                Pose2d error = txWorldTarget.value().minusExp(mLocalizer.pose());
+
+                mLogger.debug("x : " +  mLocalizer.pose().position.x);
+                mLogger.debug("y : " + mLocalizer.pose().position.y);
+                mLogger.debug("heading (deg) : " + Math.toDegrees(mLocalizer.pose().heading.toDouble()));
+
+                mLogger.debug("xError : " +  error.position.x);
+                mLogger.debug("yError : " +  error.position.y);
+                mLogger.debug("headingError  (deg): " +  Math.toDegrees(error.heading.toDouble()));
+
+
+            }
+
+            return result;
+        }
+
+        @Override
+        public void preview(Canvas c) {
+        }
+    }
+
+    public final class TurnAction implements Action {
+        private final   TimeTurn mTurn;
+
+        private double  mStartTime;
+
+        public TurnAction(TimeTurn turn) {
+            this.mTurn = turn;
+            mStartTime = -1;
+
+            mPlannedFinalPose = turn.get(turn.duration).value();
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket p) {
+            boolean result = true;
+            double t;
+            if (mStartTime < 0) {
+                mStartTime = Actions.now();
+                t = 0;
+            } else {
+                t = Actions.now() - mStartTime;
+            }
+
+            if (t >= mTurn.duration) {
+                mLeftFront.power(0);
+                mLeftBack.power(0);
+                mRightBack.power(0);
+                mRightFront.power(0);
+
+                result =  false;
+            }
+            else {
+
+                Pose2dDual<Time> txWorldTarget = mTurn.get(t);
+
+                mLocalizer.update();
+                PoseVelocity2d robotVelRobot = mLocalizer.velocity();
+
+                PoseVelocity2dDual<Time> command = new HolonomicController(
+                        mXGain, mYGain, mHeadingGain, mXVelocityGain, mYVelocityGain, mHeadingVelocityGain
+                ).compute(txWorldTarget,mLocalizer.pose(),robotVelRobot);
+
+                MecanumKinematics.WheelVelocities<Time> wheelVels = mKinematics.inverse(command);
+                double voltage = mVoltageSensor.getVoltage();
+                MotorFeedforward feedforward = new MotorFeedforward(mKs, mKv / mInPerTick, mKa / mInPerTick);
+
+                double leftFrontPower = feedforward.compute(wheelVels.leftFront) / voltage;
+                double leftBackPower = feedforward.compute(wheelVels.leftBack) / voltage;
+                double rightBackPower = feedforward.compute(wheelVels.rightBack) / voltage;
+                double rightFrontPower = feedforward.compute(wheelVels.rightFront) / voltage;
+
+                mLeftFront.power(leftFrontPower);
+                mLeftBack.power(leftBackPower);
+                mRightBack.power(rightBackPower);
+                mRightFront.power(rightFrontPower);
+
+                Pose2d error = txWorldTarget.value().minusExp(mLocalizer.pose());
+
+                mLogger.debug("x : " +  mLocalizer.pose().position.x);
+                mLogger.debug("y : " + mLocalizer.pose().position.y);
+                mLogger.debug("heading (deg) : " + Math.toDegrees(mLocalizer.pose().heading.toDouble()));
+
+                mLogger.debug("xError : " +  error.position.x);
+                mLogger.debug("yError : " +  error.position.y);
+                mLogger.debug("headingError  (deg): " +  Math.toDegrees(error.heading.toDouble()));
+
+            }
+
+            return result;
+        }
+
+        @Override
+        public void preview(Canvas c) {
+        }
     }
 
     static final String             sFrontLeftKey               = "front-left-wheel";
@@ -90,6 +269,9 @@ public class MecanumDrive extends DriveTrain {
     MotorComponent                  mLeftBack;
     MotorComponent                  mRightBack;
     OdometerComponent               mLocalizer;
+    VoltageSensor                   mVoltageSensor;
+
+    MecanumKinematics               mKinematics;
 
     double                          mInPerTick;
     double                          mLatInPerTick;
@@ -112,6 +294,8 @@ public class MecanumDrive extends DriveTrain {
     double                          mDrivingSpeedMultiplier;
     Mode                            mDrivingMode;
     Pose2d                          mInitialPose;
+
+    Pose2d                          mPlannedFinalPose;
 
     /**
      * Constructor
@@ -142,6 +326,8 @@ public class MecanumDrive extends DriveTrain {
         mLeftBack           = null;
         mRightBack          = null;
         mLocalizer          = null;
+        mKinematics         = null;
+        if(mHardware != null) { mVoltageSensor = mHardware.voltageSensor(); }
 
         mInPerTick              = 1.0;
         mLatInPerTick           = 1.0;
@@ -163,6 +349,7 @@ public class MecanumDrive extends DriveTrain {
 
         // Reading initial position from interopmodes stored data if exist
         mInitialPose = new Pose2d(new Vector2d(0,0),0);
+        mPlannedFinalPose = new Pose2d(new Vector2d(0,0),0);
         Object pose = InterOpMode.instance().get(mName + "-pose");
         if(pose != null) { mInitialPose = (Pose2d) pose; }
 
@@ -188,6 +375,10 @@ public class MecanumDrive extends DriveTrain {
                     " - y : " + (double)((int)(mLocalizer.velocity().linearVel.y)*1000) / 1000 +
                     " - heading : " + (double)((int)(mLocalizer.velocity().angVel / Math.PI * 1800))/1000 + " deg/s");
         }
+    }
+
+    public Pose2d                       finalPlannedPose() {
+        return mLocalizer.pose().inverse().times(mPlannedFinalPose);
     }
 
     /**
@@ -267,6 +458,34 @@ public class MecanumDrive extends DriveTrain {
         }
     }
 
+    public TrajectoryActionBuilder      trajectory(Pose2d pose){
+
+        TrajectoryActionBuilder result = null;
+
+        if(mConfigurationValid) {
+
+            TurnConstraints turnConstraints = new TurnConstraints(
+                    mMaxHeadingVelocity, -mMaxHeadingAcceleration, mMaxHeadingAcceleration);
+            VelConstraint   velConstraints = new MinVelConstraint(Arrays.asList(
+                    mKinematics.new WheelVelConstraint(mMaxWheelVelocity),
+                    new AngularVelConstraint(mMaxHeadingVelocity)));
+            AccelConstraint  accContraint =
+                    new ProfileAccelConstraint(mMinProfileAcceleration, mMaxProfileAcceleration);
+
+            result =  new TrajectoryActionBuilder(
+                TurnAction::new,
+                FollowTrajectoryAction::new,
+                new TrajectoryBuilderParams(
+                        1e-6,
+                        new ProfileParams(0.25, 0.1, 1e-2)
+                ), mLocalizer.pose().times(pose), 0.0,
+                turnConstraints, velConstraints, accContraint
+            );
+        }
+
+        return result;
+    }
+
     /**
      * Persist data to be able to keep the same behavior after a reinitialization.
      * Read current heading and transform it into the FTC field coordinate system
@@ -302,6 +521,7 @@ public class MecanumDrive extends DriveTrain {
         mLeftBack               = null;
         mRightBack              = null;
         mLocalizer              = null;
+        mKinematics             = null;
 
         mInPerTick              = 1.0;
         mLatInPerTick           = 1.0;
@@ -343,28 +563,40 @@ public class MecanumDrive extends DriveTrain {
                     mLeftFrontHwName = wheels.getString(sFrontLeftKey);
                     if (motors.containsKey(mLeftFrontHwName)) {
                         mLeftFront = motors.get(mLeftFrontHwName);
-                        if(mLeftFront != null) { mLeftFront.mode(DcMotor.RunMode.RUN_USING_ENCODER); }
+                        if(mLeftFront != null) {
+                            mLeftFront.mode(DcMotor.RunMode.RUN_USING_ENCODER);
+                            mLeftFront.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                        }
                     }
                 }
                 if(wheels.has(sBackLeftKey)) {
                     mLeftBackHwName = wheels.getString(sBackLeftKey);
                     if (motors.containsKey(mLeftBackHwName)) {
                         mLeftBack = motors.get(mLeftBackHwName);
-                        if(mLeftBack != null) { mLeftBack.mode(DcMotor.RunMode.RUN_USING_ENCODER); }
+                        if(mLeftBack != null) {
+                            mLeftBack.mode(DcMotor.RunMode.RUN_USING_ENCODER);
+                            mLeftBack.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                        }
                     }
                 }
                 if(wheels.has(sFrontRightKey)) {
                     mRightFrontHwName = wheels.getString(sFrontRightKey);
                     if (motors.containsKey(mRightFrontHwName)) {
                         mRightFront = motors.get(mRightFrontHwName);
-                        if(mRightFront != null ) { mRightFront.mode(DcMotor.RunMode.RUN_USING_ENCODER); }
+                        if(mRightFront != null ) {
+                            mRightFront.mode(DcMotor.RunMode.RUN_USING_ENCODER);
+                            mRightFront.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                        }
                     }
                 }
                 if(wheels.has(sBackRightKey)) {
                     mRightBackHwName = wheels.getString(sBackRightKey);
                     if (motors.containsKey(mRightBackHwName)) {
                         mRightBack = motors.get(mRightBackHwName);
-                        if(mRightBack != null) { mRightBack.mode(DcMotor.RunMode.RUN_USING_ENCODER); }
+                        if(mRightBack != null) {
+                            mRightBack.mode(DcMotor.RunMode.RUN_USING_ENCODER);
+                            mRightBack.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                        }
                     }
                 }
             }
@@ -428,6 +660,12 @@ public class MecanumDrive extends DriveTrain {
         if(mLocalizer == null) {
             mLogger.error("Missing odometer in drive train configuration");
             mConfigurationValid = false;
+        }
+
+        if(mConfigurationValid) {
+            mKinematics = new MecanumKinematics(
+                   mInPerTick * mTrackWidthTicks, mInPerTick / mLatInPerTick);
+
         }
 
     }
@@ -738,7 +976,5 @@ public class MecanumDrive extends DriveTrain {
         }
         return result;
     }
-
-
-
 }
+

@@ -21,7 +21,6 @@ import org.json.JSONArray;
 
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -39,8 +38,6 @@ public class Tuning extends Hardware {
     final Map<String, ServoComponent> mSingleServos;
     final Map<String, List<String>>   mServoMapping;
 
-    VoltageSensor                     mVoltageSensor;
-
     /**
      * Constructor
      *
@@ -57,7 +54,6 @@ public class Tuning extends Hardware {
         mSingleServos = new LinkedHashMap<>();
         mServoMapping = new LinkedHashMap<>();
 
-        mVoltageSensor  = null;
 
     }
 
@@ -66,8 +62,6 @@ public class Tuning extends Hardware {
 
     public Map<String, ServoComponent>  singleServos()  { return mSingleServos; }
     public Map<String, List<String>>    mappingServos() { return mServoMapping; }
-
-    public VoltageSensor                voltageSensor() { return mVoltageSensor; }
 
     /**
      * Extended configuration reading where each coupled servos and motors
@@ -139,14 +133,6 @@ public class Tuning extends Hardware {
 
         } catch (JSONException e) {
             mLogger.error(e.getMessage());
-        }
-
-
-        // Read voltage sensor
-        mVoltageSensor = mMap.voltageSensor.iterator().next();
-        if(mVoltageSensor == null) {
-            mLogger.warning("Voltage sensor not found");
-            mConfigurationValid = false;
         }
 
     }

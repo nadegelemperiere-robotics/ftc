@@ -12,6 +12,7 @@ import java.util.List;
 
 /* ACME robotics includes */
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 
 /* Component includes */
 import org.firstinspires.ftc.core.components.motors.MotorComponent;
@@ -33,6 +34,10 @@ public abstract class DriveTrain extends Subsystem {
     public abstract void                    initialize(Pose2d pose);
     public abstract void                    driveSpeedMultiplier(double multiplier);
     public abstract void                    drive(double xSpeed, double ySpeed, double headingSpeed);
+
+    /* ------------------- Autonomous functions -------------------- */
+
+    public abstract TrajectoryActionBuilder trajectory(Pose2d pose);
 
     /* --------------------- Tuning functions ---------------------- */
 

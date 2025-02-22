@@ -20,6 +20,7 @@ import org.json.JSONArray;
 /* Qualcomm includes */
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 /* ACME robotics includes */
 import com.acmerobotics.roadrunner.ftc.LynxFirmware;
@@ -56,6 +57,7 @@ public class Hardware implements Configurable {
     final Map<String, ServoComponent>       mServos;
     final Map<String, ImuComponent>         mImus;
     final Map<String, OdometerComponent>    mOdometers;
+    VoltageSensor                           mVoltageSensor;
 
     /**
      * Constructor
@@ -78,10 +80,11 @@ public class Hardware implements Configurable {
             }
         }
 
-        mMotors     = new LinkedHashMap<>();
-        mServos     = new LinkedHashMap<>();
-        mImus       = new LinkedHashMap<>();
-        mOdometers  = new LinkedHashMap<>();
+        mMotors         = new LinkedHashMap<>();
+        mServos         = new LinkedHashMap<>();
+        mImus           = new LinkedHashMap<>();
+        mOdometers      = new LinkedHashMap<>();
+        mVoltageSensor  = null;
 
     }
 
@@ -89,6 +92,9 @@ public class Hardware implements Configurable {
     public Map<String,ServoComponent>       servos() { return mServos; }
     public Map<String,ImuComponent>         imus() { return mImus; }
     public Map<String,OdometerComponent>    odometers() { return mOdometers; }
+    public VoltageSensor                    voltageSensor() { return mVoltageSensor; }
+
+
 
     public boolean                          isConfigured() { return mConfigurationValid;}
 
@@ -112,8 +118,21 @@ public class Hardware implements Configurable {
     public void                             read(JSONObject reader) {
 
         mConfigurationValid = true;
+        mVoltageSensor      = null;
+        mMotors.clear();
+        mImus.clear();
+        mServos.clear();
+        mOdometers.clear();
 
         try {
+
+            // Read voltage sensor
+            mVoltageSensor = mMap.voltageSensor.iterator().next();
+            if(mVoltageSensor == null) {
+                mLogger.warning("Voltage sensor not found");
+                mConfigurationValid = false;
+            }
+
 
             // Read Motors
             if (reader.has(sMotorsKey)) {

@@ -8,6 +8,9 @@
 package org.firstinspires.ftc.core.subsystems;
 
 /* System includes */
+import androidx.annotation.NonNull;
+
+import java.util.Arrays;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -18,11 +21,37 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 
 /* Qualcomm includes */
-import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 /* ACME robotics includes */
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Actions;
+import com.acmerobotics.roadrunner.RamseteController;
+import com.acmerobotics.roadrunner.Vector2dDual;
+import com.acmerobotics.roadrunner.MotorFeedforward;
+import com.acmerobotics.roadrunner.Pose2dDual;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.PoseVelocity2dDual;
+import com.acmerobotics.roadrunner.Time;
+import com.acmerobotics.roadrunner.Arclength;
+import com.acmerobotics.roadrunner.DualNum;
+import com.acmerobotics.roadrunner.TimeTrajectory;
+import com.acmerobotics.roadrunner.TimeTurn;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.TankKinematics;
+import com.acmerobotics.roadrunner.AccelConstraint;
+import com.acmerobotics.roadrunner.AngularVelConstraint;
+import com.acmerobotics.roadrunner.MinVelConstraint;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
+import com.acmerobotics.roadrunner.ProfileParams;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.TrajectoryBuilderParams;
+import com.acmerobotics.roadrunner.TurnConstraints;
+import com.acmerobotics.roadrunner.VelConstraint;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -38,6 +67,153 @@ import org.firstinspires.ftc.core.robot.Hardware;
 import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 
 public class TankDrive extends DriveTrain {
+
+    public final class FollowTrajectoryAction implements Action {
+
+        public  final TimeTrajectory mTrajectory;
+        private         double          mStartTime;
+
+        public FollowTrajectoryAction(TimeTrajectory t) {
+            mTrajectory = t;
+            mStartTime = -1;
+
+            mPlannedFinalPose = mTrajectory.get(mTrajectory.duration).value();
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket p) {
+            boolean result = true;
+
+            double t;
+            if (mStartTime < 0) {
+                mStartTime = Actions.now();
+                t = 0;
+            } else {
+                t = Actions.now() - mStartTime;
+            }
+
+            if (t >= mTrajectory.duration) {
+                for(int i_left = 0; i_left < mLeft.size();i_left ++) { mLeft.get(i_left).power(0); }
+                for(int i_right = 0; i_right < mRight.size();i_right ++) { mRight.get(i_right).power(0); }
+
+                result = false;
+            }
+            else {
+
+                DualNum<Time> x = mTrajectory.profile.get(t);
+                Pose2dDual<Arclength> txWorldTarget = mTrajectory.path.get(x.value(), 3);
+
+                mLocalizer.update();
+                PoseVelocity2d robotVelRobot = mLocalizer.velocity();
+                PoseVelocity2dDual<Time> command = new RamseteController(mKinematics.trackWidth, mRamseteZeta, mRamseteBBAr)
+                        .compute(x, txWorldTarget, mLocalizer.pose());
+
+                TankKinematics.WheelVelocities<Time> wheelVels = mKinematics.inverse(command);
+                double voltage = mVoltageSensor.getVoltage();
+                MotorFeedforward feedforward = new MotorFeedforward(mKs, mKv / mInPerTick, mKa / mInPerTick);
+
+                double leftPower = feedforward.compute(wheelVels.left) / voltage;
+                double rightPower = feedforward.compute(wheelVels.right) / voltage;
+
+                for(int i_left = 0; i_left < mLeft.size();i_left ++) { mLeft.get(i_left).power(leftPower); }
+                for(int i_right = 0; i_right < mRight.size();i_right ++) { mRight.get(i_right).power(rightPower); }
+
+                Pose2d error = txWorldTarget.value().minusExp(mLocalizer.pose());
+
+                mLogger.debug("x : " +  mLocalizer.pose().position.x);
+                mLogger.debug("y : " + mLocalizer.pose().position.y);
+                mLogger.debug("heading (deg) : " + Math.toDegrees(mLocalizer.pose().heading.toDouble()));
+
+                mLogger.debug("xError : " +  error.position.x);
+                mLogger.debug("yError : " +  error.position.y);
+                mLogger.debug("headingError  (deg): " +  Math.toDegrees(error.heading.toDouble()));
+
+
+            }
+
+            return result;
+        }
+
+        @Override
+        public void preview(Canvas c) {
+        }
+    }
+
+    public final class TurnAction implements Action {
+        private final TimeTurn mTurn;
+
+        private double  mStartTime;
+
+        public TurnAction(TimeTurn turn) {
+            this.mTurn = turn;
+            mStartTime = -1;
+
+            mPlannedFinalPose = turn.get(turn.duration).value();
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket p) {
+            boolean result = true;
+
+            double t;
+            if (mStartTime < 0) {
+                mStartTime = Actions.now();
+                t = 0;
+            } else {
+                t = Actions.now() - mStartTime;
+            }
+
+            if (t >= mTurn.duration) {
+                for(int i_left = 0; i_left < mLeft.size();i_left ++) { mLeft.get(i_left).power(0); }
+                for(int i_right = 0; i_right < mRight.size();i_right ++) { mRight.get(i_right).power(0); }
+
+                result = false;
+            }
+            else {
+
+                Pose2dDual<Time> txWorldTarget = mTurn.get(t);
+
+                mLocalizer.update();
+                PoseVelocity2d robotVelRobot = mLocalizer.velocity();
+                PoseVelocity2dDual<Time> command = new PoseVelocity2dDual<>(
+                        Vector2dDual.constant(new Vector2d(0, 0), 3),
+                        txWorldTarget.heading.velocity().plus(
+                                mTurnGain * mLocalizer.pose().heading.minus(txWorldTarget.heading.value()) +
+                                mTurnVelocityGain * (robotVelRobot.angVel - txWorldTarget.heading.velocity().value())
+                        )
+                );
+
+                TankKinematics.WheelVelocities<Time> wheelVels = mKinematics.inverse(command);
+                double voltage = mVoltageSensor.getVoltage();
+                MotorFeedforward feedforward = new MotorFeedforward(mKs, mKv / mInPerTick, mKa / mInPerTick);
+
+                double leftPower = feedforward.compute(wheelVels.left) / voltage;
+                double rightPower = feedforward.compute(wheelVels.right) / voltage;
+
+                for(int i_left = 0; i_left < mLeft.size();i_left ++) { mLeft.get(i_left).power(leftPower); }
+                for(int i_right = 0; i_right < mRight.size();i_right ++) { mRight.get(i_right).power(rightPower); }
+
+                Pose2d error = txWorldTarget.value().minusExp(mLocalizer.pose());
+
+                mLogger.debug("x : " +  mLocalizer.pose().position.x);
+                mLogger.debug("y : " + mLocalizer.pose().position.y);
+                mLogger.debug("heading (deg) : " + Math.toDegrees(mLocalizer.pose().heading.toDouble()));
+
+                mLogger.debug("xError : " +  error.position.x);
+                mLogger.debug("yError : " +  error.position.y);
+                mLogger.debug("headingError  (deg): " +  Math.toDegrees(error.heading.toDouble()));
+
+
+            }
+
+            return result;
+        }
+
+        @Override
+        public void preview(Canvas c) {
+        }
+    }
+
 
     static final String sLeftKey                    = "left";
     static final String sRightKey                   = "right";
@@ -73,24 +249,28 @@ public class TankDrive extends DriveTrain {
     List<MotorComponent>    mLeft;
     List<MotorComponent>    mRight;
     OdometerComponent       mLocalizer;
+    TankKinematics          mKinematics;
+    VoltageSensor           mVoltageSensor;
 
     double                  mInPerTick;
     double                  mTrackWidthTicks;
-    double                 mMaxWheelVelocity;
-    double                 mMinProfileAcceleration;
-    double                 mMaxProfileAcceleration;
-    double                 mMaxHeadingVelocity;
-    double                 mMaxHeadingAcceleration;
-    double                 mKs;
-    double                 mKv;
-    double                 mKa;
-    double                 mRamseteZeta;
-    double                 mRamseteBBAr;
-    double                 mTurnGain;
-    double                 mTurnVelocityGain;
+    double                  mMaxWheelVelocity;
+    double                  mMinProfileAcceleration;
+    double                  mMaxProfileAcceleration;
+    double                  mMaxHeadingVelocity;
+    double                  mMaxHeadingAcceleration;
+    double                  mKs;
+    double                  mKv;
+    double                  mKa;
+    double                  mRamseteZeta;
+    double                  mRamseteBBAr;
+    double                  mTurnGain;
+    double                  mTurnVelocityGain;
 
-    double                 mDrivingSpeedMultiplier;
-    Pose2d                 mInitialPose;
+    double                  mDrivingSpeedMultiplier;
+    Pose2d                  mInitialPose;
+
+    Pose2d                  mPlannedFinalPose;
 
     public TankDrive(String name, Hardware hardware, LogManager logger) {
 
@@ -110,6 +290,8 @@ public class TankDrive extends DriveTrain {
         mLeft = new ArrayList<>();
         mRight = new ArrayList<>();
         mLocalizer = null;
+        mKinematics = null;
+        if(mHardware != null) { mVoltageSensor = mHardware.voltageSensor(); }
 
         mInPerTick = 1.0;
         mTrackWidthTicks = 0.0;
@@ -128,6 +310,7 @@ public class TankDrive extends DriveTrain {
 
         // Reading initial position from interopmodes stored data if exist
         mInitialPose = new Pose2d(new Vector2d(0,0),0);
+        mPlannedFinalPose = new Pose2d(new Vector2d(0,0),0);
         Object pose = InterOpMode.instance().get(mName + "-pose");
         if(pose != null) { mInitialPose = (Pose2d) pose; }
 
@@ -151,6 +334,10 @@ public class TankDrive extends DriveTrain {
 
     public double driveSpeedMultiplier() {
         return mDrivingSpeedMultiplier;
+    }
+
+    public Pose2d                       finalPlannedPose() {
+        return mLocalizer.pose().inverse().times(mPlannedFinalPose);
     }
 
     public void update() {
@@ -182,6 +369,35 @@ public class TankDrive extends DriveTrain {
         }
     }
 
+    public TrajectoryActionBuilder trajectory(Pose2d pose){
+
+        TrajectoryActionBuilder result = null;
+
+        if(mConfigurationValid) {
+
+            TurnConstraints turnConstraints = new TurnConstraints(
+                    mMaxHeadingVelocity, -mMaxHeadingAcceleration, mMaxHeadingAcceleration);
+            VelConstraint velConstraints = new MinVelConstraint(Arrays.asList(
+                    mKinematics.new WheelVelConstraint(mMaxWheelVelocity),
+                    new AngularVelConstraint(mMaxHeadingVelocity)));
+            AccelConstraint accContraint =
+                    new ProfileAccelConstraint(mMinProfileAcceleration, mMaxProfileAcceleration);
+
+            result =  new TrajectoryActionBuilder(
+                    TurnAction::new,
+                    FollowTrajectoryAction::new,
+                    new TrajectoryBuilderParams(
+                            1e-6,
+                            new ProfileParams(0.25, 0.1, 1e-2)
+                    ), mLocalizer.pose().times(pose), 0.0,
+                    turnConstraints, velConstraints, accContraint
+            );
+        }
+
+        return result;
+    }
+
+
     /**
      * Persist data to be able to keep the same behavior after a reinitialization.
      * Read current heading and transform it into the FTC field coordinate system
@@ -194,6 +410,8 @@ public class TankDrive extends DriveTrain {
             InterOpMode.instance().add(mName + "-pose", current);
         }
     }
+
+
 
     /**
      * Determines if the actuator subsystem is configured correctly.
@@ -252,6 +470,7 @@ public class TankDrive extends DriveTrain {
                             MotorComponent motor = motors.get(lefts.getString(i_left));
                             if (motor != null) {
                                 motor.mode(DcMotor.RunMode.RUN_USING_ENCODER);
+                                motor.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                                 mLeft.add(motor);
                                 mLeftHwName.add(lefts.getString(i_left));
                             }
@@ -266,6 +485,7 @@ public class TankDrive extends DriveTrain {
                             MotorComponent motor = motors.get(rights.getString(i_right));
                             if (motor != null) {
                                 motor.mode(DcMotor.RunMode.RUN_USING_ENCODER);
+                                motor.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                                 mRight.add(motor);
                                 mRightHwName.add(rights.getString(i_right));
                             }
@@ -350,6 +570,12 @@ public class TankDrive extends DriveTrain {
         if (mLocalizer == null) {
             mLogger.error("Missing odometer in drive train configuration");
             mConfigurationValid = false;
+        }
+
+        if(mConfigurationValid) {
+            mKinematics = new TankKinematics(
+                    mInPerTick * mTrackWidthTicks);
+
         }
 
     }

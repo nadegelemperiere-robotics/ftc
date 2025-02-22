@@ -8,6 +8,11 @@
 package org.firstinspires.ftc.intothedeep.v1.robot;
 
 /* Tools includes */
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
+
 import org.firstinspires.ftc.core.tools.LogManager;
 import org.firstinspires.ftc.core.tools.Condition;
 
@@ -33,7 +38,42 @@ public class AutonomousSpecimenState extends RobotState {
     public  AutonomousSpecimenState(SharedData data, LogManager logger) {
         super(data,logger);
 
+        mLogger.info("start");
+
         mSequencer = new Sequencer(mLogger);
+
+        TelemetryPacket telemetry = new TelemetryPacket();
+
+        Action trajectory1 = ((SharedData)mData).chassis.trajectory(new Pose2d(new Vector2d(0,0),0))
+                .lineToX(-31)
+                .build();
+
+        Action trajectory2 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
+                .lineToX(-27)
+                .build();
+
+        Action trajectory3 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
+                .lineToX(-15)
+                .turn(Math.PI/2)
+                .lineToY(39.5)
+                .turn(Math.PI/2)
+                .lineToX(-5)
+                .build();
+
+        Action trajectory4 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
+                .lineToX(-10)
+                .turn(-Math.PI/2)
+                .lineToY(-10)
+                .turn(-Math.PI/2)
+                .lineToX(-25.5)
+                .build();
+
+        Action trajectory5 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
+                .lineToX(-5)
+                .turn(Math.PI/2)
+                .lineToY(39)
+                .build();
+
         mSequencer.sequence(
                 "AUTONOMOUS SPECIMEN",
                 new Task(
@@ -53,7 +93,7 @@ public class AutonomousSpecimenState extends RobotState {
                 new Task(
                         "Move to submersible with initial specimen",
                         () -> {},
-                        new Condition(() -> true)
+                        new Condition(() -> trajectory1.run(telemetry))
                 ),
                 new Task(
                         "Position outtake elbow to pass under the submersible bar",
@@ -79,7 +119,7 @@ public class AutonomousSpecimenState extends RobotState {
                 new Task(
                         "Move so that the hook clips on the bar",
                         () -> {},
-                        new Condition(() -> true)
+                        new Condition(() -> trajectory2.run(telemetry))
                 ),
                 new Task(
                         "Open outtake claw",
@@ -113,7 +153,7 @@ public class AutonomousSpecimenState extends RobotState {
                 new Task(
                         "Move to the submersible",
                         () -> {},
-                        new Condition(() -> true)
+                        new Condition(() -> trajectory3.run(telemetry))
                 ),
                 new Task(
                         "Elevate outtake slides",
@@ -139,7 +179,7 @@ public class AutonomousSpecimenState extends RobotState {
                 new Task(
                         "Move towards the submersible to clip",
                         () -> {},
-                        new Condition(() -> true)
+                        new Condition(() -> trajectory4.run(telemetry))
                 ),
                 new Task(
                         "Open outtake claw",
@@ -154,12 +194,14 @@ public class AutonomousSpecimenState extends RobotState {
                             ((SharedData)mData).outtakeArm.position(OuttakeArm.Position.INIT);
                             ((SharedData)mData).outtakeSlides.position("transfer",5,5000);
                         },
-                        new Condition(() -> true)
+                        new Condition(() -> trajectory5.run(telemetry))
                 )
 
         );
 
         mSequencer.run();
+
+        mLogger.info("stop");
 
     }
 
