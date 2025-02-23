@@ -4,7 +4,7 @@
         <LynxModule name="Control Hub" port="173">
             <RevRoboticsUltraplanetaryHDHexMotor name="frontLeft" port="0" />
             <RevRoboticsUltraplanetaryHDHexMotor name="backLeft" port="1" />
-            <RevRoboticsCoreHexMotor name="backRight" port="3" />
+            <RevRoboticsUltraplanetaryHDHexMotor name="backRight" port="3" />
             <RevRoboticsUltraplanetaryHDHexMotor name="frontRight" port="2" />
             <Servo name="left" port="0" />
             <Servo name="right" port="1" />

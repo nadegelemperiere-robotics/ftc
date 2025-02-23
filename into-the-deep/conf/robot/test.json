@@ -3,10 +3,10 @@
     "robot"     : {
         "hardware" : {
             "motors": {
-                "front-left-wheel":  [ ],
-                "front-right-wheel": [ ],
-                "back-left-wheel":   [ ],
-                "back-right-wheel":  [ ],
+                "front-left-wheel":  [  { "hwmap": "frontLeft" }],
+                "front-right-wheel": [  { "hwmap": "frontRight" }],
+                "back-left-wheel":   [ { "hwmap": "backLeft", "direction": "reverse" }],
+                "back-right-wheel":  [ { "hwmap": "backRight",  "direction": "reverse" }],
                 "intake-slides": [
                     { "hwmap": "frontLeft" },
                     { "hwmap": "frontRight" }
@@ -32,7 +32,7 @@
                     "back-left-wheel"       : "back-left-wheel",
                     "back-right-wheel"      : "back-right-wheel",
                     "imu"                   : "built-in",
-                    "track-width-ticks"     : 1.0,
+                    "track-width-ticks"     : 788.5972071353651,
                     "lateral-in-per-tick"   : 1.0,
                     "in-per-tick"           : 1.0
                 }
@@ -188,8 +188,8 @@
                     "max-heading-acceleration"  : 3.14159265
                 },
                 "pidf" :{
-                    "ks"                    : 0.6369655063611788,
-                    "kv"                    : 0.20224958397771445,
+                    "ks"                    : 0.3018543656211481,
+                    "kv"                    : 0.00522087166789475,
                     "ka"                    : 0.05,
                     "x-gain"                : 4.0,
                     "x-velocity-gain"       : 0.0,

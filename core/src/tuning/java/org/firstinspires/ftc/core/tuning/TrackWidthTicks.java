@@ -199,7 +199,9 @@ public class TrackWidthTicks {
 
 
         double power = Math.min(mTimer.seconds() * mPowerPerSecond, mMaxPower);
-        mDriveTrain.drive(0,0,power);
+        mLogger.info("Power : " + power);
+        mDriveTrain.drive(0,0,-power);
+        mImu.update();
 
         try{
 
@@ -339,6 +341,7 @@ public class TrackWidthTicks {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8));
             writer.write(all.toString(4)); // 4 is the indentation level for pretty printing
             writer.close();
+            mLogger.info("Data stored in " + filename);
         }
         catch(JSONException | IOException e) { mLogger.error("Unable to write data json file " + filename); }
 

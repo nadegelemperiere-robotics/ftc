@@ -2,7 +2,7 @@
    Copyright (c) [2025] Nadege LEMPERIERE
    All rights reserved
    -------------------------------------------------------
-   Mechanum Drive management
+   Tank Drive management
    ------------------------------------------------------- */
 
 package org.firstinspires.ftc.core.subsystems;
@@ -104,7 +104,6 @@ public class TankDrive extends DriveTrain {
                 Pose2dDual<Arclength> txWorldTarget = mTrajectory.path.get(x.value(), 3);
 
                 mLocalizer.update();
-                PoseVelocity2d robotVelRobot = mLocalizer.velocity();
                 PoseVelocity2dDual<Time> command = new RamseteController(mKinematics.trackWidth, mRamseteZeta, mRamseteBBAr)
                         .compute(x, txWorldTarget, mLocalizer.pose());
 
@@ -135,7 +134,7 @@ public class TankDrive extends DriveTrain {
         }
 
         @Override
-        public void preview(Canvas c) {
+        public void preview(@NonNull Canvas c) {
         }
     }
 
@@ -210,7 +209,7 @@ public class TankDrive extends DriveTrain {
         }
 
         @Override
-        public void preview(Canvas c) {
+        public void preview(@NonNull Canvas c) {
         }
     }
 
@@ -321,7 +320,11 @@ public class TankDrive extends DriveTrain {
     }
 
     public void                         initialize(Pose2d pose) {
-        if(mConfigurationValid) { mInitialPose = pose; }
+        if(mConfigurationValid) {
+            mPlannedFinalPose = pose;
+            mInitialPose = pose;
+            mLocalizer.pose(pose);
+        }
     }
 
     public boolean hasFinished() {
@@ -369,7 +372,7 @@ public class TankDrive extends DriveTrain {
         }
     }
 
-    public TrajectoryActionBuilder trajectory(Pose2d pose){
+    public TrajectoryActionBuilder trajectory(){
 
         TrajectoryActionBuilder result = null;
 
@@ -389,7 +392,7 @@ public class TankDrive extends DriveTrain {
                     new TrajectoryBuilderParams(
                             1e-6,
                             new ProfileParams(0.25, 0.1, 1e-2)
-                    ), mLocalizer.pose().times(pose), 0.0,
+                    ), mPlannedFinalPose, 0.0,
                     turnConstraints, velConstraints, accContraint
             );
         }

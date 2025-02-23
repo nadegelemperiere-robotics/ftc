@@ -45,27 +45,27 @@ public class AutonomousSampleState extends RobotState {
 
         TelemetryPacket telemetry = new TelemetryPacket();
 
-        Action trajectory1 = ((SharedData)mData).chassis.trajectory(new Pose2d(new Vector2d(0,0),0))
-                .setTangent(Math.PI)
-                .splineTo(new Vector2d(-10.75,-11.25),5*Math.PI/4)
+        Action trajectory1 = ((SharedData)mData).chassis.trajectory()
+                .splineTo(new Vector2d(10.75, 11.25),-Math.PI/4)
                 .build();
 
-        Action trajectory2 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
-                .lineToXConstantHeading(-11.5)
+        Pose2d test = new Pose2d(new Vector2d(10.75, 11.25),-Math.PI/4);
+
+        Action trajectory2 = ((SharedData)mData).chassis.trajectory()
+                .lineToXConstantHeading(11.5)
                 .turn(Math.PI/4)
-                .lineToXConstantHeading(-14)
+                .lineToXConstantHeading(14)
                 .build();
 
-        Action trajectory3 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
-                .lineToXConstantHeading(-11)
+        Action trajectory3 = ((SharedData)mData).chassis.trajectory()
+                .lineToXConstantHeading(11)
                 .turn(-7 * Math.PI/24)
                 .build();
 
-        Action trajectory4 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
-                .splineTo(new Vector2d(-51,-10),-Math.PI/2)
-                .lineToYConstantHeading(14.5)
+        Action trajectory4 = ((SharedData)mData).chassis.trajectory()
+                .splineTo(new Vector2d(51,10),Math.PI/2)
+                .lineToXConstantHeading(-14.5)
                 .build();
-
 
         mSequencer.sequence(
                 "AUTONOMOUS SAMPLE",

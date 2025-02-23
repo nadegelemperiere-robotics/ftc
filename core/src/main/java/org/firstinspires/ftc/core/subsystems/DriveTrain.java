@@ -37,7 +37,7 @@ public abstract class DriveTrain extends Subsystem {
 
     /* ------------------- Autonomous functions -------------------- */
 
-    public abstract TrajectoryActionBuilder trajectory(Pose2d pose);
+    public abstract TrajectoryActionBuilder trajectory();
 
     /* --------------------- Tuning functions ---------------------- */
 

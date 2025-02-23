@@ -20,14 +20,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 /* ACME robotics includes */
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.config.ValueProvider;
 
 /* Tools includes */
-import org.firstinspires.ftc.core.components.motors.MotorComponent;
 import org.firstinspires.ftc.core.tools.LogManager;
 
 /* Configuration includes */
@@ -57,10 +55,7 @@ public class DriveEncoderTuning extends LinearOpMode {
     public enum Param {
         FWD_IN_PER_TICK,
         LAT_IN_PER_TICK,
-        TRACK_WIDTH_TICKS,
-        KS_KV_KA,
-        PIDF,
-        VALIDATE
+        TRACK_WIDTH_TICKS
     }
 
     public enum Step {
@@ -95,7 +90,7 @@ public class DriveEncoderTuning extends LinearOpMode {
     private PowerProvider               mPowerPerSecond;
     private PowerProvider               mMaximalPower;
     private StartProvider               mShallStart;
-
+    private TrackWidthProvider          mTrackWidth;
 
     private boolean                     mFirstTimeCalled;
     private boolean                     mFirstTimeStopped;
@@ -106,19 +101,12 @@ public class DriveEncoderTuning extends LinearOpMode {
 
         try {
 
-            mLogger = new LogManager(null,FtcDashboard.getInstance(),"drive-encoders-tuning",2);
+            mLogger = new LogManager(null,FtcDashboard.getInstance(),"drive-encoders-tuning");
             mLogger.level(LogManager.Severity.TRACE);
 
             mHardware = new Tuning(hardwareMap, mLogger);
             mDriveTrain = null;
 
-            mInPerTickDistance  = new DistanceProvider();
-            mPowerPerSecond     = new PowerProvider();
-            mMaximalPower       = new PowerProvider();
-            mShallStart         = new StartProvider();
-            mMaximalPower.set(1.0);
-            mPowerPerSecond.set(0.1);
-            mInPerTickDistance.set(64.0);
             mPreviousTuning = TUNING;
 
             mConfigurationName = CONFIGURATION;
@@ -142,6 +130,15 @@ public class DriveEncoderTuning extends LinearOpMode {
             if(imus.containsKey(ImuComponent.sBuiltInKey)) { mImu = (ImuBuiltIn)imus.get(ImuComponent.sBuiltInKey); }
             if(mImu == null) throw new InvalidParameterException("No built in imu found in configuration");
 
+
+            mInPerTickDistance  = new DistanceProvider();
+            mPowerPerSecond     = new PowerProvider();
+            mMaximalPower       = new PowerProvider();
+            mShallStart         = new StartProvider();
+            mTrackWidth         = new TrackWidthProvider(mOdometer);
+            mMaximalPower.set(1.0);
+            mPowerPerSecond.set(0.1);
+            mInPerTickDistance.set(64.0);
 
             mFwdInPerTick = null;
             mLatInPerTick = null;
@@ -176,6 +173,7 @@ public class DriveEncoderTuning extends LinearOpMode {
                         FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"START");
                         FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"POWER_PER_SECOND");
                         FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"MAXIMAL_POWER");
+                        FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"TRACK_WIDTH");
                         this.processFwdInPerTick();
                         break;
                     case LAT_IN_PER_TICK:
@@ -189,15 +187,17 @@ public class DriveEncoderTuning extends LinearOpMode {
                         FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"START");
                         FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"POWER_PER_SECOND");
                         FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"MAXIMAL_POWER");
+                        FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"TRACK_WIDTH");
                         this.processLatInPerTick();
                         break;
                     case TRACK_WIDTH_TICKS :
                         description = "<p style=\"font-weight: bold; font-size: 14px\"> ------------------------- </p>" +
                                 "<p style=\"font-size: 12px\"> TRACK WIDTH TUNER </p>" +
-                                "<p style=\"font-size: 12px\"> The robot will rotate on itself once you step into processing</p>" +
+                                "<p style=\"font-size: 12px\"> The robot will rotate on itself once you step into processing and trigger the sart button</p>" +
                                 "<p style=\"font-size: 12px\"> Stop it at any point keeping in mind that longer runs will collect more data. </p>" +
-                                "<p style=\"font-size: 12px\"> All data collected is saved to a file for further analysis. <?p>" +
-                                "<p style=\"font-size: 12px\"> Finally, step to the UPDATE step to update the configuration with the value. </p>";
+                                "<p style=\"font-size: 12px\"> Finally, step to UPDATE : all data collected is saved to a file for further analysis.  </p>" +
+                                "<p style=\"font-size: 12px\"> Go to http://192.168.43.1:8080/tuning/drive-encoder-angular-ramp.html and click the “Latest” button.  </p>" +
+                                "<p style=\"font-size: 12px\"> Remove outliers from the estimate, get track width tick from the the “Ramp Regression” plot and update odometer configuration with it  </p>";
                         mLogger.info(LogManager.Target.DASHBOARD,description);
                         FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"DISTANCE");
                         FtcDashboard.getInstance().addConfigVariable(this.getClass().getSimpleName(),"POWER_PER_SECOND",mPowerPerSecond);
@@ -282,6 +282,9 @@ public class DriveEncoderTuning extends LinearOpMode {
     void processTrackWidthTicks() {
 
         switch(STEP) {
+            case STOP:
+                FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"START");
+                FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"TRACK_WIDTH");
             case INIT:
                 mTrackWidthTicks = new TrackWidthTicks(mDriveTrain, mImu, mHardware.voltageSensor(), mLogger);
                 mTrackWidthTicks.power(mPowerPerSecond.get(), mMaximalPower.get());
@@ -289,10 +292,12 @@ public class DriveEncoderTuning extends LinearOpMode {
                 mFirstTimeCalled = true;
                 mShallSave = true;
                 FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"START");
+                FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"TRACK_WIDTH");
                 break;
 
             case PROCESSING:
                 mShallSave = true;
+                FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"TRACK_WIDTH");
                 FtcDashboard.getInstance().addConfigVariable(this.getClass().getSimpleName(),"START",mShallStart);
                 if(mFirstTimeCalled) {
                     mTrackWidthTicks.start();
@@ -300,7 +305,8 @@ public class DriveEncoderTuning extends LinearOpMode {
                 }
                 if(mShallStart.get()) {
                     mFirstTimeStopped = true;
-                    mTrackWidthTicks.update(); }
+                    mTrackWidthTicks.update();
+                }
                 else {
                     if(mFirstTimeStopped) { mTrackWidthTicks.stop(); }
                     mFirstTimeCalled = false;
@@ -310,17 +316,17 @@ public class DriveEncoderTuning extends LinearOpMode {
 
             case UPDATE :
                 mFirstTimeCalled = true;
+                FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"START");
+                FtcDashboard.getInstance().addConfigVariable(this.getClass().getSimpleName(),"TRACK_WIDTH",mTrackWidth);
                 if(mShallSave) {
                     mShallSave = false;
                     mTrackWidthTicks.process();
                 }
                 mLogger.info("Data collected " + mTrackWidthTicks.data());
-                FtcDashboard.getInstance().removeConfigVariable(this.getClass().getSimpleName(),"START");
                 break;
         }
 
     }
-
 
     // Since double is a simple type, even with the appropriate constructor,
     // mDistance will only be updated locally by the dashboard.
@@ -331,7 +337,7 @@ public class DriveEncoderTuning extends LinearOpMode {
         @Override
         public Double   get()                { return mDistance;  }
         @Override
-        public void     set(Double Value)    { mDistance = Value; }
+        public void     set(Double value)    { mDistance = value; }
     }
 
     // Since double is a simple type, even with the appropriate constructor,
@@ -343,7 +349,7 @@ public class DriveEncoderTuning extends LinearOpMode {
         @Override
         public Double   get()                { return mPower;  }
         @Override
-        public void     set(Double Value)    { mPower = Value; }
+        public void     set(Double value)    { mPower = value; }
     }
 
     // ReverseProvider updates the controller reverse configuration
@@ -355,6 +361,25 @@ public class DriveEncoderTuning extends LinearOpMode {
         @Override
         public Boolean get()           { return mStart; }
         @Override
-        public void set(Boolean Value) { mStart = Value;   }
+        public void set(Boolean value) { mStart = value;   }
     }
+
+    // TrackWidthProvider updates the controller reverse configuration
+    // Since ConfMotor.Controller is not a simple type, it's managed as
+    // pointer, when we change it in the provider, it's changed in the
+    // global configuration
+    static class TrackWidthProvider implements ValueProvider<Double> {
+        DriveEncodersOdometer   mOdometer;
+        Double                  mWidth;
+        public TrackWidthProvider(DriveEncodersOdometer odometer) {
+            mOdometer = odometer;
+            mWidth = 0.0;
+        }
+        @Override
+        public Double get()           { return mWidth; }
+        @Override
+        public void set(Double value) { mWidth = value; mOdometer.trackWidthTicks(value);   }
+    }
+
+
 }

@@ -2,7 +2,7 @@
    Copyright (c) [2025] Nadege LEMPERIERE
    All rights reserved
    -------------------------------------------------------
-   Mechanum Drive management
+   Mecanum Drive management
    ------------------------------------------------------- */
 
 package org.firstinspires.ftc.core.subsystems;
@@ -82,6 +82,13 @@ public class MecanumDrive extends DriveTrain {
             mStartTime = -1;
 
             mPlannedFinalPose = mTrajectory.get(mTrajectory.duration).value();
+
+
+            List<Pose2d> poses = new ArrayList<>();
+
+            for (double i = 0.0; i < mTrajectory.duration; i+= 0.1) {
+                poses.add( mTrajectory.get(i).value());
+            }
         }
 
         @Override
@@ -143,7 +150,7 @@ public class MecanumDrive extends DriveTrain {
         }
 
         @Override
-        public void preview(Canvas c) {
+        public void preview(@NonNull Canvas c) {
         }
     }
 
@@ -157,6 +164,13 @@ public class MecanumDrive extends DriveTrain {
             mStartTime = -1;
 
             mPlannedFinalPose = turn.get(turn.duration).value();
+
+            List<Pose2d> poses = new ArrayList<>();
+
+            for (double i = 0.0; i < turn.duration; i+= 0.1) {
+                poses.add(turn.get(i).value());
+            }
+
         }
 
         @Override
@@ -219,7 +233,7 @@ public class MecanumDrive extends DriveTrain {
         }
 
         @Override
-        public void preview(Canvas c) {
+        public void preview(@NonNull Canvas c) {
         }
     }
 
@@ -360,10 +374,7 @@ public class MecanumDrive extends DriveTrain {
      */
     public void                         log() {
         if(mConfigurationValid) {
-            // mLeftFront.log();
-            // mLeftBack.log();
-            // mRightFront.log();
-            // mRightBack.log();
+
             mLocalizer.log();
 
             mLogger.info(mShortName + " POS : " +
@@ -386,7 +397,11 @@ public class MecanumDrive extends DriveTrain {
      * @param pose Current position
      */
     public void                         initialize(Pose2d pose) {
-        if(mConfigurationValid) { mInitialPose = pose; }
+        if(mConfigurationValid) {
+            mInitialPose = pose;
+            mPlannedFinalPose = pose;
+            mLocalizer.pose(pose);
+        }
     }
 
     /**
@@ -458,7 +473,7 @@ public class MecanumDrive extends DriveTrain {
         }
     }
 
-    public TrajectoryActionBuilder      trajectory(Pose2d pose){
+    public TrajectoryActionBuilder      trajectory(){
 
         TrajectoryActionBuilder result = null;
 
@@ -478,7 +493,7 @@ public class MecanumDrive extends DriveTrain {
                 new TrajectoryBuilderParams(
                         1e-6,
                         new ProfileParams(0.25, 0.1, 1e-2)
-                ), mLocalizer.pose().times(pose), 0.0,
+                ), mPlannedFinalPose, 0.0,
                 turnConstraints, velConstraints, accContraint
             );
         }

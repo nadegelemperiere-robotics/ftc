@@ -44,15 +44,15 @@ public class AutonomousSpecimenState extends RobotState {
 
         TelemetryPacket telemetry = new TelemetryPacket();
 
-        Action trajectory1 = ((SharedData)mData).chassis.trajectory(new Pose2d(new Vector2d(0,0),0))
+        Action trajectory1 = ((SharedData)mData).chassis.trajectory()
                 .lineToX(-31)
                 .build();
 
-        Action trajectory2 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
+        Action trajectory2 = ((SharedData)mData).chassis.trajectory()
                 .lineToX(-27)
                 .build();
 
-        Action trajectory3 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
+        Action trajectory3 = ((SharedData)mData).chassis.trajectory()
                 .lineToX(-15)
                 .turn(Math.PI/2)
                 .lineToY(39.5)
@@ -60,7 +60,7 @@ public class AutonomousSpecimenState extends RobotState {
                 .lineToX(-5)
                 .build();
 
-        Action trajectory4 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
+        Action trajectory4 = ((SharedData)mData).chassis.trajectory()
                 .lineToX(-10)
                 .turn(-Math.PI/2)
                 .lineToY(-10)
@@ -68,7 +68,7 @@ public class AutonomousSpecimenState extends RobotState {
                 .lineToX(-25.5)
                 .build();
 
-        Action trajectory5 = ((SharedData)mData).chassis.trajectory(((SharedData)mData).chassis.finalPlannedPose())
+        Action trajectory5 = ((SharedData)mData).chassis.trajectory()
                 .lineToX(-5)
                 .turn(Math.PI/2)
                 .lineToY(39)

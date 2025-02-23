@@ -76,7 +76,7 @@ public class AutonomousSampleOpMode extends LinearOpMode {
             // Initialize robot position with position in FIELD CENTRIC reference,
             // Meaning X is oriented towards the opponent alliance station, Y oriented to the left
             // and Z to the top. Center is the robot starting point
-            mRobot.start(Robot.Mode.AUTO_SPECIMEN, new Pose2d(new Vector2d(0,0),-Math.PI / 2));
+            mRobot.start(Robot.Mode.AUTO_SAMPLE, new Pose2d(new Vector2d(0,0),-Math.PI / 2));
 
             while(opModeIsActive() && !mRobot.state().equals("EndState")) {
                 mRobot.update();

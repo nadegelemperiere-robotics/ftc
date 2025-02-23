@@ -418,6 +418,15 @@ public class DriveEncodersOdometer implements OdometerComponent {
     }
 
     /**
+     * Track Width Tick setting function
+     *
+     * @param value the Track Width Tick value
+     */
+    public  void                        trackWidthTicks(double value) {
+        if(mConfigurationValid) { mTrackWidthTicks = value; }
+    }
+
+    /**
      * List of encoders measuring forward displacement for tuning
      *
      * @return A list of encoders measuring forward displacement
