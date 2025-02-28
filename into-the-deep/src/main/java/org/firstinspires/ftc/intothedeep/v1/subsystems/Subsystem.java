@@ -16,7 +16,7 @@ import org.firstinspires.ftc.core.tools.LogManager;
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;
 
-public abstract class Subsystem extends org.firstinspires.ftc.core.subsystems.Subsystem {
+public interface Subsystem extends org.firstinspires.ftc.core.subsystems.Subsystem {
 
     public static org.firstinspires.ftc.core.subsystems.Subsystem   factory(String name, JSONObject reader, Hardware hardware, LogManager logger) {
 

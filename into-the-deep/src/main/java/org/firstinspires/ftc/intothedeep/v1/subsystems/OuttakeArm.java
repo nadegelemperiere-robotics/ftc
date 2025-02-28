@@ -28,7 +28,7 @@ import org.firstinspires.ftc.core.orchestration.engine.Sequencer;
 import org.firstinspires.ftc.core.orchestration.engine.Task;
 
 
-public class OuttakeArm extends Subsystem {
+public class OuttakeArm implements Subsystem {
 
     static final String sClawKey   = "claw";
     static final String sWristKey  = "wrist";
@@ -308,6 +308,15 @@ public class OuttakeArm extends Subsystem {
      * @return true if the position was reached, false otherwise
      */
     public boolean                      hasFinished() { return mSequencer.hasFinished(); }
+
+    /**
+     * Manage peristence between op modes
+     */
+    public void                         persist() {
+        mClaw.persist();
+        mElbow.persist();
+        mWrist.persist();
+    }
 
     /**
      * Determines if the actuator subsystem is configured correctly.

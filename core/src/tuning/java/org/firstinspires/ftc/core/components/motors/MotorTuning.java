@@ -5,7 +5,7 @@
    Motor tuning tool
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core;
+package org.firstinspires.ftc.core.components.motors;
 
 /* System includes */
 import java.util.ArrayList;
@@ -34,16 +34,15 @@ import org.firstinspires.ftc.core.tools.LogManager;
 import org.firstinspires.ftc.core.configuration.Configuration;
 
 /* Components includes */
-import org.firstinspires.ftc.core.components.motors.MotorComponent;
 import org.firstinspires.ftc.core.components.controllers.Controller;
 
-/* Robot includes */
-import org.firstinspires.ftc.core.robot.Tuning;
-
+/* Tuning includes */
+import org.firstinspires.ftc.core.tuning.Tuning;
+import org.firstinspires.ftc.core.tuning.Hardware;
 
 @Config
 @TeleOp(name = "MotorTuning", group = "Tuning")
-public class MotorTuning extends LinearOpMode{
+public class MotorTuning extends LinearOpMode implements Tuning {
 
     public enum Mode {
         FIRST,
@@ -57,7 +56,6 @@ public class MotorTuning extends LinearOpMode{
     }
 
     /* -------- Configuration variables -------- */
-    public static long                  SLEEP_MS        = 200;
     public static String                CONFIGURATION   = "test";
     public static int                   TARGET_POSITION = 0;
 
@@ -66,11 +64,10 @@ public class MotorTuning extends LinearOpMode{
 
     private Configuration               mConfiguration;
     private String                      mConfigurationName;
-    private Tuning                      mHardware;
+    private Hardware                    mHardware;
 
     private ModeProvider                mMode;
     private int                         mTargetPosition;
-
 
     private Controller                  mController;
 
@@ -104,7 +101,7 @@ public class MotorTuning extends LinearOpMode{
 
             mController = new Controller(gamepad1, mLogger);
 
-            mHardware = new Tuning(hardwareMap, mLogger);
+            mHardware = new Hardware(this, hardwareMap, mLogger);
 
             mMode = new ModeProvider();
             mMode.set(Mode.FIRST);
@@ -117,8 +114,8 @@ public class MotorTuning extends LinearOpMode{
                     + "/FIRST/" + mConfigurationName + ".json");
             mConfiguration.log();
 
-            mMotorsHw = mHardware.mappingMotors();
-            mMotors = mHardware.singleMotors();
+            mMotorsHw = mHardware.mappingMotors(this);
+            mMotors = mHardware.singleMotors(this);
             // Single and coupled motors
             Map<String,MotorComponent> motors = mHardware.motors();
 
@@ -155,7 +152,7 @@ public class MotorTuning extends LinearOpMode{
 
                     // Now we can forget the previously selected motors sice we no longer need them
                     mCurrentMotor = currentMotor;
-                    // Select hardwaremotors and conf for current motor
+                    // Select hardware motors and conf for current motor
                     this.updateCurrentMotors();
 
                     // Initialize motor processing
@@ -168,7 +165,6 @@ public class MotorTuning extends LinearOpMode{
 
                         DirectionProvider direction = new DirectionProvider(mCurrentMotorHw.get(0));
                         FtcDashboard.getInstance().addConfigVariable(this.getClass().getSimpleName(),"DIRECTION_1",direction);
-
 
                     }
                     else {
@@ -206,15 +202,12 @@ public class MotorTuning extends LinearOpMode{
                 this.powerMotors(mController.axes.left_stick_y.value());
 
                 // Log motors state and updated configuration
+                mHardware.save(this);
                 mLogger.metric("Mode",""+mMode.get());
                 this.logMotorsState(mLogger);
                 mConfiguration.log();
 
                 mLogger.update();
-
-                // Give time for motor position change to occur
-                sleep(SLEEP_MS);
-
 
             }
 
@@ -272,7 +265,7 @@ public class MotorTuning extends LinearOpMode{
         mLogger.metric("Power", ""+Value);
         for (int i_motor = 0; i_motor < mCurrentMotorHw.size(); i_motor++) {
             MotorComponent hwMotor = mCurrentMotorHw.get(i_motor);
-            if (hwMotor != null && !hwMotor.isBusy()) {
+            if (hwMotor != null && ((hwMotor.mode() != DcMotor.RunMode.RUN_TO_POSITION) || !hwMotor.isBusy())) {
 
                 if (i_motor == 0) {
                     if (mMode.get() == Mode.FIRST || mMode.get() == Mode.BOTH) {

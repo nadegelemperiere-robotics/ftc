@@ -7,41 +7,36 @@
 
 package org.firstinspires.ftc.core.subsystems;
 
-/* System includes */
-import java.util.List;
+/* Pedro Pathing includes */
+import com.pedropathing.pathgen.PathBuilder;
+import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgen.PathChain;
+import com.pedropathing.pathgen.Path;
 
-/* ACME robotics includes */
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+public interface DriveTrain extends Subsystem {
 
-/* Component includes */
-import org.firstinspires.ftc.core.components.motors.MotorComponent;
-
-public abstract class DriveTrain extends Subsystem {
-
-    enum Mode {
+    public enum Mode {
         FIELD_CENTRIC,
         ROBOT_CENTRIC
     }
 
-    protected static final String       sPidfKey                    = "pidf";
-    protected static final String       sPhysicsKey                 = "physics";
-    protected static final String       sMotorsKey                  = "motors";
-    protected static final String       sOdometerKey                = "odometer";
-
     /* ---------------------- Drive functions ---------------------- */
 
-    public abstract void                    initialize(Pose2d pose);
-    public abstract void                    driveSpeedMultiplier(double multiplier);
-    public abstract void                    drive(double xSpeed, double ySpeed, double headingSpeed);
+    void        initialize(Pose pose);
+    void        start();
+    void        driveSpeedMultiplier(double multiplier);
+    void        drive(double xSpeed, double ySpeed, double headingSpeed);
 
-    /* ------------------- Autonomous functions -------------------- */
+    /* -------------------- Autonomous functions ------------------- */
 
-    public abstract TrajectoryActionBuilder trajectory();
+    PathBuilder pathBuilder();
 
-    /* --------------------- Tuning functions ---------------------- */
+    void        turn(double radians, boolean isLeft);
+    void        turnTo(double radians);
 
-    public abstract List<MotorComponent>    left();
-    public abstract List<MotorComponent>    right();
-
+    void        followPath(Path path, boolean hold);
+    void        followPath(Path path);
+    void        followPath(PathChain chain, boolean holdd);
+    void        followPath(PathChain chain);
+    void        followPath(PathChain chain, double maxPower, boolean hold) ;
 }

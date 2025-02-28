@@ -21,8 +21,9 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 public class DefaultSlides extends Actuator {
 
-    static final String sMinPosition = "min";
-    static final String sMaxPosition = "max";
+    static public final String sTypeKey = "default-slides";
+    static final String sMinPosition    = "min";
+    static final String sMaxPosition    = "max";
 
     int mMinPosition;
     int mMaxPosition;

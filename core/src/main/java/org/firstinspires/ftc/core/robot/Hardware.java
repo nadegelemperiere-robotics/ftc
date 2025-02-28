@@ -37,27 +37,26 @@ import org.firstinspires.ftc.core.components.motors.MotorCoupled;
 import org.firstinspires.ftc.core.components.servos.ServoComponent;
 import org.firstinspires.ftc.core.components.servos.ServoCoupled;
 import org.firstinspires.ftc.core.components.imus.ImuComponent;
-import org.firstinspires.ftc.core.components.odometers.OdometerComponent;
+import org.firstinspires.ftc.core.components.localizers.LocalizerComponent;
 
 public class Hardware implements Configurable {
 
-    static final String             sMotorsKey      = "motors";
-    static final String             sImusKey        = "imus";
-    static final String             sServosKey      = "servos";
-    static final String             sOdometersKey   = "odometers";
+    static final protected String   sMotorsKey      = "motors";
+    static final protected String   sImusKey        = "imus";
+    static final protected String   sServosKey      = "servos";
+    static final protected String   sLocalizersKey  = "localizers";
 
+    final protected LogManager                      mLogger;
 
-    final LogManager                        mLogger;
+    protected boolean                               mConfigurationValid;
 
-    boolean                                 mConfigurationValid;
+    final protected HardwareMap                     mMap;
 
-    final HardwareMap                       mMap;
-
-    final Map<String, MotorComponent>       mMotors;
-    final Map<String, ServoComponent>       mServos;
-    final Map<String, ImuComponent>         mImus;
-    final Map<String, OdometerComponent>    mOdometers;
-    VoltageSensor                           mVoltageSensor;
+    final protected Map<String, MotorComponent>     mMotors;
+    final protected Map<String, ServoComponent>     mServos;
+    final protected Map<String, ImuComponent>       mImus;
+    final protected Map<String, LocalizerComponent> mLocalizers;
+    VoltageSensor                                   mVoltageSensor;
 
     /**
      * Constructor
@@ -83,7 +82,7 @@ public class Hardware implements Configurable {
         mMotors         = new LinkedHashMap<>();
         mServos         = new LinkedHashMap<>();
         mImus           = new LinkedHashMap<>();
-        mOdometers      = new LinkedHashMap<>();
+        mLocalizers     = new LinkedHashMap<>();
         mVoltageSensor  = null;
 
     }
@@ -91,7 +90,7 @@ public class Hardware implements Configurable {
     public Map<String,MotorComponent>       motors() { return mMotors; }
     public Map<String,ServoComponent>       servos() { return mServos; }
     public Map<String,ImuComponent>         imus() { return mImus; }
-    public Map<String,OdometerComponent>    odometers() { return mOdometers; }
+    public Map<String,LocalizerComponent>   localizers() { return mLocalizers; }
     public VoltageSensor                    voltageSensor() { return mVoltageSensor; }
 
 
@@ -122,7 +121,7 @@ public class Hardware implements Configurable {
         mMotors.clear();
         mImus.clear();
         mServos.clear();
-        mOdometers.clear();
+        mLocalizers.clear();
 
         try {
 
@@ -201,23 +200,23 @@ public class Hardware implements Configurable {
             }
 
             // Read Odometers
-            if (reader.has(sOdometersKey)) {
+            if (reader.has(sLocalizersKey)) {
 
-                JSONObject odometers = reader.getJSONObject(sOdometersKey);
+                JSONObject odometers = reader.getJSONObject(sLocalizersKey);
                 Iterator<String> keys = odometers.keys();
                 while (keys.hasNext()) {
 
                     String key = keys.next();
 
-                    OdometerComponent odometer = OdometerComponent.factory(key, odometers.getJSONObject(key), mMap, mMotors, mImus, mLogger);
-                    if(odometer == null) {
-                        mLogger.warning("Odometer " + key + " not recognized by factory");
+                    LocalizerComponent localizer = LocalizerComponent.factory(key, odometers.getJSONObject(key), mMap, mMotors, mImus, mLogger);
+                    if(localizer == null) {
+                        mLogger.warning("Localizer " + key + " not recognized by factory");
                         mConfigurationValid = false;
                     }
-                    else if (!odometer.isConfigured()) {
-                        mLogger.warning("Odometer " + key + " configuration is invalid");
+                    else if (!localizer.isConfigured()) {
+                        mLogger.warning("Localizer " + key + " configuration is invalid");
                         mConfigurationValid = false;
-                    } else { mOdometers.put(key, odometer); }
+                    } else { mLocalizers.put(key, localizer); }
 
                 }
             }
@@ -278,13 +277,13 @@ public class Hardware implements Configurable {
             writer.put(sImusKey, imus);
 
             // Write odometers
-            JSONObject odometers = new JSONObject();
-            for (Map.Entry<String, OdometerComponent> odometer : mOdometers.entrySet()) {
+            JSONObject localizers = new JSONObject();
+            for (Map.Entry<String, LocalizerComponent> localizer : mLocalizers.entrySet()) {
                 JSONObject temp = new JSONObject();
-                odometer.getValue().write(temp);
-                odometers.put(odometer.getKey(), temp);
+                localizer.getValue().write(temp);
+                localizers.put(localizer.getKey(), temp);
             }
-            writer.put(sOdometersKey, odometers);
+            writer.put(sLocalizersKey, localizers);
 
         } catch (JSONException e) { mLogger.error(e.getMessage()); }
     }
@@ -346,9 +345,9 @@ public class Hardware implements Configurable {
 
         // Log odometers
         result.append("<details style=\"margin-left:10px\">\n");
-        result.append("<summary style=\"font-size: 12px; font-weight: 500\"> ODOMETERS </summary>\n");
+        result.append("<summary style=\"font-size: 12px; font-weight: 500\"> LOCALIZERS </summary>\n");
         result.append("<ul>\n");
-        mOdometers.forEach((key, value) -> result.append("<details style=\"margin-left:10px\">\n")
+        mLocalizers.forEach((key, value) -> result.append("<details style=\"margin-left:10px\">\n")
                     .append("<summary style=\"font-size: 11px; font-weight: 500\"> ")
                     .append(key.toUpperCase())
                     .append(" </summary>\n")
@@ -402,9 +401,9 @@ public class Hardware implements Configurable {
 
         // Log odometers
         result.append(header)
-                .append("> ODOMETERS\n");
+                .append("> LOCALIZERS\n");
 
-        mOdometers.forEach((key, value) -> result.append(header)
+        mLocalizers.forEach((key, value) -> result.append(header)
                     .append("--> ")
                     .append(key)
                     .append("\n")

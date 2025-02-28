@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -91,6 +92,15 @@ public class MotorSingle implements MotorComponent {
     }
 
     /**
+     * Return the encoder for this motor
+     * @return The encoder
+     */
+    @Override
+    public EncoderComponent             encoder() {
+        return new EncoderSingle(mMotor,mName, mLogger);
+    }
+
+    /**
      * Logs the current motor positions, velocities, and power levels.
      *
      * @return A formatted string containing motor telemetry data.
@@ -147,7 +157,10 @@ public class MotorSingle implements MotorComponent {
             }
             else { mInvertPosition = 1; }
 
-            if(mMotor != null) { mMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); }
+            if(mMotor != null) {
+                mMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                mMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            }
 
         }
         catch(JSONException e) { mLogger.error(e.getMessage()); }
@@ -216,7 +229,7 @@ public class MotorSingle implements MotorComponent {
 
             if (mMotor != null) {
                 result.append(header)
-                        .append("> HW :")
+                        .append("> HW : ")
                         .append(mHwName)
                         .append(" - DIR : ")
                         .append(sDirection2String.get(mMotor.getDirection()))
@@ -378,6 +391,15 @@ public class MotorSingle implements MotorComponent {
         }
         return result;
 
+    }
+
+    @Override
+    public void                         achieveableMaxRPMFraction(double value) {
+        if(mConfigurationValid) {
+            MotorConfigurationType motorConfigurationType = mMotor.getMotorType().clone();
+            motorConfigurationType.setAchieveableMaxRPMFraction(value);
+            mMotor.setMotorType(motorConfigurationType);
+        }
     }
 
 

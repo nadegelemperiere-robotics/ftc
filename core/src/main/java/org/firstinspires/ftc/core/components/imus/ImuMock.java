@@ -58,6 +58,7 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 public class ImuMock implements ImuComponent {
 
+    public static final String sTypeKey    = "mock";
     final LogManager                                mLogger;
 
     final boolean                                   mConfigurationValid;
@@ -91,6 +92,13 @@ public class ImuMock implements ImuComponent {
      * Cache current imu value to enable multiple calls in a loop without
      */
     public void                         update() {}
+
+    /**
+     * Yaw reste function
+     */
+    public void                         reset() {
+        mCurrentHeading = 0;
+    }
 
     /**
      * Logs the current imu yaw, pitch and roll.

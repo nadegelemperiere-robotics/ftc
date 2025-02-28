@@ -30,8 +30,9 @@
                     { "hwmap": "outtakeElbowPitchLeft" },
                     { "hwmap": "outtakeElbowPitchRight", "direction" : "reverse" }]
             },
-            "odometers": {
+            "localizers": {
                 "otos": {
+                    "hwmap"             : "sensor_otos",
                     "x-offset"          : 0.4566,
                     "y-offset"          : -3.5984,
                     "heading-offset"    : 0.03,
@@ -177,7 +178,7 @@
                     "back-left-wheel":   "back-left-wheel",
                     "back-right-wheel":  "back-right-wheel"
                 },
-                "odometer"  : "otos",
+                "localizer" : "otos",
                 "reference" : "robot-centric",
                 "physics"   : {
                     "in-per-tick"               : 1,

@@ -19,33 +19,29 @@ import org.firstinspires.ftc.core.configuration.Configurable;
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;
 
-public abstract class Subsystem implements Configurable {
+public interface Subsystem extends Configurable {
 
-    protected static final String sTypeKey = "type";
+    String sTypeKey = "type";
 
-    public static Subsystem   factory(String name, JSONObject reader, Hardware hardware, LogManager logger) {
+    static Subsystem   factory(String name, JSONObject reader, Hardware hardware, LogManager logger) {
         Subsystem result = null;
         try {
             if (reader.has(sTypeKey)) {
                 String type = reader.getString(sTypeKey);
                 switch (type) {
-                    case "mecanum-drive" :
+                    case MecanumDrive.sTypeKey :
                         result = new MecanumDrive(name,hardware,logger);
                         result.read(reader);
                         break;
-                    case "tank-drive" :
-                        result = new TankDrive(name,hardware,logger);
-                        result.read(reader);
-                        break;
-                    case "actuator" :
+                    case Actuator.sTypeKey :
                         result = new Actuator(name,hardware,logger);
                         result.read(reader);
                         break;
-                    case "toggle-actuator" :
+                    case ToggleActuator.sTypeKey :
                         result = new ToggleActuator(name,hardware,logger);
                         result.read(reader);
                         break;
-                    case "default-slides" :
+                    case DefaultSlides.sTypeKey :
                         result = new DefaultSlides(name,hardware,logger);
                         result.read(reader);
                         break;
@@ -58,11 +54,11 @@ public abstract class Subsystem implements Configurable {
     }
 
     /* ----------------------- Task management --------------------- */
-    public void    update() {}
-    public void    log() {}
-    public boolean hasFinished() { return true; }
+    void    update();
+    void    log();
+    boolean hasFinished();
 
     /* ------------ Inter OpModes persistence management ----------- */
-    public void    persist() {}
+    void    persist();
 
 }

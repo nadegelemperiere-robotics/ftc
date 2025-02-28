@@ -7,12 +7,16 @@
 
 package org.firstinspires.ftc.intothedeep.v1.robot;
 
-/* Tools includes */
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Vector2d;
 
+/* PedroPathing includes */
+import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgen.BezierCurve;
+import com.pedropathing.pathgen.BezierLine;
+import com.pedropathing.pathgen.Path;
+import com.pedropathing.pathgen.PathChain;
+import com.pedropathing.pathgen.Point;
+
+/* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 import org.firstinspires.ftc.core.tools.Condition;
 
@@ -42,37 +46,46 @@ public class AutonomousSpecimenState extends RobotState {
 
         mSequencer = new Sequencer(mLogger);
 
-        TelemetryPacket telemetry = new TelemetryPacket();
+        Pose initial = ((SharedData)mData).chassis.getPose();
+        Pose clipSpecimen1 = new Pose(31, 0,-Math.PI);
+        Pose lockSpecimen1 = new Pose(27, 0,-Math.PI);
+        Pose preGrabSpecimen = new Pose(15, -39.5, 0);
+        Pose grabSpecimen = new Pose(5, -39.5, 0);
+        Pose clipSpecimen2 = new Pose(25.5,10,-Math.PI);
+        Pose lockSpecimen2 = new Pose(30, 0,-Math.PI);
+        Pose park = new Pose(39,5,-Math.PI/2);
 
-        Action trajectory1 = ((SharedData)mData).chassis.trajectory()
-                .lineToX(-31)
+        PathChain trajectory1 = ((SharedData)mData).chassis.pathBuilder()
+                .addPath(new BezierLine(new Point(initial), new Point(clipSpecimen1)))
+                .setLinearHeadingInterpolation(initial.getHeading(), clipSpecimen1.getHeading())
                 .build();
 
-        Action trajectory2 = ((SharedData)mData).chassis.trajectory()
-                .lineToX(-27)
+        PathChain trajectory2 = ((SharedData)mData).chassis.pathBuilder()
+                .addPath(new BezierLine(new Point(clipSpecimen1), new Point(lockSpecimen1)))
+                .setLinearHeadingInterpolation(clipSpecimen1.getHeading(), lockSpecimen1.getHeading())
                 .build();
 
-        Action trajectory3 = ((SharedData)mData).chassis.trajectory()
-                .lineToX(-15)
-                .turn(Math.PI/2)
-                .lineToY(39.5)
-                .turn(Math.PI/2)
-                .lineToX(-5)
+        PathChain trajectory3 = ((SharedData)mData).chassis.pathBuilder()
+                .addPath(new BezierLine(new Point(lockSpecimen1), new Point(preGrabSpecimen)))
+                .setLinearHeadingInterpolation(lockSpecimen1.getHeading(), preGrabSpecimen.getHeading())
+                .addPath(new BezierLine(new Point(preGrabSpecimen), new Point(grabSpecimen)))
                 .build();
 
-        Action trajectory4 = ((SharedData)mData).chassis.trajectory()
-                .lineToX(-10)
-                .turn(-Math.PI/2)
-                .lineToY(-10)
-                .turn(-Math.PI/2)
-                .lineToX(-25.5)
+        PathChain trajectory4 = ((SharedData)mData).chassis.pathBuilder()
+                .addPath(new BezierLine(new Point(grabSpecimen), new Point(preGrabSpecimen)))
+                .addPath(new BezierLine(new Point(preGrabSpecimen), new Point(clipSpecimen2)))
                 .build();
 
-        Action trajectory5 = ((SharedData)mData).chassis.trajectory()
-                .lineToX(-5)
-                .turn(Math.PI/2)
-                .lineToY(39)
+        PathChain trajectory5 = ((SharedData)mData).chassis.pathBuilder()
+                .addPath(new BezierLine(new Point(clipSpecimen2), new Point(lockSpecimen2)))
                 .build();
+
+        PathChain trajectory6 = ((SharedData)mData).chassis.pathBuilder()
+                .addPath(new BezierLine(new Point(lockSpecimen2), new Point(clipSpecimen2)))
+                .addPath(new BezierLine(new Point(clipSpecimen2), new Point(park)))
+                .setLinearHeadingInterpolation(clipSpecimen2.getHeading(), park.getHeading())
+                .build();
+
 
         mSequencer.sequence(
                 "AUTONOMOUS SPECIMEN",
@@ -92,8 +105,10 @@ public class AutonomousSpecimenState extends RobotState {
                 ),
                 new Task(
                         "Move to submersible with initial specimen",
-                        () -> {},
-                        new Condition(() -> trajectory1.run(telemetry))
+                        () -> {
+                            ((SharedData)mData).chassis.followPath(trajectory1);
+                        },
+                        new Condition(() -> ((SharedData)mData).chassis.hasFinished())
                 ),
                 new Task(
                         "Position outtake elbow to pass under the submersible bar",
@@ -118,8 +133,10 @@ public class AutonomousSpecimenState extends RobotState {
                 ),
                 new Task(
                         "Move so that the hook clips on the bar",
-                        () -> {},
-                        new Condition(() -> trajectory2.run(telemetry))
+                        () -> {
+                            ((SharedData)mData).chassis.followPath(trajectory2);
+                        },
+                        new Condition(() -> ((SharedData)mData).chassis.hasFinished())
                 ),
                 new Task(
                         "Open outtake claw",
@@ -133,8 +150,9 @@ public class AutonomousSpecimenState extends RobotState {
                         () -> {
                             ((SharedData)mData).outtakeArm.position(OuttakeArm.Position.SPECIMEN_AHEAD);
                             ((SharedData)mData).outtakeSlides.position("transfer",5,5000);
+                            ((SharedData)mData).chassis.followPath(trajectory3);
                         },
-                        new Condition(() -> true)
+                        new Condition(() -> ((SharedData)mData).chassis.hasFinished())
                 ),
                 new Task(
                         "Close claw to grab specimen",
@@ -152,8 +170,10 @@ public class AutonomousSpecimenState extends RobotState {
                 ),
                 new Task(
                         "Move to the submersible",
-                        () -> {},
-                        new Condition(() -> trajectory3.run(telemetry))
+                        () -> {
+                            ((SharedData)mData).chassis.followPath(trajectory4);
+                        },
+                        new Condition(() -> ((SharedData)mData).chassis.hasFinished())
                 ),
                 new Task(
                         "Elevate outtake slides",
@@ -178,8 +198,10 @@ public class AutonomousSpecimenState extends RobotState {
                 ),
                 new Task(
                         "Move towards the submersible to clip",
-                        () -> {},
-                        new Condition(() -> trajectory4.run(telemetry))
+                        () -> {
+                            ((SharedData)mData).chassis.followPath(trajectory5);
+                        },
+                        new Condition(() -> ((SharedData)mData).chassis.hasFinished())
                 ),
                 new Task(
                         "Open outtake claw",
@@ -193,8 +215,9 @@ public class AutonomousSpecimenState extends RobotState {
                         () -> {
                             ((SharedData)mData).outtakeArm.position(OuttakeArm.Position.INIT);
                             ((SharedData)mData).outtakeSlides.position("transfer",5,5000);
+                            ((SharedData)mData).chassis.followPath(trajectory6);
                         },
-                        new Condition(() -> trajectory5.run(telemetry))
+                        new Condition(() -> ((SharedData)mData).chassis.hasFinished())
                 )
 
         );

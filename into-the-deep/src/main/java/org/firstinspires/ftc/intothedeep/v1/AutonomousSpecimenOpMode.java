@@ -8,13 +8,14 @@
 package org.firstinspires.ftc.intothedeep.v1;
 
 /* Qualcomm includes */
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 /* ACME robotics includes */
 import com.acmerobotics.dashboard.FtcDashboard;
+
+/* PedroPathing includes */
+import com.pedropathing.localization.Pose;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -76,7 +77,7 @@ public class AutonomousSpecimenOpMode extends LinearOpMode {
             // Meaning X is oriented towards the opponent alliance station, Y oriented to the left
             // and Z to the top. Center is the robot starting point
 
-            mRobot.start(Robot.Mode.AUTO_SPECIMEN, new Pose2d(new Vector2d(0,0),-Math.PI));
+            mRobot.start(Robot.Mode.AUTO_SPECIMEN, new Pose(0,0,-Math.PI));
 
             while(opModeIsActive() && !mRobot.state().equals("EndState")) {
                 mRobot.update();

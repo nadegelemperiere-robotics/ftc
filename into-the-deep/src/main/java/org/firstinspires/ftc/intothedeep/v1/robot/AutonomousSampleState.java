@@ -7,11 +7,13 @@
 
 package org.firstinspires.ftc.intothedeep.v1.robot;
 
-/* Roadrunner includes */
-import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+/* PedroPathing includes */
+import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgen.BezierCurve;
+import com.pedropathing.pathgen.BezierLine;
+import com.pedropathing.pathgen.Path;
+import com.pedropathing.pathgen.PathChain;
+import com.pedropathing.pathgen.Point;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -43,28 +45,30 @@ public class AutonomousSampleState extends RobotState {
 
         mSequencer = new Sequencer(mLogger);
 
-        TelemetryPacket telemetry = new TelemetryPacket();
+        Pose initial = ((SharedData)mData).chassis.getPose();
+        Pose underTheBasket = new Pose(10.75, 11.25,-Math.PI/4);
+        Pose sample1 = new Pose(14, 10.5,0);
+        Pose preAscend = new Pose(51, 10, Math.PI / 2);
+        Pose ascend = new Pose(51, -14.5, Math.PI / 2);
 
-        Action trajectory1 = ((SharedData)mData).chassis.trajectory()
-                .splineTo(new Vector2d(10.75, 11.25),-Math.PI/4)
+        PathChain trajectory1 = ((SharedData)mData).chassis.pathBuilder()
+                .addPath(new BezierLine(new Point(initial), new Point(underTheBasket)))
+                .setTangentHeadingInterpolation()
                 .build();
 
-        Pose2d test = new Pose2d(new Vector2d(10.75, 11.25),-Math.PI/4);
-
-        Action trajectory2 = ((SharedData)mData).chassis.trajectory()
-                .lineToXConstantHeading(11.5)
-                .turn(Math.PI/4)
-                .lineToXConstantHeading(14)
+        PathChain trajectory2 = ((SharedData)mData).chassis.pathBuilder()
+                .addPath(new BezierLine(new Point(underTheBasket), new Point(sample1)))
+                .setLinearHeadingInterpolation(underTheBasket.getHeading(), sample1.getHeading())
                 .build();
 
-        Action trajectory3 = ((SharedData)mData).chassis.trajectory()
-                .lineToXConstantHeading(11)
-                .turn(-7 * Math.PI/24)
-                .build();
+        PathChain trajectory3 = ((SharedData)mData).chassis.pathBuilder()
+                .addPath(new BezierLine(new Point(sample1), new Point(underTheBasket)))
+                .setLinearHeadingInterpolation(sample1.getHeading(), underTheBasket.getHeading()).build();
 
-        Action trajectory4 = ((SharedData)mData).chassis.trajectory()
-                .splineTo(new Vector2d(51,10),Math.PI/2)
-                .lineToXConstantHeading(-14.5)
+        PathChain trajectory4 = ((SharedData)mData).chassis.pathBuilder()
+                .addPath(new BezierLine(new Point(underTheBasket), new Point(preAscend)))
+                .setLinearHeadingInterpolation(underTheBasket.getHeading(),preAscend.getHeading())
+                .addPath(new BezierLine(new Point(preAscend), new Point(ascend)))
                 .build();
 
         mSequencer.sequence(
@@ -87,10 +91,11 @@ public class AutonomousSampleState extends RobotState {
                         "Move to basket with initial sample while raising the slides",
                         () -> {
                             ((SharedData)mData).outtakeSlides.position("max",25,5000);
+                            ((SharedData)mData).chassis.followPath(trajectory1);
                         },
                         Condition.and(
                             new Condition(() -> ((SharedData)mData).outtakeSlides.hasFinished()),
-                            new Condition(() -> trajectory1.run(telemetry))
+                            new Condition(() -> ((SharedData)mData).chassis.hasFinished())
                         )
                 ),
                 new Task(
@@ -123,8 +128,10 @@ public class AutonomousSampleState extends RobotState {
                 ),
                 new Task(
                         "Move to first sample",
-                        () -> {},
-                        new Condition(() -> trajectory2.run(telemetry))
+                        () -> {
+                            ((SharedData)mData).chassis.followPath(trajectory2);
+                        },
+                        new Condition(() -> ((SharedData)mData).chassis.hasFinished())
                 ),
                 new Task("Extend slides",
                         () -> {
@@ -205,9 +212,10 @@ public class AutonomousSampleState extends RobotState {
                         "Moving back to basket",
                         () -> {
                             ((SharedData)mData).intakeArm.position(IntakeArm.Position.INIT);
+                            ((SharedData)mData).chassis.followPath(trajectory3);
                         },
                         Condition.and(
-                            new Condition(() -> trajectory3.run(telemetry)),
+                            new Condition(() -> ((SharedData)mData).chassis.hasFinished()),
                             new Condition(() -> ((SharedData)mData).intakeArm.hasFinished())
                         )
                 ),
@@ -241,8 +249,10 @@ public class AutonomousSampleState extends RobotState {
                 ),
                 new Task(
                         "Move to ascend area",
-                        () -> {},
-                        new Condition(() -> trajectory4.run(telemetry))
+                        () -> {
+                            ((SharedData)mData).chassis.followPath(trajectory4);
+                        },
+                        new Condition(() -> ((SharedData)mData).chassis.hasFinished())
                 )
         );
 

@@ -3,9 +3,6 @@
    All rights reserved
    -------------------------------------------------------
    ServoComponent is an interface for servo management
-   It supersedes Servo and provides additional capabilities
-   such as :
-   - Synchronizing 2 coupled servos
    ------------------------------------------------------- */
 
 package org.firstinspires.ftc.core.components.servos;

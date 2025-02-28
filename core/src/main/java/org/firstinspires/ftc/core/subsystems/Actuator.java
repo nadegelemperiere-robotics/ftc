@@ -32,8 +32,9 @@ import org.firstinspires.ftc.core.robot.Hardware;
 /* Orchestration includes */
 import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 
-public class Actuator extends Subsystem {
+public class Actuator implements Subsystem {
 
+    static final public String sTypeKey         = "actuator";
     public static final String sMotorKey        = "motor";
     public static final String sServoKey        = "servo";
     public static final String sPositionsKey    = "positions";
@@ -108,7 +109,7 @@ public class Actuator extends Subsystem {
      *
      * @return true if the position was reached, false otherwise
      */
-    public boolean hasFinished() {
+    public boolean                      hasFinished() {
         return mHasFinished;
     }
 
@@ -117,7 +118,7 @@ public class Actuator extends Subsystem {
      *
      * @return the name of the position, empty string if moving freely
      */
-    public String position() {
+    public String                       position() {
         return mPosition;
     }
 

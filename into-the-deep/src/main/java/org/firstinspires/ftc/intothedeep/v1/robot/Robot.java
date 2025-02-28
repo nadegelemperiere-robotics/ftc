@@ -18,8 +18,8 @@ import org.json.JSONObject;
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-/* ACME robotics includes */
-import com.acmerobotics.roadrunner.Pose2d;
+/* PderoPathing includes */
+import com.pedropathing.localization.Pose;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -88,7 +88,7 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
     /**
      * Starts the robot in initial position
      */
-    public void                         start(Mode mode, Pose2d pose) {
+    public void                         start(Mode mode, Pose pose) {
         if(mConfigurationValid) {
             super.start();
             if(pose != null) { mData.chassis.initialize(pose); }

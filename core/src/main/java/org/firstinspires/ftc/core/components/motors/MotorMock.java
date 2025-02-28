@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -72,6 +73,15 @@ public class MotorMock implements MotorComponent {
 
     @Override
     public void                         encoderCorrection(boolean ShallCorrect) {  }
+
+    /**
+     * Return the encoder for this motor
+     * @return The encoder
+     */
+    @Override
+    public EncoderComponent             encoder() {
+        return new EncoderMock(this, mName, mLogger);
+    }
 
     /**
      * Logs the current motor positions, velocities, and power levels.
@@ -192,5 +202,8 @@ public class MotorMock implements MotorComponent {
 
     @Override
     public double                       velocity()  { return 0.0; }
+
+    @Override
+    public void                         achieveableMaxRPMFraction(double value) {}
 
 }

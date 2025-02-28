@@ -79,6 +79,7 @@ public interface MotorComponent extends Configurable {
     void                        log();
     boolean                     encoderCorrection();
     void                        encoderCorrection(boolean value);
+    EncoderComponent            encoder();
 
     /* ------------------ Configurable functions ------------------- */
 
@@ -112,6 +113,7 @@ public interface MotorComponent extends Configurable {
     void                        targetPositionTolerance(int tolerance);
     int                         targetPositionTolerance();
     double                      velocity();
+    void                        achieveableMaxRPMFraction(double value);
 
 
 }

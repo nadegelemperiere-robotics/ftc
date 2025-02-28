@@ -21,7 +21,8 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 public class ToggleActuator extends Actuator {
 
-    static final String sToggleKey = "toggle";
+    static final String sToggleKey      = "toggle";
+    static public final String sTypeKey = "toggle-actuator";
 
     String  mPosition1Name;
     String  mPosition2Name;

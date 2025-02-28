@@ -54,7 +54,6 @@ package org.firstinspires.ftc.core.components.imus;
 import java.util.Map;
 
 /* JSON includes */
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -64,8 +63,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /* ACME includes */
 import com.acmerobotics.roadrunner.ftc.LazyImu;
+import com.acmerobotics.roadrunner.ftc.LazyHardwareMapImu;
 
 /* FTC Controller */
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 
@@ -74,6 +75,7 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 public class ImuBuiltIn implements ImuComponent {
 
+    public static final String sTypeKey    = "built-in";
     static final String sHwMapKey          = "hwmap";
     static final String sLogoDirectionKey  = "logo-direction";
     static final String sUsbDirectionKey   = "usb-direction";
@@ -179,6 +181,13 @@ public class ImuBuiltIn implements ImuComponent {
     }
 
     /**
+     * Yaw reste function
+     */
+    public void                         reset() {
+        mImu.get().resetYaw();
+    }
+
+    /**
      * Retrieves the current heading (yaw angle) of the robot in radians.
      *
      * @return The heading in radians, adjusted with the configured offset.
@@ -244,7 +253,7 @@ public class ImuBuiltIn implements ImuComponent {
 
             if(mMap != null && orientation != null && !mHwName.isEmpty())
             {
-                mImu = new LazyImu(mMap, mHwName, orientation);
+                mImu = new LazyHardwareMapImu(mMap, mHwName, orientation);
             }
 
         } catch(JSONException e) {

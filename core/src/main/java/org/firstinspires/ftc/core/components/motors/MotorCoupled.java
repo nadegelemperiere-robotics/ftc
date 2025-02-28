@@ -63,6 +63,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -152,6 +153,15 @@ public class MotorCoupled implements MotorComponent {
     }
 
     /**
+     * Return the coupled encoder for this coupled motor
+     * @return The coupled encoder
+     */
+    @Override
+    public EncoderComponent             encoder() {
+        return new EncoderCoupled(mFirst, mSecond,mName, mLogger);
+    }
+    
+    /**
      * Logs the current motor positions, velocities, and power levels.
      *
      * @return A formatted string containing motor telemetry data.
@@ -235,8 +245,14 @@ public class MotorCoupled implements MotorComponent {
                 }
                 else { mSecondInvertPosition = 1; }
 
-                if(mFirst != null) { mFirst.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); }
-                if(mSecond != null) { mSecond.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); }
+                if(mFirst != null) {
+                    mFirst.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    mFirst.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                }
+                if(mSecond != null) {
+                    mSecond.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    mSecond.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                }
 
             }
             catch(JSONException e) { mLogger.error(e.getMessage()); }
@@ -339,7 +355,7 @@ public class MotorCoupled implements MotorComponent {
                 result.append(header)
                         .append("> ")
                         .append(sFirstKey)
-                        .append(" HW :")
+                        .append(" HW : ")
                         .append(mFirstHwName)
                         .append(" - DIR : ")
                         .append(sDirection2String.get(mFirst.getDirection()))
@@ -530,6 +546,18 @@ public class MotorCoupled implements MotorComponent {
         }
         return result;
 
+    }
+
+    @Override
+    public void                         achieveableMaxRPMFraction(double value) {
+        if(mConfigurationValid) {
+            MotorConfigurationType motorConfigurationType = mFirst.getMotorType().clone();
+            motorConfigurationType.setAchieveableMaxRPMFraction(value);
+            mFirst.setMotorType(motorConfigurationType);
+            motorConfigurationType = mSecond.getMotorType().clone();
+            motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
+            mSecond.setMotorType(motorConfigurationType);
+        }
     }
 
 }

@@ -20,6 +20,7 @@ public class DefaultState extends RobotState {
 
     public  DefaultState(SharedData data, LogManager logger) {
         super(data,logger);
+        ((SharedData)mData).chassis.start();
     }
 
     @Override

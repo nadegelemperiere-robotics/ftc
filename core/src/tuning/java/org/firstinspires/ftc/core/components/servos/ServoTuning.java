@@ -5,7 +5,7 @@
    Servo tuning tool
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core;
+package org.firstinspires.ftc.core.components.servos;
 
 /* System includes */
 import java.util.LinkedHashMap;
@@ -34,15 +34,15 @@ import org.firstinspires.ftc.core.tools.LogManager;
 import org.firstinspires.ftc.core.configuration.Configuration;
 
 /* Components includes */
-import org.firstinspires.ftc.core.components.servos.ServoComponent;
 import org.firstinspires.ftc.core.components.controllers.Controller;
 
 /* Robot includes */
-import org.firstinspires.ftc.core.robot.Tuning;
+import org.firstinspires.ftc.core.tuning.Tuning;
+import org.firstinspires.ftc.core.tuning.Hardware;
 
 @Config
 @TeleOp(name = "ServoTuning", group = "Tuning")
-public class ServoTuning extends LinearOpMode {
+public class ServoTuning extends LinearOpMode implements Tuning {
 
     public enum Mode {
         FIRST,
@@ -62,7 +62,7 @@ public class ServoTuning extends LinearOpMode {
 
     private Configuration               mConfiguration;
     private String                      mConfigurationName;
-    private Tuning                      mHardware;
+    private Hardware                    mHardware;
 
     private ModeProvider                mMode;
 
@@ -98,7 +98,7 @@ public class ServoTuning extends LinearOpMode {
 
             mController = new Controller(gamepad1, mLogger);
 
-            mHardware = new Tuning(hardwareMap, mLogger);
+            mHardware = new Hardware(this, hardwareMap, mLogger);
 
             mMode = new ModeProvider();
             mMode.set(Mode.FIRST);
@@ -110,9 +110,8 @@ public class ServoTuning extends LinearOpMode {
                     + "/FIRST/" + mConfigurationName + ".json");
             mConfiguration.log();
 
-            mServosHw = mHardware.mappingServos();
-            mServos = mHardware.singleServos();
-
+            mServosHw = mHardware.mappingServos(this);
+            mServos = mHardware.singleServos(this);
 
             // Single and coupled motors
             Map<String, ServoComponent> servos = mHardware.servos();
@@ -195,6 +194,7 @@ public class ServoTuning extends LinearOpMode {
                 this.setPosition(TARGET_POS);
 
                 // Log servos state and updated configuration
+                mHardware.save(this);
                 mLogger.metric("Mode",""+mMode.get());
                 this.logServosState(mLogger);
                 mConfiguration.log();

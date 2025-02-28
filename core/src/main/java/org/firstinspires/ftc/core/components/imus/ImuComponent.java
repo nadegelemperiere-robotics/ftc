@@ -65,10 +65,7 @@ import org.firstinspires.ftc.core.configuration.Configurable;
 
 public interface ImuComponent extends Configurable {
 
-    public static final  String       sBuiltInKey = "built-in";
-    public static final  String       sMockKey = "mock";
-
-     /**
+    /**
      * Factory method to create and configure an ImuComponent from a JSON object.
      *
      * @param name The name of the IMU component.
@@ -82,11 +79,11 @@ public interface ImuComponent extends Configurable {
         ImuComponent result = null;
 
         switch (name) {
-            case sBuiltInKey:
+            case ImuBuiltIn.sTypeKey:
                 result = new ImuBuiltIn(name, map, logger);
                 result.read(reader);
                 break;
-            case sMockKey:
+            case ImuMock.sTypeKey:
                 result = new ImuMock(name, logger);
                 result.read(reader);
                 break;
@@ -113,6 +110,7 @@ public interface ImuComponent extends Configurable {
 
     double                      heading();
     double                      headingVelocity();
+    void                        reset();
 
 
 
