@@ -45,10 +45,7 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
      */
     public void                         read(JSONObject reader) {
         super.read(reader);
-        mConfigurationValid = true;
-        if (mHardware == null || !mHardware.isConfigured()) {
-            mConfigurationValid = false;
-        }
+        mConfigurationValid = mHardware.isConfigured();
         for (Map.Entry<String, Subsystem> subsystem : mSubsystems.entrySet()) {
             if (subsystem.getValue() == null || !subsystem.getValue().isConfigured()) {
                 mConfigurationValid = false;

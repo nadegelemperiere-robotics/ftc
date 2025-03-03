@@ -5,7 +5,7 @@
    Forward velocity tuning tool
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.subsystems;
+package subsystems;
 
 /* System includes */
 import java.util.ArrayList;
@@ -171,7 +171,7 @@ public class LateralZeroPowerAccelerationTuning extends LinearOpMode implements 
                     average += acceleration;
                 }
                 if(!mAccelerations.isEmpty()) { average /= mAccelerations.size(); }
-                if(!mAccelerations.isEmpty()) { mLogger.metric("Average decceleration","" + average); }
+                if(!mAccelerations.isEmpty()) { mLogger.metric("Average deceleration","" + average); }
 
                 /* Manage motor change */
                 if(!Objects.equals(mLeftBack.name(), LEFT_BACK)) {

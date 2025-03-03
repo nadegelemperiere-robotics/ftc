@@ -8,10 +8,6 @@
 
 package org.firstinspires.ftc.core.components.motors;
 
-/* PedroPathing includes */
-import com.pedropathing.localization.Encoder;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 

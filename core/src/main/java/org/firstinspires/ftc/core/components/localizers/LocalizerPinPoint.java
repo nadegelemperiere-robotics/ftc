@@ -57,7 +57,7 @@ public class LocalizerPinPoint extends LocalizerComponent {
     double                                      mTotalHeading;
     Pose                                        mStartPose;
     long                                        mDeltaTimeNano;
-    NanoTimer                                   mTimer;
+    final NanoTimer                             mTimer;
     Pose                                        mCurrentVelocity;
     Pose                                        mPinpointPose;
 

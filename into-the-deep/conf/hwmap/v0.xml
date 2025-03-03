@@ -9,7 +9,7 @@
             <Servo name="left_hand" port="0" />
             <Servo name="servo" port="1" />
             <LynxEmbeddedIMU name="imu" port="0" bus="0" />
-            <SparkFunOTOS2 name="otos" port="0" bus="3" />
+            <SparkFunOTOS2 name="otos" port="0" bus="2" />
         </LynxModule>
     </LynxUsbDevice>
 </Robot>

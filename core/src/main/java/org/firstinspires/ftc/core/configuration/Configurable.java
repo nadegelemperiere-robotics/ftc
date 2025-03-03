@@ -46,6 +46,6 @@ public interface Configurable {
      *
      * @return configuration as string
      */
-    public String logConfigurationText(String header);
+    String logConfigurationText(String header);
 
 }

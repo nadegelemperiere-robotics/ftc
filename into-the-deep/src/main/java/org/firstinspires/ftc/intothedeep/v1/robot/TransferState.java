@@ -68,37 +68,27 @@ public class TransferState extends RobotState {
                 ),
                 new Task(
                         "Micro release inttake claw",
-                        () -> {
-                            ((SharedData)mData).intakeArm.microrelease();
-                        },
+                        () -> ((SharedData)mData).intakeArm.microrelease(),
                         new Condition(() -> ((SharedData)mData).intakeArm.hasFinished())
                 ),
                 new Task(
                         "Close inttake claw",
-                        () -> {
-                            ((SharedData)mData).intakeArm.close();
-                        },
+                        () -> ((SharedData)mData).intakeArm.close(),
                         new Condition(() -> ((SharedData)mData).intakeArm.hasFinished())
                 ),
                 new Task(
                         "Move intake slides to exchange position",
-                        () -> {
-                            ((SharedData)mData).intakeSlides.position("transfer-exchange", 2,2000);
-                        },
+                        () -> ((SharedData)mData).intakeSlides.position("transfer-exchange", 2,2000),
                         new Condition(() -> ((SharedData)mData).intakeSlides.hasFinished())
                 ),
                 new Task(
                         "Close outtake claw",
-                        () -> {
-                            ((SharedData)mData).outtakeArm.toogleClaw();
-                        },
+                        () -> ((SharedData)mData).outtakeArm.toogleClaw(),
                         new Condition(() -> ((SharedData)mData).outtakeArm.hasFinished())
                 ),
                 new Task(
                         "Open inttake claw",
-                        () -> {
-                            ((SharedData)mData).intakeArm.toogleClaw();
-                        },
+                        () -> ((SharedData)mData).intakeArm.toogleClaw(),
                         new Condition(() -> ((SharedData)mData).intakeArm.hasFinished())
                 ),
                 new Task(

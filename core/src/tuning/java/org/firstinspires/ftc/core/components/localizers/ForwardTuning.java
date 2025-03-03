@@ -5,7 +5,7 @@
    Localizers forward tuning tool
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.components.localizers;
+package components.localizers;
 
 /* System includes */
 import java.util.LinkedHashMap;
@@ -35,6 +35,9 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 /* Configuration includes */
 import org.firstinspires.ftc.core.configuration.Configuration;
+
+/* Components includes */
+import org.firstinspires.ftc.core.components.localizers.LocalizerComponent;
 
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;
@@ -216,8 +219,8 @@ public class ForwardTuning extends LinearOpMode implements Tuning {
     // global class.
     // When we select a new motor, we make sure to deselect all the others
     static class SelectedProvider implements ValueProvider<Boolean> {
-        Map<String, Boolean> mAllSelection;
-        String mCurrentSelection;
+        final Map<String, Boolean> mAllSelection;
+        final String mCurrentSelection;
 
         public SelectedProvider(Map<String, Boolean> selection, String current) {
             mAllSelection = selection;

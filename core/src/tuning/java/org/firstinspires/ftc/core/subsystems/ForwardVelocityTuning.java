@@ -5,7 +5,7 @@
    Forward velocity tuning tool
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.subsystems;
+package subsystems;
 
 /* System includes */
 import java.util.ArrayList;

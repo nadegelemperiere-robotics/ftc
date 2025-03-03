@@ -181,70 +181,61 @@ public class Controller implements Configurable {
      */
     public String  logConfigurationHTML() {
 
-        StringBuilder result = new StringBuilder();
+        String result = "<details style=\"margin-left:10px\">\n" +
+                "<summary style=\"font-size: 12px; font-weight: 500\"> AXES </summary>\n" +
+                "<ul>\n" +
+                "<li>\n" +
+                "<details style=\"margin-left:10px\">\n" +
+                "<summary style=\"font-size: 12px; font-weight: 500\"> LEFT STICK X </summary>\n" +
+                "<ul>\n" +
+                this.axes.left_stick_x.logConfigurationHTML() +
+                "</ul>\n" +
+                "</details>\n" +
+                "</li>\n" +
+                "<li>\n" +
+                "<details style=\"margin-left:10px\">\n" +
+                "<summary style=\"font-size: 12px; font-weight: 500\"> LEFT STICK Y </summary>\n" +
+                "<ul>\n" +
+                this.axes.left_stick_y.logConfigurationHTML() +
+                "</ul>\n" +
+                "</details>\n" +
+                "</li>\n" +
+                "<li>\n" +
+                "<details style=\"margin-left:10px\">\n" +
+                "<summary style=\"font-size: 12px; font-weight: 500\"> LEFT TRIGGER </summary>\n" +
+                "<ul>\n" +
+                this.axes.left_trigger.logConfigurationHTML() +
+                "</ul>\n" +
+                "</details>\n" +
+                "</li>\n" +
+                "<li>\n" +
+                "<details style=\"margin-left:10px\">\n" +
+                "<summary style=\"font-size: 12px; font-weight: 500\"> RIGHT STICK X </summary>\n" +
+                "<ul>\n" +
+                this.axes.right_stick_x.logConfigurationHTML() +
+                "</ul>\n" +
+                "</details>\n" +
+                "</li>\n" +
+                "<li>\n" +
+                "<details style=\"margin-left:10px\">\n" +
+                "<summary style=\"font-size: 12px; font-weight: 500\"> RIGHT STICK Y </summary>\n" +
+                "<ul>\n" +
+                this.axes.right_stick_y.logConfigurationHTML() +
+                "</ul>\n" +
+                "</details>\n" +
+                "</li>\n" +
+                "<li>\n" +
+                "<details style=\"margin-left:10px\">\n" +
+                "<summary style=\"font-size: 12px; font-weight: 500\"> RIGHT TRIGGER </summary>\n" +
+                "<ul>\n" +
+                this.axes.right_trigger.logConfigurationHTML() +
+                "</ul>\n" +
+                "</details>\n" +
+                "</li>\n" +
+                "</ul>\n" +
+                "</details>\n";
 
-        result.append("<details style=\"margin-left:10px\">\n")
-                .append("<summary style=\"font-size: 12px; font-weight: 500\"> AXES </summary>\n")
-                .append("<ul>\n");
-
-        result.append("<li>\n")
-                .append("<details style=\"margin-left:10px\">\n")
-                .append("<summary style=\"font-size: 12px; font-weight: 500\"> LEFT STICK X </summary>\n")
-                .append("<ul>\n")
-                .append(this.axes.left_stick_x.logConfigurationHTML())
-                .append("</ul>\n")
-                .append("</details>\n")
-                .append("</li>\n");
-
-        result.append("<li>\n")
-                .append("<details style=\"margin-left:10px\">\n")
-                .append("<summary style=\"font-size: 12px; font-weight: 500\"> LEFT STICK Y </summary>\n")
-                .append("<ul>\n")
-                .append(this.axes.left_stick_y.logConfigurationHTML())
-                .append("</ul>\n")
-                .append("</details>\n")
-                .append("</li>\n");
-
-        result.append("<li>\n")
-                .append("<details style=\"margin-left:10px\">\n")
-                .append("<summary style=\"font-size: 12px; font-weight: 500\"> LEFT TRIGGER </summary>\n")
-                .append("<ul>\n")
-                .append(this.axes.left_trigger.logConfigurationHTML())
-                .append("</ul>\n")
-                .append("</details>\n")
-                .append("</li>\n");
-
-        result.append("<li>\n")
-                .append("<details style=\"margin-left:10px\">\n")
-                .append("<summary style=\"font-size: 12px; font-weight: 500\"> RIGHT STICK X </summary>\n")
-                .append("<ul>\n")
-                .append(this.axes.right_stick_x.logConfigurationHTML())
-                .append("</ul>\n")
-                .append("</details>\n")
-                .append("</li>\n");
-
-        result.append("<li>\n")
-                .append("<details style=\"margin-left:10px\">\n")
-                .append("<summary style=\"font-size: 12px; font-weight: 500\"> RIGHT STICK Y </summary>\n")
-                .append("<ul>\n")
-                .append(this.axes.right_stick_y.logConfigurationHTML())
-                .append("</ul>\n")
-                .append("</details>\n")
-                .append("</li>\n");
-
-        result.append("<li>\n")
-                .append("<details style=\"margin-left:10px\">\n")
-                .append("<summary style=\"font-size: 12px; font-weight: 500\"> RIGHT TRIGGER </summary>\n")
-                .append("<ul>\n")
-                .append(this.axes.right_trigger.logConfigurationHTML())
-                .append("</ul>\n")
-                .append("</details>\n")
-                .append("</li>\n");
-
-        result.append("</ul>\n")
-                .append("</details>\n");
-
-        return result.toString();
+        return result;
     }
     /**
      * Configuration logging into HTML

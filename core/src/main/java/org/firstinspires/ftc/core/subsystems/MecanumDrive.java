@@ -162,7 +162,7 @@ public class MecanumDrive extends Follower implements DriveTrain {
     protected MotorComponent        mLeftBack;
     protected MotorComponent        mRightBack;
     protected LocalizerComponent    mLocalizer;
-    List<MotorComponent>            mMotors;
+    final List<MotorComponent>      mMotors;
     VoltageSensor                   mVoltageSensor;
 
     double                          mDrivingSpeedMultiplier;
@@ -198,8 +198,8 @@ public class MecanumDrive extends Follower implements DriveTrain {
     double[]                        mDrivePowers;
     double[]                        mTeleopDriveValues;
 
-    ArrayList<Vector>               mVelocities;
-    ArrayList<Vector>               mAccelerations;
+    final ArrayList<Vector>         mVelocities;
+    final ArrayList<Vector>         mAccelerations;
 
     Vector                          mAverageVelocity;
     Vector                          mAveragePreviousVelocity;

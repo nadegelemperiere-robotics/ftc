@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.core.subsystems;
+package subsystems;
 
 /* Android includes */
 import android.os.Environment;
@@ -23,6 +23,9 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 /* Configuration includes */
 import org.firstinspires.ftc.core.configuration.Configuration;
+
+/* Subsystems includes */
+import org.firstinspires.ftc.core.subsystems.MecanumDrive;
 
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;

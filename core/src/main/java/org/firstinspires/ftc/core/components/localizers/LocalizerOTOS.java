@@ -49,9 +49,9 @@ public class LocalizerOTOS extends LocalizerComponent {
     protected SparkFunOTOS          mOtos;
 
     Pose                            mStartPose;
-    SparkFunOTOS.Pose2D             mOtosPose;
-    SparkFunOTOS.Pose2D             mOtosVelocity;
-    SparkFunOTOS.Pose2D             mOtosAcceleration;
+    final SparkFunOTOS.Pose2D       mOtosPose;
+    final SparkFunOTOS.Pose2D       mOtosVelocity;
+    final SparkFunOTOS.Pose2D       mOtosAcceleration;
     SparkFunOTOS.Pose2D             mOffset;
     double                          mPreviousHeading;
     double                          mTotalHeading;

@@ -46,7 +46,6 @@ public class LocalizerTwoDeadWheels extends LocalizerComponent {
     final protected LogManager          mLogger;
 
     protected boolean                   mConfigurationValid;
-    boolean                             mIsFirstTime;
 
     final String                        mName;
     String                              mForwardHwName;
@@ -82,7 +81,6 @@ public class LocalizerTwoDeadWheels extends LocalizerComponent {
 
         mLogger             = logger;
         mConfigurationValid = true;
-        mIsFirstTime        = true;
 
         mName           = name;
         mForwardHwName  = "";

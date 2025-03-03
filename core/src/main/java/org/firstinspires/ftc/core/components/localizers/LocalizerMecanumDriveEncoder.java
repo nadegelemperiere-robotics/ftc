@@ -49,7 +49,6 @@ public class LocalizerMecanumDriveEncoder extends LocalizerComponent {
     final LogManager                    mLogger;
 
     protected boolean                   mConfigurationValid;
-    boolean                             mIsFirstTime;
 
     final String                        mName;
     String                              mLeftBackHwName;
@@ -92,7 +91,6 @@ public class LocalizerMecanumDriveEncoder extends LocalizerComponent {
 
         mLogger             = logger;
         mConfigurationValid = false;
-        mIsFirstTime        = true;
 
         mName               = name;
         mLeftFrontHwName    = "";

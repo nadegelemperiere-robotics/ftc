@@ -25,7 +25,6 @@ import org.json.JSONObject;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -85,8 +84,6 @@ public class MotorMock implements MotorComponent {
 
     /**
      * Logs the current motor positions, velocities, and power levels.
-     *
-     * @return A formatted string containing motor telemetry data.
      */
     @Override
     public void                         log()

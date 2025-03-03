@@ -87,7 +87,7 @@ public class Hardware extends org.firstinspires.ftc.core.robot.Hardware {
                     String key = keys.next();
 
                     JSONArray array = motors.getJSONArray(key);
-                    List<String> mapping = new ArrayList<String>();
+                    List<String> mapping = new ArrayList<>();
 
                     for(int i_motor = 0; i_motor < array.length(); i_motor ++) {
 
@@ -115,7 +115,7 @@ public class Hardware extends org.firstinspires.ftc.core.robot.Hardware {
                     String key = keys.next();
 
                     JSONArray array = servos.getJSONArray(key);
-                    List<String> mapping = new ArrayList<String>();
+                    List<String> mapping = new ArrayList<>();
 
                     for(int i_servo = 0; i_servo < array.length(); i_servo ++) {
 

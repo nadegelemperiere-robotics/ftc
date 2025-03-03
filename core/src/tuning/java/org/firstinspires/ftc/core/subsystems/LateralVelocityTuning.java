@@ -5,7 +5,7 @@
    Forward velocity tuning tool
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.subsystems;
+package subsystems;
 
 /* System includes */
 import java.util.ArrayList;
@@ -167,7 +167,7 @@ public class LateralVelocityTuning extends LinearOpMode implements Tuning {
                 for (Double velocity : mVelocities) {
                     average += velocity;
                 }
-                if(!mVelocities.isEmpty()) { average /= (double) mVelocities.size(); }
+                if(!mVelocities.isEmpty()) { average /= mVelocities.size(); }
                 if(!mVelocities.isEmpty()) { mLogger.metric("Average velocity","" + average); }
 
                 /* Manage motor change */

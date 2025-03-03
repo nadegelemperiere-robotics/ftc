@@ -64,7 +64,7 @@ public class LocalizerThreeDeadWheels extends LocalizerComponent {
     Pose                                mDisplacementPose;
     Pose                                mCurrentVelocity;
     Matrix                              mPrevRotationMatrix;
-    NanoTimer                           mTimer;
+    final NanoTimer                     mTimer;
     long                                mDeltaTimeNano;
     Pose                                mLeftEncoderPose;
     Pose                                mRightEncoderPose;

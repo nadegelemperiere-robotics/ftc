@@ -10,7 +10,6 @@ package org.firstinspires.ftc.core.components.localizers;
 
 /* System includes */
 import java.util.Map;
-import java.util.List;
 
 /* JSON includes */
 import org.json.JSONObject;

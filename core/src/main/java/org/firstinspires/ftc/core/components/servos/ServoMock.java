@@ -65,8 +65,6 @@ public class ServoMock implements ServoComponent {
 
     /**
      * Logs the current servo position.
-     *
-     * @return A formatted string containing servo telemetry data.
      */
     @Override
     public void                         log() {

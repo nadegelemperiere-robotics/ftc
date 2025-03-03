@@ -27,10 +27,7 @@ public class Dispatcher extends org.firstinspires.ftc.core.orchestration.dispatc
     }
 
     @Override
-    protected     void commands() {
-
-
-    }
+    protected     void commands() {}
 
 
 }

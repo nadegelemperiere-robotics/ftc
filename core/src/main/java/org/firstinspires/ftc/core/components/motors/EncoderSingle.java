@@ -8,13 +8,14 @@
 
 package org.firstinspires.ftc.core.components.motors;
 
+/* Qualcomm includes */
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
 /* PedroPathing includes */
 import com.pedropathing.localization.Encoder;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.ServoController;
 
+/* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
-
 
 public class EncoderSingle extends EncoderComponent {
 

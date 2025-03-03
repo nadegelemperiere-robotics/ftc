@@ -5,7 +5,7 @@
    Motor tuning tool
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.components.motors;
+package components.motors;
 
 /* System includes */
 import java.util.ArrayList;
@@ -35,6 +35,7 @@ import org.firstinspires.ftc.core.configuration.Configuration;
 
 /* Components includes */
 import org.firstinspires.ftc.core.components.controllers.Controller;
+import org.firstinspires.ftc.core.components.motors.MotorComponent;
 
 /* Tuning includes */
 import org.firstinspires.ftc.core.tuning.Tuning;
@@ -340,8 +341,8 @@ public class MotorTuning extends LinearOpMode implements Tuning {
     // global class.
     // When we select a new motor, we make sure to deselect all the others
     static class SelectedProvider implements ValueProvider<Boolean> {
-        Map<String, Boolean> mAllSelection;
-        String mCurrentSelection;
+        final Map<String, Boolean> mAllSelection;
+        final String mCurrentSelection;
 
         public SelectedProvider(Map<String, Boolean> selection, String current) {
             mAllSelection = selection;
@@ -371,7 +372,7 @@ public class MotorTuning extends LinearOpMode implements Tuning {
     // pointer, when we change it in the provider, it's changed in the
     // global configuration
     static class ReverseProvider implements ValueProvider<Boolean> {
-        MotorComponent mMotor;
+        final MotorComponent mMotor;
         public ReverseProvider( MotorComponent motor) {
             mMotor = motor;
         }
@@ -386,7 +387,7 @@ public class MotorTuning extends LinearOpMode implements Tuning {
     // pointer, when we change it in the provider, it's changed in the
     // global configuration
     static class DirectionProvider implements ValueProvider<Direction> {
-        MotorComponent mMotor;
+        final MotorComponent mMotor;
         public DirectionProvider( MotorComponent motor) {
             mMotor = motor;
         }

@@ -15,7 +15,7 @@ import com.pedropathing.pathgen.Path;
 
 public interface DriveTrain extends Subsystem {
 
-    public enum Mode {
+    enum Mode {
         FIELD_CENTRIC,
         ROBOT_CENTRIC
     }

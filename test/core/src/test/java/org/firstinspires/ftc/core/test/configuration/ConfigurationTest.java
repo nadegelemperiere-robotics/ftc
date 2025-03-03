@@ -203,7 +203,7 @@ class ConfigurableTest implements Configurable {
                 writer.put("data1",mData1);
                 writer.put("data2",mData2);
             }
-            catch(JSONException e ) {  }
+            catch(JSONException ignored ) {  }
         }
     }
 

@@ -5,13 +5,11 @@
    Forward velocity tuning tool
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.subsystems;
+package subsystems;
 
 /* System includes */
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Objects;
-import java.util.List;
 
 /* Android includes */
 import android.os.Environment;
@@ -45,6 +43,7 @@ import org.firstinspires.ftc.core.configuration.Configuration;
 import org.firstinspires.ftc.core.components.controllers.Controller;
 import org.firstinspires.ftc.core.components.motors.MotorComponent;
 import org.firstinspires.ftc.core.components.localizers.LocalizerComponent;
+
 
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;

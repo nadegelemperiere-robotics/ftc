@@ -102,8 +102,6 @@ public class MotorSingle implements MotorComponent {
 
     /**
      * Logs the current motor positions, velocities, and power levels.
-     *
-     * @return A formatted string containing motor telemetry data.
      */
     @Override
     public void                         log()

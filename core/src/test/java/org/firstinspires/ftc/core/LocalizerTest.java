@@ -268,8 +268,8 @@ public class LocalizerTest extends LinearOpMode implements Tuning {
     // global class.
     // When we select a new motor, we make sure to deselect all the others
     static class SelectedProvider implements ValueProvider<Boolean> {
-        Map<String, Boolean> mAllSelection;
-        String mCurrentSelection;
+        final Map<String, Boolean> mAllSelection;
+        final String mCurrentSelection;
 
         public SelectedProvider(Map<String, Boolean> selection, String current) {
             mAllSelection = selection;

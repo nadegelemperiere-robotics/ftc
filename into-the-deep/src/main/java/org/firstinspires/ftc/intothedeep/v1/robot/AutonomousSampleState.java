@@ -9,9 +9,7 @@ package org.firstinspires.ftc.intothedeep.v1.robot;
 
 /* PedroPathing includes */
 import com.pedropathing.localization.Pose;
-import com.pedropathing.pathgen.BezierCurve;
 import com.pedropathing.pathgen.BezierLine;
-import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
 
