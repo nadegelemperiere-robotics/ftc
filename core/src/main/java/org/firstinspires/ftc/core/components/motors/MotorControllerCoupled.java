@@ -5,16 +5,18 @@
    Coupled Controller managing coupled servos together
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.components.servos;
+package org.firstinspires.ftc.core.components.motors;
 
 /* Qualcomm includes */
-import com.qualcomm.robotcore.hardware.ServoController;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
 
-public class ServoControllerCoupled implements ServoControllerComponent {
+public class MotorControllerCoupled implements MotorControllerComponent {
 
     final LogManager        mLogger;
 
@@ -22,11 +24,11 @@ public class ServoControllerCoupled implements ServoControllerComponent {
 
     final String            mName;
 
-    final ServoController   mFirst;
-    final ServoController   mSecond;
+    final DcMotorController   mFirst;
+    final DcMotorController   mSecond;
 
     /* -------------- Constructors --------------- */
-    public ServoControllerCoupled(ServoController first, ServoController second, String name, LogManager logger)
+    public MotorControllerCoupled(DcMotorController first, DcMotorController second, String name, LogManager logger)
     {
         mConfigurationValid  = true;
 
@@ -135,47 +137,35 @@ public class ServoControllerCoupled implements ServoControllerComponent {
         }
     }
 
-    /* ----------------- ServoController functions ----------------- */
-
-    /**
-     * Enables all of the servos connected to this controller
-     */
-    @Override
-    public void	                        pwmEnable(){
-        if(mConfigurationValid) {
-            mFirst.pwmEnable();
-            mSecond.pwmDisable();
-        }
-    }
-
-    /**
-     * Disables all of the servos connected to this controller
-     */
-    @Override
-    public void	                        pwmDisable(){
-        if(mConfigurationValid) {
-            mFirst.pwmDisable();
-            mSecond.pwmDisable();
-        }
-    }
-
-    /**
-     * Returns the enablement status of the collective set of servos connected to this controller
-     * @return the enablement status of the collective set of servos connected to this controller
-     */
-    @Override
-    public ServoController.PwmStatus	getPwmStatus(){
-        ServoController.PwmStatus result = ServoController.PwmStatus.DISABLED;
-        if(mConfigurationValid) {
-            result = mFirst.getPwmStatus();
-        }
-        return result;
-    }
+    /* ---------------- DcMotorController functions ---------------- */
 
     @Override
-    public void                         setServoPosition(int servo, double position) {}
+    public MotorConfigurationType       getMotorType(int motor) { return null; }
+    @Override
+    public DcMotor.RunMode	            getMotorMode(int motor) { return DcMotor.RunMode.RUN_WITHOUT_ENCODER; }
+    @Override
+    public double	                    getMotorPower(int motor) { return 0; }
+    @Override
+    public boolean	                    isBusy(int motor) { return false; }
+    @Override
+    public DcMotor.ZeroPowerBehavior	getMotorZeroPowerBehavior(int motor) { return DcMotor.ZeroPowerBehavior.UNKNOWN; }
+    @Override
+    public boolean	                    getMotorPowerFloat(int motor) { return false; }
+    @Override
+    public int                          getMotorTargetPosition(int motor) { return 0; }
+    @Override
+    public int	                        getMotorCurrentPosition(int motor) { return 0; }
 
     @Override
-    public double	                    getServoPosition(int servo) { return -1;}
-
+    public void                         setMotorType(int motor, MotorConfigurationType motorType) {}
+    @Override
+    public void	                        setMotorMode(int motor, DcMotor.RunMode mode) {}
+    @Override
+    public void	                        setMotorPower(int motor, double power) {}
+    @Override
+    public void	                        setMotorZeroPowerBehavior(int motor, DcMotor.ZeroPowerBehavior zeroPowerBehavior) {}
+    @Override
+    public void	                        setMotorTargetPosition(int motor, int position) {}
+    @Override
+    public void	                        resetDeviceConfigurationForOpMode(int motor) {}
 }

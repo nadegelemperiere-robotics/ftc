@@ -135,9 +135,9 @@ public class Actuator implements Subsystem {
                 mHasFinished = !(mMotor.isBusy()) || !(mTimer.isArmed());
                 if(!mTimer.isArmed() && mMotor.isBusy()) { mLogger.warning(mName + " timeouted"); }
                 if (mHasFinished) {
-                    mMotor.power(mHoldPositionPower);
-                    double error = Math.abs(mMotor.currentPosition() - mMotor.targetPosition());
-                    mLogger.info(mName + " finished with error " + error + " for tolerance " + mMotor.targetPositionTolerance() );
+                    mMotor.setPower(mHoldPositionPower);
+                    double error = Math.abs(mMotor.getCurrentPosition() - mMotor.getTargetPosition());
+                    mLogger.info(mName + " finished with error " + error + " for tolerance " + mMotor.getTargetPositionTolerance() );
                     mMotor.log();
                 }
             }
@@ -152,17 +152,17 @@ public class Actuator implements Subsystem {
 
         if(mMotor != null && this.hasFinished()) {
             //mMotor.log();
-            mLogger.info(mShortName + " : pos = " + mPosition + " - enc : " + mMotor.currentPosition() + " - spd : " + mMotor.velocity() + " - pwr : " + mMotor.power() + " - mode : " + mMotor.mode());
+            mLogger.info(mShortName + " : pos = " + mPosition + " - enc : " + mMotor.getCurrentPosition() + " - spd : " + mMotor.getVelocity() + " - pwr : " + mMotor.getPower() + " - mode : " + mMotor.getMode());
         }
         else if(mMotor != null && !this.hasFinished()) {
             //mMotor.log();
-            mLogger.info(mShortName + " : pos > " + mPosition + " - enc : " + mMotor.currentPosition() + " - spd : " + mMotor.velocity() + " - pwr : " + mMotor.power() + " - mode : " + mMotor.mode());
+            mLogger.info(mShortName + " : pos > " + mPosition + " - enc : " + mMotor.getCurrentPosition() + " - spd : " + mMotor.getVelocity() + " - pwr : " + mMotor.getPower() + " - mode : " + mMotor.getMode());
         }
         else if(mServo != null && this.hasFinished()) {
-            mLogger.info(mShortName + " : pos = " + mPosition + " - srv : " + mServo.position());
+            mLogger.info(mShortName + " : pos = " + mPosition + " - srv : " + mServo.getPosition());
         }
         else if(mServo != null && !this.hasFinished()) {
-            mLogger.info(mShortName + " : pos > " + mPosition + " - srv : " + mServo.position());
+            mLogger.info(mShortName + " : pos > " + mPosition + " - srv : " + mServo.getPosition());
         }
     }
 
@@ -176,15 +176,15 @@ public class Actuator implements Subsystem {
 
         if( mMotor != null && mPositions.containsKey(position) && mConfigurationValid && this.hasFinished()) {
 
-            mMotor.targetPositionTolerance(tolerance);
+            mMotor.setTargetPositionTolerance(tolerance);
             mTolerance = tolerance;
 
             Double target = mPositions.get(position);
             if(target != null) {
-                mMotor.targetPosition((int)(target - mOffset));
-                mMotor.mode(DcMotor.RunMode.RUN_TO_POSITION);
+                mMotor.setTargetPosition((int)(target - mOffset));
+                mMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 mHasFinished = false;
-                mMotor.power(mSetPositionPower);
+                mMotor.setPower(mSetPositionPower);
                 mPosition = position;
                 mTimer.arm(timeout);
             }
@@ -192,7 +192,7 @@ public class Actuator implements Subsystem {
         }
         if( mServo != null && mPositions.containsKey(position) && mConfigurationValid) {
             Double target = mPositions.get(position);
-            if(target != null) { mServo.position(target); }
+            if(target != null) { mServo.setPosition(target); }
             mPosition = position;
             mHasFinished = false;
             mTimer.arm(timeout);
@@ -217,7 +217,7 @@ public class Actuator implements Subsystem {
             // - Storing offset = 320 then reset motor to 0 -> Now accessing position 0 means asking motor for position -320
             // - Stopping a second time at motor position of -320
             // - Storing offset +320 -320 = 0 -> Accessing position 0 is now back to asking motor position 0
-            InterOpMode.instance().add(mName + "-offset", mOffset + (double)mMotor.currentPosition());
+            InterOpMode.instance().add(mName + "-offset", mOffset + (double)mMotor.getCurrentPosition());
         }
     }
 

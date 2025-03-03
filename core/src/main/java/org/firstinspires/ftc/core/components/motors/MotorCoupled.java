@@ -60,14 +60,23 @@ import org.json.JSONException;
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
+
+/* FTC controller includes */
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
+/**
+ * Overloading of DcMotorEx to manage coupled motors
+ */
 public class MotorCoupled implements MotorComponent {
 
     public static final String  sFirstKey  = "first";
@@ -88,6 +97,7 @@ public class MotorCoupled implements MotorComponent {
     DcMotorEx                   mSecond;
     int                         mFirstInvertPosition;
     int                         mSecondInvertPosition;
+    MotorControllerComponent    mController;
 
 
     /* ----------------------- Constructors ------------------------ */
@@ -111,6 +121,7 @@ public class MotorCoupled implements MotorComponent {
         mDirection              = DcMotor.Direction.FORWARD;
         mFirst                  = null;
         mSecond                 = null;
+        mController             = null;
         mFirstInvertPosition    = 1;
         mSecondInvertPosition   = 1;
 
@@ -119,12 +130,11 @@ public class MotorCoupled implements MotorComponent {
     /* --------------------- Custom functions ---------------------- */
 
     /**
-            * Retrieves the name of the coupled motor component.
-            *
-            * @return The name of the component.
+     * Retrieves the name of the coupled motor component.
+     * @return The name of the component.
      */
     @Override
-    public String                       name() { return mName; }
+    public String                       getName() { return mName; }
 
     /**
      * Determines if encoder correction is required.
@@ -132,7 +142,7 @@ public class MotorCoupled implements MotorComponent {
      * @return True if at least one motor has inverted encoder behavior, false otherwise.
      */
     @Override
-    public boolean                      encoderCorrection() { return ((mFirstInvertPosition == -1) || (mSecondInvertPosition == -1)); }
+    public boolean                      getEncoderCorrection() { return ((mFirstInvertPosition == -1) || (mSecondInvertPosition == -1)); }
 
     /**
      * Enables or disables encoder correction.
@@ -140,7 +150,7 @@ public class MotorCoupled implements MotorComponent {
      * @param shallCorrect True to enable encoder correction, false to disable.
      */
     @Override
-    public void                         encoderCorrection(boolean shallCorrect) {
+    public void                         setEncoderCorrection(boolean shallCorrect) {
         if (mConfigurationValid) {
             if (shallCorrect) {
                 mFirstInvertPosition = -1;
@@ -157,15 +167,31 @@ public class MotorCoupled implements MotorComponent {
      * @return The coupled encoder
      */
     @Override
-    public EncoderComponent             encoder() {
+    public EncoderComponent             getEncoder() {
         return new EncoderCoupled(mFirst, mSecond,mName, mLogger);
+    }
+
+    /**
+     * Sets the fraction of the motor power accessible
+     * @param rate the power fraction
+     */
+    @Override
+    public void                         setAchieveableMaxRPMFraction(double rate){
+        if(mConfigurationValid) {
+            MotorConfigurationType motorConfigurationType = mFirst.getMotorType().clone();
+            motorConfigurationType.setAchieveableMaxRPMFraction(rate);
+            mFirst.setMotorType(motorConfigurationType);
+            motorConfigurationType = mSecond.getMotorType().clone();
+            motorConfigurationType.setAchieveableMaxRPMFraction(rate);
+            mSecond.setMotorType(motorConfigurationType);
+        }
     }
     
     /**
      * Logs the current motor positions, velocities, and power levels.
      */
     @Override
-    public void                       log() {
+    public void                         log() {
 
         if (mConfigurationValid) {
             mLogger.metric(LogManager.Target.DASHBOARD, mName+"-1-pos","" + mFirst.getCurrentPosition());
@@ -198,6 +224,7 @@ public class MotorCoupled implements MotorComponent {
         mConfigurationValid = true;
         mFirst = null;
         mSecond = null;
+        mController = null;
 
         if(!reader.has(sFirstKey))       { mLogger.error("Missing first DC motor for coupled motor"); }
         else if(!reader.has(sSecondKey)) { mLogger.error("Missing second DC motor for coupled motor"); }
@@ -258,6 +285,15 @@ public class MotorCoupled implements MotorComponent {
 
         if (mFirst == null) { mConfigurationValid = false; }
         if (mSecond == null) { mConfigurationValid = false; }
+
+        if(mConfigurationValid) {
+            mController = new MotorControllerCoupled(mFirst.getController(), mSecond.getController(), mName, mLogger);
+            if(!mFirst.getMotorType().equals(mSecond.getMotorType())) {
+                mLogger.warning("Coupled motor does not have the same type");
+            }if(!mFirst.getManufacturer().equals(mSecond.getManufacturer())) {
+                mLogger.warning("Coupled motor does not have the same manufacturer");
+            }
+        }
 
     }
 
@@ -379,10 +415,93 @@ public class MotorCoupled implements MotorComponent {
 
     }
 
+    /* ------------------ HardwareDevice functions ----------------- */
+
+    /**
+     * Returns an indication of the manufacturer of this device.
+     * @return the manufacturer
+     */
+    @Override
+    public Manufacturer                 getManufacturer()
+    {
+        Manufacturer result = Manufacturer.Unknown;
+        if(mConfigurationValid) {
+            result = mFirst.getManufacturer();
+        }
+        return result;
+    }
+
+    /**
+     * Returns a string suitable for display to the user as to the type of device.Note that this is a device-type-specific name; it has nothing to do with thename by which a user might have configured the device in a robot configuration.
+     * @return the device name
+     */
+    @Override
+    public String                       getDeviceName()
+    {
+        String result = "";
+        if(mConfigurationValid) {
+            result = mFirst.getDeviceName() + " coupled with " + mSecond.getDeviceName();
+        }
+        return result;
+    }
+
+    /**
+     * Get connection information about this device in a human readable format
+     * @return connection information
+     */
+    @Override
+    public String                       getConnectionInfo() {
+        String result = "";
+        if(mConfigurationValid) {
+            result = "First : " + mFirst.getConnectionInfo();
+            result += "\nSecond : " + mSecond.getConnectionInfo();
+        }
+        return result;
+    }
+
+    /**
+     * Version
+     */
+    @Override
+    public int                          getVersion() {
+        int result = -1;
+        if(mConfigurationValid) {
+            result = mFirst.getVersion();
+        }
+        return result;
+    }
+
+    /**
+     * Resets the device's configuration to that which is expected at the beginning of an OpMode.For example, motors will reset the their direction to 'forward'.
+     */
+    @Override
+    public void                         resetDeviceConfigurationForOpMode() {
+        if(mConfigurationValid) {
+            mFirst.resetDeviceConfigurationForOpMode();
+            mSecond.resetDeviceConfigurationForOpMode();
+        }
+    }
+
+    /**
+     * Closes this device
+     */
+    @Override
+    public void                         close()
+    {
+        if(mConfigurationValid) {
+            mFirst.close();
+            mSecond.close();
+        }
+    }
+
     /* --------------------- DcMotor functions --------------------- */
 
+    /**
+     * Returns the current reading of the encoder for this motor. The units for this reading, that is, the number of ticks per revolution, are specific to the motor/encoder in question, and thus are not specified here.
+     * @return the current reading of the encoder for this motor
+     */
     @Override
-    public int	                        currentPosition()
+    public int	                        getCurrentPosition()
     {
         int result = -1;
         if(mConfigurationValid) {
@@ -392,23 +511,34 @@ public class MotorCoupled implements MotorComponent {
         return result;
     }
 
+    /**
+     * Returns the current logical direction in which this motor is set as operating.
+     * @return the current logical direction in which this motor is set as operating.
+     */
     @Override
-    public DcMotorSimple.Direction      direction()
+    public DcMotorSimple.Direction      getDirection()
     {
         return mDirection;
     }
 
-
+    /**
+     * Returns the current run mode for this motor
+     * @return the current run mode for this motor
+     */
     @Override
-    public DcMotor.RunMode	            mode()
+    public DcMotor.RunMode	            getMode()
     {
         DcMotor.RunMode result =  DcMotor.RunMode.RUN_WITHOUT_ENCODER;
         if (mConfigurationValid) { result = mFirst.getMode(); }
         return result;
     }
 
+    /**
+     * Returns the current target encoder position for this motor.
+     * @return the current target encoder position for this motor.
+     */
     @Override
-    public int	                        targetPosition()
+    public int	                        getTargetPosition()
     {
         int result = -1;
         if(mConfigurationValid) {
@@ -418,8 +548,24 @@ public class MotorCoupled implements MotorComponent {
         return result;
     }
 
+    /**
+     * Returns the current behavior of the motor were a power level of zero to be applied.
+     * @return the current behavior of the motor were a power level of zero to be applied.
+     */
     @Override
-    public double	                    power()
+    public DcMotor.ZeroPowerBehavior	getZeroPowerBehavior()
+    {
+        DcMotor.ZeroPowerBehavior result = DcMotor.ZeroPowerBehavior.UNKNOWN;
+        if(mConfigurationValid) { result = mFirst.getZeroPowerBehavior(); }
+        return result;
+    }
+
+    /**
+     * Returns the current configured power level of the motor.
+     * @return the current level of the motor, a value in the interval [0.0, 1.0]
+     */
+    @Override
+    public double	                    getPower()
     {
         double result = -1;
         if(mConfigurationValid) {
@@ -428,14 +574,24 @@ public class MotorCoupled implements MotorComponent {
         return result;
     }
 
+    /**
+     * Returns whether the motor is currently in a float power level.
+     */
     @Override
-    public DcMotor.ZeroPowerBehavior	zeroPowerBehavior()
+    @Deprecated
+    public boolean	                    getPowerFloat()
     {
-        DcMotor.ZeroPowerBehavior result = DcMotor.ZeroPowerBehavior.UNKNOWN;
-        if(mConfigurationValid) { result = mFirst.getZeroPowerBehavior(); }
+        boolean result = false;
+        if(mConfigurationValid) {
+            result = mFirst.getPowerFloat() && mSecond.getPowerFloat();
+        }
         return result;
     }
 
+    /**
+     * Returns true if the motor is currently advancing or retreating to a target position.
+     * @return true if the motor is currently advancing or retreating to a target position.
+     */
     @Override
     public boolean	                    isBusy()
     {
@@ -444,8 +600,43 @@ public class MotorCoupled implements MotorComponent {
         return result;
     }
 
+    /**
+     * Returns the assigned type for this motor. If no particular motor type has beenconfigured, then getUnspecifiedMotorType will be returned.Note that the motor type for a given motor is initially assigned in the robotconfiguration user interface, though it may subsequently be modified using methods herein.
+     * @return motor type
+     */
     @Override
-    public void	                        mode(DcMotor.RunMode mode)
+    public MotorConfigurationType       getMotorType() {
+        MotorConfigurationType result = null;
+        if(mConfigurationValid) {
+            result = mFirst.getMotorType();
+        }
+        return result;
+    }
+
+    /**
+     * Returns the underlying motor controller on which this motor is situated.
+     * @return the underlying motor controller on which this motor is situated.f
+     */
+    @Override
+    public DcMotorController            getController() {
+        return mController;
+    }
+
+    /**
+     * Unable to provide this method since each motor has a difference port
+     * @return -1
+     */
+    @Override
+    public int                          getPortNumber() {
+        return -1;
+    }
+
+    /**
+     * Sets the current run mode for this motor
+     * @param mode the new current run mode for this motor
+     */
+    @Override
+    public void	                        setMode(DcMotor.RunMode mode)
     {
         if(mConfigurationValid) {
             mFirst.setMode(mode);
@@ -453,8 +644,12 @@ public class MotorCoupled implements MotorComponent {
         }
     }
 
+    /**
+     * Sets the logical direction in which this motor operates.
+     * @param direction the direction to set for this motor
+     */
     @Override
-    public void	                        direction(DcMotorSimple.Direction direction)
+    public void	                        setDirection(DcMotorSimple.Direction direction)
     {
         if(direction != mDirection && mConfigurationValid) {
 
@@ -469,8 +664,13 @@ public class MotorCoupled implements MotorComponent {
         }
     }
 
+    /**
+     * Sets the desired encoder target position to which the motor should advance or retreat and then actively hold thereat. This behavior is similar to the operation of a servo. The maximum speed at which this advance or retreat occurs is governed by the power level currently set on the motor. While the motor is advancing or retreating to the desired taget position, isBusy() will return true.
+     * Note that adjustment to a target position is only effective when the motor is in RUN_TO_POSITION RunMode. Note further that, clearly, the motor must be equipped with an encoder in order for this mode to function properly.
+     * @param position the desired encoder target position
+     */
     @Override
-    public void	                        targetPosition(int position)
+    public void	                        setTargetPosition(int position)
     {
         if(mConfigurationValid) {
             mFirst.setTargetPosition(mFirstInvertPosition * position);
@@ -478,8 +678,12 @@ public class MotorCoupled implements MotorComponent {
         }
     }
 
+    /**
+     * Sets the behavior of the motor when a power level of zero is applied.
+     * @param zeroPowerBehavior the new behavior of the motor when a power level of zero is applied.
+     */
     @Override
-    public void	                        zeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior)
+    public void	                        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior)
     {
         if(mConfigurationValid) {
             mFirst.setZeroPowerBehavior(zeroPowerBehavior);
@@ -487,8 +691,13 @@ public class MotorCoupled implements MotorComponent {
         }
     }
 
+    /**
+     * Sets the power level of the motor, expressed as a fraction of the maximum possible power / speed supported according to the run mode in which the motor is operating.
+     * Setting a power level of zero will brake the motor
+     * @param power the new power level of the motor, a value in the interval [-1.0, 1.0]
+     */
     @Override
-    public void	                        power(double power)
+    public void	                        setPower(double power)
     {
         if(mConfigurationValid) {
             mFirst.setPower(power);
@@ -496,10 +705,82 @@ public class MotorCoupled implements MotorComponent {
         }
     }
 
+    /**
+     * Sets the zero power behavior of the motor to FLOAT, then applies zero power to that motor.
+     */
+    @Override
+    @Deprecated
+    public void	                        setPowerFloat()
+    {
+        if(mConfigurationValid) {
+            mFirst.setPowerFloat();
+            mSecond.setPowerFloat();
+        }
+    }
+
+    /**
+     * Sets the assigned type of this motor. Usage of this method is very rare.
+     * @param type the new assigned type for this motor
+     */
+    @Override
+    public void                         setMotorType(MotorConfigurationType type) {
+        if(mConfigurationValid) {
+            mFirst.setMotorType(type);
+            mSecond.setMotorType(type);
+        }
+    }
+
     /* -------------------- DcMotorEx functions -------------------- */
 
+    /**
+     * Returns the current consumed by the motor
+     * @param unit current units
+     * @return the current consumed by the motor
+     */
     @Override
-    public PIDFCoefficients             PIDFCoefficients(DcMotor.RunMode mode){
+    public double                       getCurrent(CurrentUnit unit) {
+        double result = 0;
+        if(mConfigurationValid) {
+            result = 0.5 * mFirst.getCurrent(unit) + 0.5 * mSecond.getCurrent(unit);
+        }
+        return result;
+    }
+
+    /**
+     * Returns the current alert for by the motor
+     * @param unit current units
+     * @return the current alert for by the motor
+     */
+    @Override
+    public double                       getCurrentAlert(CurrentUnit unit) {
+        double result = 0;
+        if(mConfigurationValid) {
+            result = 0.5 * mFirst.getCurrentAlert(unit) + 0.5 * mSecond.getCurrentAlert(unit);
+        }
+        return result;
+    }
+
+    /**
+     * Returns whether the current consumption of this motor exceeds the alert threshold.
+     * @return true if threshold exceeded, false otherwise
+     */
+    @Override
+    public boolean                      isOverCurrent() {
+        boolean result = false;
+        if(mConfigurationValid) {
+            result = mFirst.isOverCurrent() || mSecond.isOverCurrent();
+        }
+        return result;
+    }
+
+
+    /**
+     * Returns the PIDF control coefficients used when running in the indicated mode on this motor.
+     * @param mode either {@link RunMode#RUN_USING_ENCODER} or {@link RunMode#RUN_TO_POSITION}
+     * @return the PIDF control coefficients used when running in the indicated mode on this motor
+     */
+    @Override
+    public PIDFCoefficients             getPIDFCoefficients(DcMotor.RunMode mode){
         PIDFCoefficients result = null;
         if(mConfigurationValid) {
             result = mSecond.getPIDFCoefficients(mode);
@@ -507,25 +788,26 @@ public class MotorCoupled implements MotorComponent {
         return result;
     }
 
+    /**
+     * Returns the PIDF control coefficients used when running in the indicated mode on this motor.
+     * @param mode either {@link RunMode#RUN_USING_ENCODER} or {@link RunMode#RUN_TO_POSITION}
+     * @return the PIDF control coefficients used when running in the indicated mode on this motor
+     */
     @Override
-    public void                        PIDFCoefficients(DcMotor.RunMode mode, PIDFCoefficients pidfCoefficients){
+    public PIDCoefficients              getPIDCoefficients(DcMotor.RunMode mode){
+        PIDCoefficients result = null;
         if(mConfigurationValid) {
-            mFirst.setPIDFCoefficients(mode, pidfCoefficients);
-            mSecond.setPIDFCoefficients(mode, pidfCoefficients);
+            result = mSecond.getPIDCoefficients(mode);
         }
+        return result;
     }
 
+    /**
+     * Returns the current target positioning tolerance of this motor
+     * @return the current target positioning tolerance of this motor
+     */
     @Override
-    public void                        targetPositionTolerance(int tolerance)
-    {
-        if(mConfigurationValid) {
-            mFirst.setTargetPositionTolerance(tolerance);
-            mSecond.setTargetPositionTolerance(tolerance);
-        }
-    }
-
-    @Override
-    public int                         targetPositionTolerance()
+    public int                         getTargetPositionTolerance()
     {
         int result = -1;
         if(mConfigurationValid) {
@@ -535,8 +817,12 @@ public class MotorCoupled implements MotorComponent {
 
     }
 
+    /**
+     * Returns the current velocity of the motor, in ticks per second
+     * @return the current velocity of the motor
+     */
     @Override
-    public double                       velocity()
+    public double                       getVelocity()
     {
         double result = 0;
         if(mConfigurationValid) {
@@ -546,15 +832,152 @@ public class MotorCoupled implements MotorComponent {
 
     }
 
+    /**
+     * Returns the current velocity of the motor, in angular unit per second
+     * @return the current velocity of the motor
+     */
     @Override
-    public void                         achieveableMaxRPMFraction(double value) {
+    public double                       getVelocity(AngleUnit unit)
+    {
+        double result = 0;
         if(mConfigurationValid) {
-            MotorConfigurationType motorConfigurationType = mFirst.getMotorType().clone();
-            motorConfigurationType.setAchieveableMaxRPMFraction(value);
-            mFirst.setMotorType(motorConfigurationType);
-            motorConfigurationType = mSecond.getMotorType().clone();
-            motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
-            mSecond.setMotorType(motorConfigurationType);
+            result = 0.5 * mSecond.getVelocity(unit) + 0.5 * mFirst.getVelocity(unit);
+        }
+        return result;
+
+    }
+
+    /**
+     * Returns whether this motor is energized
+     */
+    @Override
+    public boolean                      isMotorEnabled() {
+        boolean result = false;
+        if(mConfigurationValid) {
+            result = mFirst.isMotorEnabled() && mSecond.isMotorEnabled();
+        }
+        return result;
+    }
+
+    /**
+     * Sets the current alert for by the motor
+     * @param unit current units
+     * @param alert the alert threshold for by the motor
+     */
+    @Override
+    public void                         setCurrentAlert(double alert, CurrentUnit unit) {
+        if(mConfigurationValid) {
+            mFirst.setCurrentAlert(alert, unit);
+            mSecond.setCurrentAlert(alert, unit);
+        }
+    }
+
+    /**
+     * Sets the PIDF control coefficients for one of the PID modes of this motor. 
+     * @param mode either {@link RunMode#RUN_USING_ENCODER} or {@link RunMode#RUN_TO_POSITION}
+     * @param pidfCoefficients the new coefficients to use when in that mode on this motor
+     */
+    @Override
+    public void                        setPIDFCoefficients(DcMotor.RunMode mode, PIDFCoefficients pidfCoefficients){
+        if(mConfigurationValid) {
+            mFirst.setPIDFCoefficients(mode, pidfCoefficients);
+            mSecond.setPIDFCoefficients(mode, pidfCoefficients);
+        }
+    }
+
+    /**
+     * Sets the PID control coefficients for one of the PID modes of this motor.
+     * @param mode either {@link RunMode#RUN_USING_ENCODER} or {@link RunMode#RUN_TO_POSITION}
+     * @param pidCoefficients the new coefficients to use when in that mode on this motor
+     */
+    @Override
+    public void                        setPIDCoefficients(DcMotor.RunMode mode, PIDCoefficients pidCoefficients){
+        if(mConfigurationValid) {
+            mFirst.setPIDCoefficients(mode, pidCoefficients);
+            mSecond.setPIDCoefficients(mode, pidCoefficients);
+        }
+    }
+    /**
+     * A shorthand for setting the PIDF coefficients for the DcMotor.RunMode.RUN_USING_ENCODER mode.
+     */
+    @Override
+    public void                        setVelocityPIDFCoefficients(double p, double i, double d, double f){
+        if(mConfigurationValid) {
+            mFirst.setVelocityPIDFCoefficients(p,i,d,f);
+            mSecond.setVelocityPIDFCoefficients(p,i,d,f);
+        }
+    }
+
+    /**
+     * A shorthand for setting the PIDF coefficients for the DcMotor.RunMode.RUN_TO_POSITION mode. MotorControlAlgorithm.PIDF is used. Readers are reminded that DcMotor.RunMode.RUN_TO_POSITION mode makes use of both the coefficients set for RUN_TO_POSITION and the coefficients set for RUN_WITH_ENCODER, due to the fact that internally the RUN_TO_POSITION logic calculates an on-the-fly velocity goal on each control cycle, then (logically) runs the RUN_WITH_ENCODER logic. Because of that double- layering, only the proportional ('p') coefficient makes logical sense for use in the RUN_TO_POSITION coefficients.
+     */
+    @Override
+    public void                        setPositionPIDFCoefficients(double p){
+        if(mConfigurationValid) {
+            mFirst.setPositionPIDFCoefficients(p);
+            mSecond.setPositionPIDFCoefficients(p);
+        }
+    }
+
+    /**
+     * Sets the target positioning tolerance of this motor
+     * @param tolerance the desired tolerance, in encoder ticks
+     */
+    @Override
+    public void                         setTargetPositionTolerance(int tolerance)
+    {
+        if(mConfigurationValid) {
+            mFirst.setTargetPositionTolerance(tolerance);
+            mSecond.setTargetPositionTolerance(tolerance);
+        }
+    }
+
+
+    /**
+     * Individually energizes this particular motor
+     */
+    @Override
+    public void                         setMotorEnable() {
+        if(mConfigurationValid) {
+            mFirst.setMotorEnable();
+            mSecond.setMotorEnable();
+        }
+    }
+
+    /**
+     * Individually de-energizes this particular motor
+     */
+    @Override
+    public void                         setMotorDisable() {
+        if(mConfigurationValid) {
+            mFirst.setMotorDisable();
+            mSecond.setMotorDisable();
+        }
+    }
+
+    /**
+     * Sets the velocity of the motor
+     * @param ticks  the desired ticks per second
+     */
+    @Override
+    public void                         setVelocity(double ticks) {
+        if(mConfigurationValid) {
+            mFirst.setVelocity(ticks);
+            mSecond.setVelocity(ticks);
+        }
+    }
+
+    /**
+     * Sets the velocity of the motor
+     * @param angularRate   the desired angular rate, in units per second
+     * @param unit          the units in which angularRate is expressed
+     *
+     */
+    @Override
+    public void                         setVelocity(double angularRate, AngleUnit unit){
+        if(mConfigurationValid) {
+            mFirst.setVelocity(angularRate, unit);
+            mSecond.setVelocity(angularRate, unit);
         }
     }
 

@@ -8,60 +8,17 @@
 package org.firstinspires.ftc.core.subsystems;
 
 /* System includes */
-import java.util.Arrays;
 import java.util.Map;
-import java.util.ArrayList;
-import java.util.List;
 
 /* JSON object */
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/* Qualcomm includes */
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 /* Pedro Pathing includes */
-import static com.pedropathing.follower.FollowerConstants.automaticHoldEnd;
-import static com.pedropathing.follower.FollowerConstants.cacheInvalidateSeconds;
-import static com.pedropathing.follower.FollowerConstants.centripetalScaling;
-import static com.pedropathing.follower.FollowerConstants.xMovement;
-import static com.pedropathing.follower.FollowerConstants.yMovement;
-import static com.pedropathing.follower.FollowerConstants.drivePIDFFeedForward;
-import static com.pedropathing.follower.FollowerConstants.drivePIDFSwitch;
-import static com.pedropathing.follower.FollowerConstants.forwardZeroPowerAcceleration;
-import static com.pedropathing.follower.FollowerConstants.headingPIDFFeedForward;
-import static com.pedropathing.follower.FollowerConstants.headingPIDFSwitch;
-import static com.pedropathing.follower.FollowerConstants.lateralZeroPowerAcceleration;
-import static com.pedropathing.follower.FollowerConstants.nominalVoltage;
-import static com.pedropathing.follower.FollowerConstants.secondaryDrivePIDFFeedForward;
-import static com.pedropathing.follower.FollowerConstants.secondaryHeadingPIDFFeedForward;
-import static com.pedropathing.follower.FollowerConstants.secondaryTranslationalPIDFFeedForward;
-import static com.pedropathing.follower.FollowerConstants.translationalPIDFFeedForward;
-import static com.pedropathing.follower.FollowerConstants.translationalPIDFSwitch;
-import static com.pedropathing.follower.FollowerConstants.useSecondaryDrivePID;
-import static com.pedropathing.follower.FollowerConstants.useSecondaryHeadingPID;
-import static com.pedropathing.follower.FollowerConstants.useSecondaryTranslationalPID;
-import static com.pedropathing.follower.FollowerConstants.useVoltageCompensationInAuto;
-import com.pedropathing.follower.DriveVectorScaler;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.localization.Pose;
-import com.pedropathing.localization.PoseUpdater;
-import com.pedropathing.pathgen.BezierPoint;
-import com.pedropathing.pathgen.MathFunctions;
-import com.pedropathing.pathgen.Path;
-import com.pedropathing.pathgen.PathBuilder;
-import com.pedropathing.pathgen.PathCallback;
-import com.pedropathing.pathgen.PathChain;
-import com.pedropathing.pathgen.Point;
-import com.pedropathing.pathgen.Vector;
-import com.pedropathing.util.DashboardPoseTracker;
-import com.pedropathing.util.Drawing;
-import com.pedropathing.util.FilteredPIDFController;
-import com.pedropathing.util.KalmanFilter;
-import com.pedropathing.util.PIDFController;
 import com.pedropathing.util.CustomFilteredPIDFCoefficients;
 import com.pedropathing.util.CustomPIDFCoefficients;
 import com.pedropathing.util.KalmanFilterParameters;
@@ -150,102 +107,13 @@ public class MecanumDrive extends Follower implements DriveTrain {
 
     final String                    mName;
     String                          mShortName;
-    String                          mLeftFrontHwName;
-    String                          mLeftBackHwName;
-    String                          mRightFrontHwName;
-    String                          mRightBackHwName;
     String                          mLocalizerHwName;
 
     final Hardware                  mHardware;
-    protected MotorComponent        mLeftFront;
-    protected MotorComponent        mRightFront;
-    protected MotorComponent        mLeftBack;
-    protected MotorComponent        mRightBack;
-    protected LocalizerComponent    mLocalizer;
-    final List<MotorComponent>      mMotors;
-    VoltageSensor                   mVoltageSensor;
+    LocalizerComponent              mLocalizer;
 
     double                          mDrivingSpeedMultiplier;
     Mode                            mDrivingMode;
-
-    DriveVectorScaler               mDriveVectorScaler;
-
-    PoseUpdater                     mPoseUpdater;
-    DashboardPoseTracker            mDashboardPoseTracker;
-
-    Pose                            mClosestPose;
-
-    Path                            mCurrentPath;
-    PathChain                       mCurrentPathChain;
-    int                             mChainIndex;
-    long[]                          mPathStartTimes;
-
-    boolean                         mFollowingPathChain;
-    boolean                         mHoldingPosition;
-    boolean                         mIsBusy;
-    boolean                         mReachedParametricPathEnd;
-    boolean                         mHoldPositionAtEnd;
-    boolean                         mTeleopDrive;
-
-    double                          mGlobalMaxPower;
-    double                          mPreviousSecondaryTranslationalIntegral;
-    double                          mPreviousTranslationalIntegral;
-    double                          mDriveError;
-    double                          mHeadingError;
-
-    long                            mReachedParametricPathEndTime;
-
-    double[]                        mDrivePowers;
-    double[]                        mTeleopDriveValues;
-
-    final ArrayList<Vector>         mVelocities;
-    final ArrayList<Vector>         mAccelerations;
-
-    Vector                          mAverageVelocity;
-    Vector                          mAveragePreviousVelocity;
-    Vector                          mAverageAcceleration;
-    Vector                          mSecondaryTranslationalIntegralVector;
-    Vector                          mTranslationalIntegralVector;
-    Vector                          mTeleopDriveVector;
-    Vector                          mTeleopHeadingVector;
-    Vector                          mDriveVector;
-    Vector                          mHeadingVector;
-    Vector                          mTranslationalVector;
-    Vector                          mCentripetalVector;
-    Vector                          mCorrectiveVector;
-    double                          mCentripetalScaling;
-
-    PIDFController                  mSecondaryTranslationalPIDF;
-    PIDFController                  mSecondaryTranslationalIntegral;
-    PIDFController                  mTranslationalPIDF;
-    PIDFController                  mTranslationalIntegral;
-    PIDFController                  mSecondaryHeadingPIDF;
-    PIDFController                  mHeadingPIDF;
-    FilteredPIDFController          mSecondaryDrivePIDF;
-    FilteredPIDFController          mDrivePIDF;
-
-    KalmanFilter                    mDriveKalmanFilter;
-    double[]                        mDriveErrors;
-    double                          mRawDriveError;
-    double                          mPreviousRawDriveError;
-
-    boolean                         mDrawOnDashboard;
-    boolean                         mUseTranslational;
-    boolean                         mUseCentripetal;
-    boolean                         mUseHeading;
-    boolean                         mUseDrive;
-
-    /*
-     * Voltage Compensation
-     * Credit to team 14343 Escape Velocity for the mVoltage code
-     * Credit to team 23511 Seattle Solvers for implementing the mVoltage code into Follower.java
-     */
-    boolean                         mCached;
-
-    public double                   mVoltage;
-    final ElapsedTime               mVoltageTimer;
-
-    ElapsedTime                     mZeroVelocityDetectedTimer;
 
     /**
      * Constructor
@@ -254,7 +122,7 @@ public class MecanumDrive extends Follower implements DriveTrain {
      * @param logger Logger for trace
      */
     public  MecanumDrive(String name, Hardware hardware, LogManager logger) {
-        super(null);
+        super(hardware);
 
         mLogger                 = logger;
         mConfigurationValid     = false;
@@ -264,24 +132,10 @@ public class MecanumDrive extends Follower implements DriveTrain {
 
         mName               = name;
         mShortName          = "";
-        mLeftFrontHwName    = "";
-        mLeftBackHwName     = "";
-        mRightFrontHwName   = "";
-        mRightBackHwName    = "";
         mLocalizerHwName    = "";
 
         mHardware           = hardware;
-        mLeftFront          = null;
-        mRightFront         = null;
-        mLeftBack           = null;
-        mRightBack          = null;
         mLocalizer          = null;
-        if(mHardware != null) { mVoltageSensor = mHardware.voltageSensor(); }
-        
-        mMotors             = new ArrayList<>();
-        mVelocities         = new ArrayList<>();
-        mAccelerations      = new ArrayList<>();
-        mVoltageTimer       = new ElapsedTime();
         
     }
 
@@ -342,6 +196,8 @@ public class MecanumDrive extends Follower implements DriveTrain {
                         true);
             }
 
+            update();
+
             mLogger.debug(LogManager.Target.FILE,"stop");
 
         }
@@ -354,7 +210,7 @@ public class MecanumDrive extends Follower implements DriveTrain {
     public void                         persist()
     {
         if(mConfigurationValid) {
-            Pose current = mPoseUpdater.getPose();
+            Pose current = this.poseUpdater.getPose();
             InterOpMode.instance().add(mName + "-pose", current);
         }
     }
@@ -378,1180 +234,10 @@ public class MecanumDrive extends Follower implements DriveTrain {
         }
     }
 
-
-    /**
-     * This initializes the follower.
-     * In this, the DriveVectorScaler and PoseUpdater is instantiated, the drive motors are
-     * initialized and their behavior is set, and the variables involved in approximating first and
-     * second derivatives for teleop are set.
-     */
-
-    @Override
-    public void                         initialize() {
-
-        if(mConfigurationValid) {
-
-            mGlobalMaxPower = 1;
-            mVoltage = 0;
-            mCentripetalScaling = centripetalScaling;
-
-            mVoltageTimer.reset();
-
-            mDriveKalmanFilter              = new KalmanFilter(FollowerConstants.driveKalmanFilterParameters);
-            mSecondaryTranslationalPIDF     = new PIDFController(FollowerConstants.secondaryTranslationalPIDFCoefficients);
-            mSecondaryTranslationalIntegral = new PIDFController(FollowerConstants.secondaryTranslationalIntegral);
-            mTranslationalPIDF              = new PIDFController(FollowerConstants.translationalPIDFCoefficients);
-            mTranslationalIntegral          = new PIDFController(FollowerConstants.translationalIntegral);
-            mSecondaryHeadingPIDF           = new PIDFController(FollowerConstants.secondaryHeadingPIDFCoefficients);
-            mHeadingPIDF                    = new PIDFController(FollowerConstants.headingPIDFCoefficients);
-            mSecondaryDrivePIDF             = new FilteredPIDFController(FollowerConstants.secondaryDrivePIDFCoefficients);
-            mDrivePIDF                      = new FilteredPIDFController(FollowerConstants.drivePIDFCoefficients);
-
-            mDrawOnDashboard    = true;
-            mUseTranslational   = true;
-            mUseCentripetal     = true;
-            mUseHeading         = true;
-            mUseDrive           = true;
-            mCached             = false;
-
-            double[] convertToPolar = Point.cartesianToPolar(xMovement, -yMovement);
-            Vector frontLeftVector = MathFunctions.normalizeVector(new Vector(convertToPolar[0], convertToPolar[1]));
-
-            mPoseUpdater        = new PoseUpdater(null, mLocalizer);
-            mDriveVectorScaler  = new DriveVectorScaler(frontLeftVector);
-
-            // Order to match DriveVectorScaler
-            mMotors.add(mLeftFront);
-            mMotors.add(mLeftBack);
-            mMotors.add(mRightFront);
-            mMotors.add(mRightBack);
-            for(int i_motor = 0; i_motor < mMotors.size(); i_motor ++) {
-                mMotors.get(i_motor).achieveableMaxRPMFraction(1.0);
-            }
-
-            setMotorsToFloat();
-
-            mDashboardPoseTracker = new DashboardPoseTracker(mPoseUpdater);
-
-            breakFollowing();
-        }
-    }
-
-    @Override
-    public void setCentripetalScaling(double value) {
-        mCentripetalScaling = value;
-    }
-
-    /**
-     * This sets the motors to the zero power behavior of brake.
-     */
-    private void setMotorsToBrake() {
-        if(mConfigurationValid) {
-            for(int i_motor = 0; i_motor < mMotors.size(); i_motor ++) {
-                mMotors.get(i_motor).zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            }
-        }
-    }
-
-    /**
-     * This sets the motors to the zero power behavior of float.
-     */
-    private void setMotorsToFloat() {
-        if(mConfigurationValid) {
-            for(int i_motor = 0; i_motor < mMotors.size(); i_motor ++) {
-                mMotors.get(i_motor).zeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            }
-        }
-    }
-
-    /**
-     * This sets the maximum power the motors are allowed to use.
-     *
-     * @param value This caps the motor power from [0, 1].
-     */
-    @Override
-    public void setMaxPower(double value) {
-        if(mConfigurationValid) {
-            mGlobalMaxPower = value;
-            mDriveVectorScaler.setMaxPowerScaling(value);
-        }
-    }   
-
-    /**
-     * This gets a Point from the current Path from a specified t-value.
-     *
-     * @return returns the Point.
-     */
-    @Override
-    public Point getPointFromPath(double t) {
-        Point result = null;
-        if(mConfigurationValid && mCurrentPath != null) { result = mCurrentPath.getPoint(t); } 
-        return result;
-    }
-
-    /**
-     * This returns the current pose from the PoseUpdater.
-     *
-     * @return returns the pose
-     */
-    @Override
-    public Pose getPose() {
-        return mPoseUpdater.getPose();
-    }
-
-    /**
-     * This sets the current pose in the PoseUpdater without using offsets.
-     *
-     * @param pose The pose to set the current pose to.
-     */
-    @Override
-    public void setPose(Pose pose) {
-        mPoseUpdater.setPose(pose);
-    }
-
-    /**
-     * This returns the current velocity of the robot as a Vector.
-     *
-     * @return returns the current velocity as a Vector.
-     */
-    @Override
-    public Vector getVelocity() {
-        return mPoseUpdater.getVelocity();
-    }
-
-    /**
-     * This returns the current acceleration of the robot as a Vector.
-     *
-     * @return returns the current acceleration as a Vector.
-     */
-    @Override
-    public Vector getAcceleration() {
-        return mPoseUpdater.getAcceleration();
-    }
-
-    /**
-     * This returns the magnitude of the current velocity. For when you only need the magnitude.
-     *
-     * @return returns the magnitude of the current velocity.
-     */
-    @Override
-    public double getVelocityMagnitude() {
-        return mPoseUpdater.getVelocity().getMagnitude();
-    }
-
-    /**
-     * This sets the starting pose. Do not run this after moving at all.
-     *
-     * @param pose the pose to set the starting pose to.
-     */
-    @Override
-    public void setStartingPose(Pose pose) {
-        mPoseUpdater.setStartingPose(pose);
-    }
-
-    /**
-     * This sets the current pose, using offsets so no reset time delay. This is better than the
-     * Road Runner reset, in general. Think of using offsets as setting trim in an aircraft. This can
-     * be reset as well, so beware of using the resetOffset() method.
-     *
-     * @param set The pose to set the current pose to.
-     */
-    @Override
-    public void setCurrentPoseWithOffset(Pose set) {
-        mPoseUpdater.setCurrentPoseWithOffset(set);
-    }
-
-    /**
-     * This sets the offset for only the x position.
-     *
-     * @param xOffset This sets the offset.
-     */
-    @Override
-    public void setXOffset(double xOffset) {
-        mPoseUpdater.setXOffset(xOffset);
-    }
-
-    /**
-     * This sets the offset for only the y position.
-     *
-     * @param yOffset This sets the offset.
-     */
-    @Override
-    public void setYOffset(double yOffset) {
-        mPoseUpdater.setYOffset(yOffset);
-    }
-
-    /**
-     * This sets the offset for only the heading.
-     *
-     * @param headingOffset This sets the offset.
-     */
-    @Override
-    public void setHeadingOffset(double headingOffset) {
-        mPoseUpdater.setHeadingOffset(headingOffset);
-    }
-
-    /**
-     * This returns the x offset.
-     *
-     * @return returns the x offset.
-     */
-    @Override
-    public double getXOffset() {
-        return mPoseUpdater.getXOffset();
-    }
-
-    /**
-     * This returns the y offset.
-     *
-     * @return returns the y offset.
-     */
-    @Override
-    public double getYOffset() {
-        return mPoseUpdater.getYOffset();
-    }
-
-    /**
-     * This returns the heading offset.
-     *
-     * @return returns the heading offset.
-     */
-    @Override
-    public double getHeadingOffset() {
-        return mPoseUpdater.getHeadingOffset();
-    }
-
-    /**
-     * This resets all offsets set to the PoseUpdater. If you have reset your pose using the
-     * setCurrentPoseUsingOffset(Pose set) method, then your pose will be returned to what the
-     * PoseUpdater thinks your pose would be, not the pose you reset to.
-     */
-    @Override
-    public void resetOffset() {
-        mPoseUpdater.resetOffset();
-    }
-
-    /**
-     * This holds a Point.
-     *
-     * @param point   the Point to stay at.
-     * @param heading the heading to face.
-     */
-    @Override
-    public void holdPoint(BezierPoint point, double heading) {
-        breakFollowing();
-        mHoldingPosition    = true;
-        mIsBusy             = false;
-        mFollowingPathChain = false;
-        mCurrentPath        = new Path(point);
-        mCurrentPath.setConstantHeadingInterpolation(heading);
-        mClosestPose        = mCurrentPath.getClosestPoint(mPoseUpdater.getPose(), 1);
-    }
-
-    /**
-     * This holds a Point.
-     *
-     * @param point   the Point to stay at.
-     * @param heading the heading to face.
-     */
-    @Override
-    public void holdPoint(Point point, double heading) {
-        holdPoint(new BezierPoint(point), heading);
-    }
-
-    /**
-     * This holds a Point.
-     *
-     * @param pose the Point (as a Pose) to stay at.
-     */
-    @Override
-    public void holdPoint(Pose pose) {
-        holdPoint(new Point(pose), pose.getHeading());
-    }
-
-    /**
-     * This follows a Path.
-     * This also makes the Follower hold the last Point on the Path.
-     *
-     * @param path the Path to follow.
-     * @param holdEnd this makes the Follower hold the last Point on the Path.
-     */
-    @Override
-    public void followPath(Path path, boolean holdEnd) {
-        mDriveVectorScaler.setMaxPowerScaling(mGlobalMaxPower);
-        breakFollowing();
-        mHoldPositionAtEnd  = holdEnd;
-        mIsBusy             = true;
-        mFollowingPathChain = false;
-        mCurrentPath        = path;
-        mClosestPose        = mCurrentPath.getClosestPoint(mPoseUpdater.getPose(), FollowerConstants.BEZIER_CURVE_SEARCH_LIMIT);
-    }
-
-    /**
-     * This follows a Path.
-     *
-     * @param path the Path to follow.
-     */
-    @Override
-    public void followPath(Path path) {
-        followPath(path, automaticHoldEnd);
-    }
-
-    /**
-     * This follows a PathChain. Drive vector projection is only done on the last Path.
-     * This also makes the Follower hold the last Point on the PathChain.
-     *
-     * @param pathChain the PathChain to follow.
-     * @param holdEnd this makes the Follower hold the last Point on the PathChain.
-     */
-    @Override
-    public void followPath(PathChain pathChain, boolean holdEnd) {
-        followPath(pathChain, mGlobalMaxPower, holdEnd);
-    }
-
-    /**
-     * This follows a PathChain. Drive vector projection is only done on the last Path.
-     *
-     * @param pathChain the PathChain to follow.
-     */
-    @Override
-    public void followPath(PathChain pathChain) {
-        followPath(pathChain, automaticHoldEnd);
-    }
-
-    /**
-     * This follows a PathChain. Drive vector projection is only done on the last Path.
-     * This also makes the Follower hold the last Point on the PathChain.
-     *
-     * @param pathChain the PathChain to follow.
-     * @param maxPower the max power of the Follower for this path
-     * @param holdEnd this makes the Follower hold the last Point on the PathChain.
-     */
-    @Override
-    public void followPath(PathChain pathChain, double maxPower, boolean holdEnd) {
-        mDriveVectorScaler.setMaxPowerScaling(maxPower);
-        breakFollowing();
-        mHoldPositionAtEnd  = holdEnd;
-        mPathStartTimes     = new long[pathChain.size()];
-        mPathStartTimes[0]  = System.currentTimeMillis();
-        mIsBusy             = true;
-        mFollowingPathChain = true;
-        mChainIndex         = 0;
-        mCurrentPathChain   = pathChain;
-        mCurrentPath        = pathChain.getPath(mChainIndex);
-        mClosestPose        = mCurrentPath.getClosestPoint(mPoseUpdater.getPose(), FollowerConstants.BEZIER_CURVE_SEARCH_LIMIT);
-        mCurrentPathChain.resetCallbacks();
-    }
-
-    /**
-     * Resumes pathing
-     */
-    @Override
-    public void resumePathFollowing() {
-        mPathStartTimes     = new long[mCurrentPathChain.size()];
-        mPathStartTimes[0]  = System.currentTimeMillis();
-        mIsBusy             = true;
-        mClosestPose        = mCurrentPath.getClosestPoint(mPoseUpdater.getPose(), FollowerConstants.BEZIER_CURVE_SEARCH_LIMIT);
-    }
-
-    /**
-     * This starts teleop drive control.
-     */
-    @Override
-    public void startTeleopDrive() {
-        breakFollowing();
-        mTeleopDrive = true;
-
-        if(FollowerConstants.useBrakeModeInTeleOp) { setMotorsToBrake(); }
-    }
-
-    /**
-     * Calls an update to the PoseUpdater, which updates the robot's current position estimate.
-     */
-    public void updatePose() {
-        mPoseUpdater.update();
-
-        if (mDrawOnDashboard) { mDashboardPoseTracker.update(); }
-    }
-
-    /**
-     * This calls an update to the PoseUpdater, which updates the robot's current position estimate.
-     * This also updates all the Follower's PIDFs, which updates the motor powers.
-     */
-    @Override
-    public void update() {
-        mLogger.debug(mName + " start");
-
-        updatePose();
-
-        if (!mTeleopDrive) {
-            if (mCurrentPath != null) {
-                if (mHoldingPosition) {
-                    mClosestPose = mCurrentPath.getClosestPoint(mPoseUpdater.getPose(), 1);
-
-                    mDrivePowers = mDriveVectorScaler.getDrivePowers(MathFunctions.scalarMultiplyVector(getTranslationalCorrection(), FollowerConstants.holdPointTranslationalScaling), MathFunctions.scalarMultiplyVector(getHeadingVector(), FollowerConstants.holdPointHeadingScaling), new Vector(), mPoseUpdater.getPose().getHeading());
-
-                    for(int i_motor = 0; i_motor < mMotors.size(); i_motor ++) {
-                        if (Math.abs(mMotors.get(i_motor).power() - mDrivePowers[i_motor]) > FollowerConstants.motorCachingThreshold) {
-                            double mVoltageNormalized = getVoltageNormalized();
-
-                            if (useVoltageCompensationInAuto) {
-                                mLogger.trace("Power " + mDrivePowers[i_motor] * mVoltageNormalized + " to motor " + mMotors.get(i_motor).name());
-                                mMotors.get(i_motor).power(mDrivePowers[i_motor] * mVoltageNormalized);
-                            } else {
-                                mLogger.trace("Power " + mDrivePowers[i_motor] + " to motor " + mMotors.get(i_motor).name());
-                                mMotors.get(i_motor).power(mDrivePowers[i_motor]);
-                            }
-                        }
-                        mMotors.get(i_motor).zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                    }
-                    
-                } else {
-                    if (mIsBusy) {
-                        mClosestPose = mCurrentPath.getClosestPoint(mPoseUpdater.getPose(), FollowerConstants.BEZIER_CURVE_SEARCH_LIMIT);
-
-                        if (mFollowingPathChain) updateCallbacks();
-
-                        mDrivePowers= mDriveVectorScaler.getDrivePowers(getCorrectiveVector(), getHeadingVector(), getDriveVector(), mPoseUpdater.getPose().getHeading());
-
-                        for(int i_motor = 0; i_motor < mMotors.size(); i_motor ++) {
-                            if (Math.abs(mMotors.get(i_motor).power() - mDrivePowers[i_motor]) > FollowerConstants.motorCachingThreshold) {
-                                double mVoltageNormalized = getVoltageNormalized();
-
-                                if (useVoltageCompensationInAuto) {
-                                    mLogger.trace("Power " + mDrivePowers[i_motor] * mVoltageNormalized + " to motor " + mMotors.get(i_motor).name());
-                                    mMotors.get(i_motor).power(mDrivePowers[i_motor] * mVoltageNormalized);
-                                } else {
-                                    mLogger.trace("Power " + mDrivePowers[i_motor] + " to motor " + mMotors.get(i_motor).name());
-                                    mMotors.get(i_motor).power(mDrivePowers[i_motor]);
-                                }
-                            }
-                            mMotors.get(i_motor).zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                        }
-                    }
-
-                    // try to fix the robot stop near the end issue
-                    // if robot is almost reach the end and velocity is close to zero
-                    // then, break the following if other criteria meet
-                    if (mPoseUpdater.getVelocity().getMagnitude() < 1.0 && mCurrentPath.getClosestPointTValue() > 0.8
-                            && mZeroVelocityDetectedTimer == null && mIsBusy) {
-                        mZeroVelocityDetectedTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
-                        mLogger.warning("!!!! Robot stuck !!!!");
-
-                        debugLog();
-                    }
-
-                    if (mCurrentPath.isAtParametricEnd() ||
-                            (mZeroVelocityDetectedTimer != null && mZeroVelocityDetectedTimer.milliseconds() > 500.0)) {
-                        if (mFollowingPathChain && mChainIndex < mCurrentPathChain.size() - 1) {
-
-                            mLogger.debug("mChainIndex: " + mChainIndex + " | Pose: " + getPose());
-                            
-                            // Not at last path, keep going
-                            breakFollowing();
-                            mPathStartTimes[mChainIndex]    = System.currentTimeMillis();
-                            mIsBusy                         = true;
-                            mFollowingPathChain             = true;
-                            mChainIndex++;
-                            mCurrentPath                    = mCurrentPathChain.getPath(mChainIndex);
-                            mClosestPose                    = mCurrentPath.getClosestPoint(mPoseUpdater.getPose(), FollowerConstants.BEZIER_CURVE_SEARCH_LIMIT);
-                        } else {
-                            // At last path, run some end detection stuff
-                            // set mIsBusy to false if at end
-                            if (!mReachedParametricPathEnd) {
-                                mReachedParametricPathEnd = true;
-                                mReachedParametricPathEndTime = System.currentTimeMillis();
-                            }
-
-                            if ((System.currentTimeMillis() - mReachedParametricPathEndTime > mCurrentPath.getPathEndTimeoutConstraint()) ||
-                                    (mPoseUpdater.getVelocity().getMagnitude() < mCurrentPath.getPathEndVelocityConstraint()
-                                            && MathFunctions.distance(mPoseUpdater.getPose(), mClosestPose) < mCurrentPath.getPathEndTranslationalConstraint() &&
-                                            MathFunctions.getSmallestAngleDifference(mPoseUpdater.getPose().getHeading(), mCurrentPath.getClosestPointHeadingGoal()) < mCurrentPath.getPathEndHeadingConstraint())) {
-                                if (mHoldPositionAtEnd) {
-                                    mHoldPositionAtEnd = false;
-                                    holdPoint(new BezierPoint(mCurrentPath.getLastControlPoint()), mCurrentPath.getHeadingGoal(1));
-                                } else {
-                                    if (mIsBusy) {
-                                        mLogger.debug("isAtParametricEnd:" + mCurrentPath.isAtParametricEnd()
-                                                + " | mIsBusy: " + mIsBusy
-                                                + " | mClosestPose:" + mClosestPose
-                                                + " | Pose: " + getPose()
-                                                + " | t-value: " + String.format("%3.5f", mCurrentPath.getClosestPointTValue())
-                                                + " | velocity: " + String.format("%3.2f", mPoseUpdater.getVelocity().getMagnitude())
-                                                + " | distance: " + String.format("%3.2f", MathFunctions.distance(mPoseUpdater.getPose(), mClosestPose))
-                                                + " | heading (degree): " + String.format("%3.2f", Math.toDegrees(MathFunctions.getSmallestAngleDifference(mPoseUpdater.getPose().getHeading(), mCurrentPath.getClosestPointHeadingGoal())))
-                                        );
-                                    }
-
-                                    breakFollowing();
-                                }
-                            }
-                        }
-                    }
-                    mLogger.debug("IsBusy:" + mIsBusy);
-                }
-            }
-        } else {
-            mVelocities.add(mPoseUpdater.getVelocity());
-            mVelocities.remove(mVelocities.get(mVelocities.size() - 1));
-
-            calculateAveragedVelocityAndAcceleration();
-
-            mDrivePowers= mDriveVectorScaler.getDrivePowers(getCentripetalForceCorrection(), mTeleopHeadingVector, mTeleopDriveVector, mPoseUpdater.getPose().getHeading());
-
-            for(int i_motor = 0; i_motor < mMotors.size(); i_motor ++) {
-                if (Math.abs(mMotors.get(i_motor).power() - mDrivePowers[i_motor]) > FollowerConstants.motorCachingThreshold) {
-                    double mVoltageNormalized = getVoltageNormalized();
-
-                    if (useVoltageCompensationInAuto) {
-                        mLogger.trace("Power " + mDrivePowers[i_motor] * mVoltageNormalized + " to motor " + mMotors.get(i_motor).name());
-                        mMotors.get(i_motor).power(mDrivePowers[i_motor] * mVoltageNormalized);
-                    } else {
-                        mLogger.trace("Power " + mDrivePowers[i_motor] + " to motor " + mMotors.get(i_motor).name());
-                        mMotors.get(i_motor).power(mDrivePowers[i_motor]);
-                    }
-                }
-                mMotors.get(i_motor).zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            }
-        }
-
-        mLogger.debug(mName + " stop");
-    }
-
-    /**
-     * This sets the teleop drive vectors. This defaults to robot centric.
-     *
-     * @param forwardDrive determines the forward drive vector for the robot in teleop. In field centric
-     *                     movement, this is the x-axis.
-     * @param lateralDrive determines the lateral drive vector for the robot in teleop. In field centric
-     *                     movement, this is the y-axis.
-     * @param heading determines the heading vector for the robot in teleop.
-     */
-    @Override
-    public void setTeleOpMovementVectors(double forwardDrive, double lateralDrive, double heading) {
-        setTeleOpMovementVectors(forwardDrive, lateralDrive, heading, true);
-    }
-
-    /**
-     * This sets the teleop drive vectors.
-     *
-     * @param forwardDrive determines the forward drive vector for the robot in teleop. In field centric
-     *                     movement, this is the x-axis.
-     * @param lateralDrive determines the lateral drive vector for the robot in teleop. In field centric
-     *                     movement, this is the y-axis.
-     * @param heading determines the heading vector for the robot in teleop.
-     * @param robotCentric sets if the movement will be field or robot centric
-     */
-    @Override
-    public void setTeleOpMovementVectors(double forwardDrive, double lateralDrive, double heading, boolean robotCentric) {
-        mTeleopDriveValues[0] = MathFunctions.clamp(forwardDrive, -1, 1);
-        mTeleopDriveValues[1] = MathFunctions.clamp(lateralDrive, -1, 1);
-        mTeleopDriveValues[2] = MathFunctions.clamp(heading, -1, 1);
-        mTeleopDriveVector.setOrthogonalComponents(mTeleopDriveValues[0], mTeleopDriveValues[1]);
-        mTeleopDriveVector.setMagnitude(MathFunctions.clamp(mTeleopDriveVector.getMagnitude(), 0, 1));
-
-        if (robotCentric) {
-            mTeleopDriveVector.rotateVector(getPose().getHeading());
-        }
-
-        mTeleopHeadingVector.setComponents(mTeleopDriveValues[2], getPose().getHeading());
-    }
-
-    /**
-     * This calculates an averaged approximate velocity and acceleration. This is used for a
-     * real-time correction of centripetal force, which is used in teleop.
-     */
-    @Override
-    public void calculateAveragedVelocityAndAcceleration() {
-        mAverageVelocity = new Vector();
-        mAveragePreviousVelocity = new Vector();
-
-        for (int i = 0; i < mVelocities.size() / 2; i++) {
-            mAverageVelocity = MathFunctions.addVectors(mAverageVelocity, mVelocities.get(i));
-        }
-        mAverageVelocity = MathFunctions.scalarMultiplyVector(mAverageVelocity, 1.0 / ((double) mVelocities.size() / 2));
-
-        for (int i = mVelocities.size() / 2; i < mVelocities.size(); i++) {
-            mAveragePreviousVelocity = MathFunctions.addVectors(mAveragePreviousVelocity, mVelocities.get(i));
-        }
-        mAveragePreviousVelocity = MathFunctions.scalarMultiplyVector(mAveragePreviousVelocity, 1.0 / ((double) mVelocities.size() / 2));
-
-        mAccelerations.add(MathFunctions.subtractVectors(mAverageVelocity, mAveragePreviousVelocity));
-        mAccelerations.remove(mAccelerations.size() - 1);
-
-        mAverageAcceleration = new Vector();
-
-        for (int i = 0; i < mAccelerations.size(); i++) {
-            mAverageAcceleration = MathFunctions.addVectors(mAverageAcceleration, mAccelerations.get(i));
-        }
-        mAverageAcceleration = MathFunctions.scalarMultiplyVector(mAverageAcceleration, 1.0 / mAccelerations.size());
-    }
-
-    /**
-     * This checks if any PathCallbacks should be run right now, and runs them if applicable.
-     */
-    @Override
-    public void updateCallbacks() {
-        for (PathCallback callback : mCurrentPathChain.getCallbacks()) {
-            if (!callback.hasBeenRun()) {
-                if (callback.getType() == PathCallback.PARAMETRIC) {
-                    // parametric call back
-                    if (mChainIndex == callback.getIndex() && (getCurrentTValue() >= callback.getStartCondition() || MathFunctions.roughlyEquals(getCurrentTValue(), callback.getStartCondition()))) {
-                        callback.run();
-                    }
-                } else {
-                    // time based call back
-                    if (mChainIndex >= callback.getIndex() && System.currentTimeMillis() - mPathStartTimes[callback.getIndex()] > callback.getStartCondition()) {
-                        callback.run();
-                    }
-
-                }
-            }
-        }
-    }
-
-    /**
-     * This resets the PIDFs and stops following the current Path.
-     */
-    @Override
-    public void breakFollowing() {
-        mTeleopDrive                            = false;
-        setMotorsToFloat();
-        mHoldingPosition                        = false;
-        mIsBusy                                 = false;
-        mReachedParametricPathEnd               = false;
-        mSecondaryDrivePIDF.reset();
-        mDrivePIDF.reset();
-        mSecondaryHeadingPIDF.reset();
-        mHeadingPIDF.reset();
-        mSecondaryTranslationalPIDF.reset();
-        mSecondaryTranslationalIntegral.reset();
-        mSecondaryTranslationalIntegralVector   = new Vector();
-        mPreviousSecondaryTranslationalIntegral = 0;
-        mTranslationalPIDF.reset();
-        mTranslationalIntegral.reset();
-        mTranslationalIntegralVector            = new Vector();
-        mPreviousTranslationalIntegral          = 0;
-        mDriveVector                            = new Vector();
-        mHeadingVector                          = new Vector();
-        mTranslationalVector                    = new Vector();
-        mCentripetalVector                      = new Vector();
-        mCorrectiveVector                       = new Vector();
-        mDriveError                             = 0;
-        mHeadingError                           = 0;
-        mRawDriveError                          = 0;
-        mPreviousRawDriveError                  = 0;
-        mDriveErrors = new double[2];
-        Arrays.fill(mDriveErrors, 0);
-        mDriveKalmanFilter.reset();
-
-        for (int i = 0; i < FollowerConstants.AVERAGED_VELOCITY_SAMPLE_NUMBER; i++) {
-            mVelocities.add(new Vector());
-        }
-        for (int i = 0; i < FollowerConstants.AVERAGED_VELOCITY_SAMPLE_NUMBER / 2; i++) {
-            mAccelerations.add(new Vector());
-        }
-        calculateAveragedVelocityAndAcceleration();
-        mTeleopDriveValues                      = new double[3];
-        mTeleopDriveVector                      = new Vector();
-        mTeleopHeadingVector                    = new Vector();
-
-        for (int i = 0; i < mMotors.size(); i++) {
-            mMotors.get(i).power(0);
-        }
-
-        mZeroVelocityDetectedTimer = null;
-    }
-
-    /**
-     * This returns if the Follower is currently following a Path or a PathChain.
-     *
-     * @return returns if the Follower is busy.
-     */
-    @Override
-    public boolean  isBusy() {
-        return mIsBusy;
-    }
-
-    /**
-     * This returns a Vector in the direction the robot must go to move along the path. This Vector
-     * takes into account the projected position of the robot to calculate how much power is needed.
-     * <p>
-     * Note: This vector is clamped to be at most 1 in magnitude.
-     *
-     * @return returns the drive vector.
-     */
-    @Override
-    public Vector getDriveVector() {
-        if (!mUseDrive) return new Vector();
-        if (mFollowingPathChain && mChainIndex < mCurrentPathChain.size() - 1) {
-            return new Vector(mDriveVectorScaler.getMaxPowerScaling(), mCurrentPath.getClosestPointTangentVector().getTheta());
-        }
-
-        mDriveError= getDriveVelocityError();
-
-        if (Math.abs(mDriveError) < drivePIDFSwitch && useSecondaryDrivePID) {
-            // Log.d("Follower_logger_secondary::", "In secondary drive PIDF");
-            mSecondaryDrivePIDF.updateError(mDriveError);
-            mDriveVector = new Vector(MathFunctions.clamp(mSecondaryDrivePIDF.runPIDF() + secondaryDrivePIDFFeedForward * MathFunctions.getSign(mDriveError), -mDriveVectorScaler.getMaxPowerScaling(), mDriveVectorScaler.getMaxPowerScaling()), mCurrentPath.getClosestPointTangentVector().getTheta());
-            return MathFunctions.copyVector(mDriveVector);
-        }
-
-        mDrivePIDF.updateError(mDriveError);
-        mDriveVector = new Vector(MathFunctions.clamp(mDrivePIDF.runPIDF() + drivePIDFFeedForward * MathFunctions.getSign(mDriveError), -mDriveVectorScaler.getMaxPowerScaling(), mDriveVectorScaler.getMaxPowerScaling()), mCurrentPath.getClosestPointTangentVector().getTheta());
-        return MathFunctions.copyVector(mDriveVector);
-    }
-
-    /**
-     * This returns the velocity the robot needs to be at to make it to the end of the Path
-     * at some specified deceleration (well technically just some negative acceleration).
-     *
-     * @return returns the projected velocity.
-     */
-    @Override
-    public double getDriveVelocityError() {
-        double distanceToGoal;
-        if (!mCurrentPath.isAtParametricEnd()) {
-            distanceToGoal = mCurrentPath.length() * (1 - mCurrentPath.getClosestPointTValue());
-        } else {
-            Vector offset = new Vector();
-            offset.setOrthogonalComponents(getPose().getX() - mCurrentPath.getLastControlPoint().getX(), getPose().getY() - mCurrentPath.getLastControlPoint().getY());
-            distanceToGoal = MathFunctions.dotProduct(mCurrentPath.getEndTangent(), offset);
-        }
-
-        Vector distanceToGoalVector = MathFunctions.scalarMultiplyVector(MathFunctions.normalizeVector(mCurrentPath.getClosestPointTangentVector()), distanceToGoal);
-        Vector velocity = new Vector(MathFunctions.dotProduct(getVelocity(), MathFunctions.normalizeVector(mCurrentPath.getClosestPointTangentVector())), mCurrentPath.getClosestPointTangentVector().getTheta());
-
-        Vector forwardHeadingVector = new Vector(1.0, mPoseUpdater.getPose().getHeading());
-
-        double forwardVelocity = MathFunctions.dotProduct(forwardHeadingVector, velocity);
-        double forwardDistanceToGoal = MathFunctions.dotProduct(forwardHeadingVector, distanceToGoalVector);
-        double forwardVelocityGoal = MathFunctions.getSign(forwardDistanceToGoal) * Math.sqrt(Math.abs(-2 * mCurrentPath.getZeroPowerAccelerationMultiplier() * forwardZeroPowerAcceleration * (forwardDistanceToGoal <= 0 ? 1 : -1) * forwardDistanceToGoal));
-        double forwardVelocityZeroPowerDecay = forwardVelocity - MathFunctions.getSign(forwardDistanceToGoal) * Math.sqrt(Math.abs(Math.pow(forwardVelocity, 2) + 2 * forwardZeroPowerAcceleration * Math.abs(forwardDistanceToGoal)));
-
-        Vector lateralHeadingVector = new Vector(1.0, mPoseUpdater.getPose().getHeading() - Math.PI / 2);
-        double lateralVelocity = MathFunctions.dotProduct(lateralHeadingVector, velocity);
-        double lateralDistanceToGoal = MathFunctions.dotProduct(lateralHeadingVector, distanceToGoalVector);
-
-        double lateralVelocityGoal = MathFunctions.getSign(lateralDistanceToGoal) * Math.sqrt(Math.abs(-2 * mCurrentPath.getZeroPowerAccelerationMultiplier() * lateralZeroPowerAcceleration * (lateralDistanceToGoal <= 0 ? 1 : -1) * lateralDistanceToGoal));
-        double lateralVelocityZeroPowerDecay = lateralVelocity - MathFunctions.getSign(lateralDistanceToGoal) * Math.sqrt(Math.abs(Math.pow(lateralVelocity, 2) + 2 * lateralZeroPowerAcceleration * Math.abs(lateralDistanceToGoal)));
-
-        Vector forwardVelocityError = new Vector(forwardVelocityGoal - forwardVelocityZeroPowerDecay - forwardVelocity, forwardHeadingVector.getTheta());
-        Vector lateralVelocityError = new Vector(lateralVelocityGoal - lateralVelocityZeroPowerDecay - lateralVelocity, lateralHeadingVector.getTheta());
-        Vector velocityErrorVector = MathFunctions.addVectors(forwardVelocityError, lateralVelocityError);
-
-        mPreviousRawDriveError = mRawDriveError;
-        mRawDriveError = velocityErrorVector.getMagnitude() * MathFunctions.getSign(MathFunctions.dotProduct(velocityErrorVector, mCurrentPath.getClosestPointTangentVector()));
-
-        double projection = 2 * mDriveErrors[1] - mDriveErrors[0];
-
-        mDriveKalmanFilter.update(mRawDriveError - mPreviousRawDriveError, projection);
-
-        for (int i = 0; i < mDriveErrors.length - 1; i++) {
-            mDriveErrors[i] = mDriveErrors[i + 1];
-        }
-        mDriveErrors[1] = mDriveKalmanFilter.getState();
-
-        return mDriveKalmanFilter.getState();
-    }
-    /**
-     * This returns a Vector in the direction of the robot that contains the heading correction
-     * as its magnitude. Positive heading correction turns the robot counter-clockwise, and negative
-     * heading correction values turn the robot clockwise. So basically, Pedro Pathing uses a right-
-     * handed coordinate system.
-     * <p>
-     * Note: This vector is clamped to be at most 1 in magnitude.
-     *
-     * @return returns the heading vector.
-     */
-    @Override
-    public Vector getHeadingVector() {
-        if (!mUseHeading) return new Vector();
-        mHeadingError= MathFunctions.getTurnDirection(mPoseUpdater.getPose().getHeading(), mCurrentPath.getClosestPointHeadingGoal()) * MathFunctions.getSmallestAngleDifference(mPoseUpdater.getPose().getHeading(), mCurrentPath.getClosestPointHeadingGoal());
-        if (Math.abs(mHeadingError) < headingPIDFSwitch && useSecondaryHeadingPID) {
-//            if(logDebug) {
-//                Log.d("Follower_logger", "using secondary heading PIDF controller, error: "
-//                        + String.format("%3.3f", Math.toDegrees(headingError)));
-//
-//            }
-            mSecondaryHeadingPIDF.updateError(mHeadingError);
-            mHeadingVector = new Vector(MathFunctions.clamp(mSecondaryHeadingPIDF.runPIDF() + secondaryHeadingPIDFFeedForward * MathFunctions.getTurnDirection(mPoseUpdater.getPose().getHeading(), mCurrentPath.getClosestPointHeadingGoal()), -mDriveVectorScaler.getMaxPowerScaling(), mDriveVectorScaler.getMaxPowerScaling()), mPoseUpdater.getPose().getHeading());
-            return MathFunctions.copyVector(mHeadingVector);
-        }
-        mHeadingPIDF.updateError(mHeadingError);
-        mHeadingVector = new Vector(MathFunctions.clamp(mHeadingPIDF.runPIDF() + headingPIDFFeedForward * MathFunctions.getTurnDirection(mPoseUpdater.getPose().getHeading(), mCurrentPath.getClosestPointHeadingGoal()), -mDriveVectorScaler.getMaxPowerScaling(), mDriveVectorScaler.getMaxPowerScaling()), mPoseUpdater.getPose().getHeading());
-        return MathFunctions.copyVector(mHeadingVector);
-    }
-
-    /**
-     * This returns a combined Vector in the direction the robot must go to correct both translational
-     * error as well as centripetal force.
-     * <p>
-     * Note: This vector is clamped to be at most 1 in magnitude.
-     *
-     * @return returns the corrective vector.
-     */
-    @Override
-    public Vector getCorrectiveVector() {
-        Vector centripetal = getCentripetalForceCorrection();
-        Vector translational = getTranslationalCorrection();
-        Vector corrective = MathFunctions.addVectors(centripetal, translational);
-
-        if (corrective.getMagnitude() > mDriveVectorScaler.getMaxPowerScaling()) {
-            return MathFunctions.addVectors(centripetal, MathFunctions.scalarMultiplyVector(translational, mDriveVectorScaler.findNormalizingScaling(centripetal, translational)));
-        }
-
-        mCorrectiveVector = MathFunctions.copyVector(corrective);
-
-        return corrective;
-    }
-
-    /**
-     * This returns a Vector in the direction the robot must go to account for only translational
-     * error.
-     * <p>
-     * Note: This vector is clamped to be at most 1 in magnitude.
-     *
-     * @return returns the translational correction vector.
-     */
-    @Override
-    public Vector getTranslationalCorrection() {
-        if (!mUseTranslational) return new Vector();
-        Vector mTranslationalVector = new Vector();
-        double x = mClosestPose.getX() - mPoseUpdater.getPose().getX();
-        double y = mClosestPose.getY() - mPoseUpdater.getPose().getY();
-        mTranslationalVector.setOrthogonalComponents(x, y);
-
-        if (!(mCurrentPath.isAtParametricEnd() || mCurrentPath.isAtParametricStart())) {
-            mTranslationalVector = MathFunctions.subtractVectors(mTranslationalVector, new Vector(MathFunctions.dotProduct(mTranslationalVector, MathFunctions.normalizeVector(mCurrentPath.getClosestPointTangentVector())), mCurrentPath.getClosestPointTangentVector().getTheta()));
-
-            mSecondaryTranslationalIntegralVector = MathFunctions.subtractVectors(mSecondaryTranslationalIntegralVector, new Vector(MathFunctions.dotProduct(mSecondaryTranslationalIntegralVector, MathFunctions.normalizeVector(mCurrentPath.getClosestPointTangentVector())), mCurrentPath.getClosestPointTangentVector().getTheta()));
-            mTranslationalIntegralVector = MathFunctions.subtractVectors(mTranslationalIntegralVector, new Vector(MathFunctions.dotProduct(mTranslationalIntegralVector, MathFunctions.normalizeVector(mCurrentPath.getClosestPointTangentVector())), mCurrentPath.getClosestPointTangentVector().getTheta()));
-        }
-
-        if (MathFunctions.distance(mPoseUpdater.getPose(), mClosestPose) < translationalPIDFSwitch && useSecondaryTranslationalPID) {
-            mSecondaryTranslationalIntegral.updateError(mTranslationalVector.getMagnitude());
-            mSecondaryTranslationalIntegralVector = MathFunctions.addVectors(mSecondaryTranslationalIntegralVector, new Vector(mSecondaryTranslationalIntegral.runPIDF() - mPreviousSecondaryTranslationalIntegral, mTranslationalVector.getTheta()));
-            mPreviousSecondaryTranslationalIntegral = mSecondaryTranslationalIntegral.runPIDF();
-
-            mSecondaryTranslationalPIDF.updateError(mTranslationalVector.getMagnitude());
-            mTranslationalVector.setMagnitude(mSecondaryTranslationalPIDF.runPIDF() + secondaryTranslationalPIDFFeedForward);
-            mTranslationalVector = MathFunctions.addVectors(mTranslationalVector, mSecondaryTranslationalIntegralVector);
-        } else {
-            mTranslationalIntegral.updateError(mTranslationalVector.getMagnitude());
-            mTranslationalIntegralVector = MathFunctions.addVectors(mTranslationalIntegralVector, new Vector(mTranslationalIntegral.runPIDF() - mPreviousTranslationalIntegral, mTranslationalVector.getTheta()));
-            mPreviousTranslationalIntegral = mTranslationalIntegral.runPIDF();
-
-            mTranslationalPIDF.updateError(mTranslationalVector.getMagnitude());
-            mTranslationalVector.setMagnitude(mTranslationalPIDF.runPIDF() + translationalPIDFFeedForward);
-            mTranslationalVector = MathFunctions.addVectors(mTranslationalVector, mTranslationalIntegralVector);
-        }
-
-        mTranslationalVector.setMagnitude(MathFunctions.clamp(mTranslationalVector.getMagnitude(), 0, mDriveVectorScaler.getMaxPowerScaling()));
-
-        this.mTranslationalVector = MathFunctions.copyVector(mTranslationalVector);
-
-        return mTranslationalVector;
-    }
-
-    /**
-     * This returns the raw translational error, or how far off the closest point the robot is.
-     *
-     * @return This returns the raw translational error as a Vector.
-     */
-    @Override
-    public Vector getTranslationalError() {
-        Vector error = new Vector();
-        double x = mClosestPose.getX() - mPoseUpdater.getPose().getX();
-        double y = mClosestPose.getY() - mPoseUpdater.getPose().getY();
-        error.setOrthogonalComponents(x, y);
-        return error;
-    }
-
-    /**
-     * This returns a Vector in the direction the robot must go to account for only centripetal
-     * force.
-     * <p>
-     * Note: This vector is clamped to be between [0, 1] in magnitude.
-     *
-     * @return returns the centripetal force correction vector.
-     */
-    @Override
-    public Vector getCentripetalForceCorrection() {
-        if (!mUseCentripetal) return new Vector();
-        double curvature;
-        if (!mTeleopDrive) {
-            curvature = mCurrentPath.getClosestPointCurvature();
-        } else {
-            double yPrime = mAverageVelocity.getYComponent() / mAverageVelocity.getXComponent();
-            double yDoublePrime = mAverageAcceleration.getYComponent() / mAverageVelocity.getXComponent();
-            curvature = (yDoublePrime) / (Math.pow(Math.sqrt(1 + Math.pow(yPrime, 2)), 3));
-        }
-        if (Double.isNaN(curvature)) return new Vector();
-        mCentripetalVector = new Vector(MathFunctions.clamp(centripetalScaling * FollowerConstants.mass * Math.pow(MathFunctions.dotProduct(mPoseUpdater.getVelocity(), MathFunctions.normalizeVector(mCurrentPath.getClosestPointTangentVector())), 2) * curvature, -mDriveVectorScaler.getMaxPowerScaling(), mDriveVectorScaler.getMaxPowerScaling()), mCurrentPath.getClosestPointTangentVector().getTheta() + Math.PI / 2 * MathFunctions.getSign(mCurrentPath.getClosestPointNormalVector().getTheta()));
-        return mCentripetalVector;
-    }
-
-    /**
-     * This returns the closest pose to the robot on the Path the Follower is currently following.
-     * This closest pose is calculated through a binary search method with some specified number of
-     * steps to search. By default, 10 steps are used, which should be more than enough.
-     *
-     * @return returns the closest pose.
-     */
-    @Override
-    public Pose getClosestPose() {
-        return mClosestPose;
-    }
-
-    /**
-     * This returns whether the follower is at the parametric end of its current Path.
-     * The parametric end is determined by if the closest Point t-value is greater than some specified
-     * end t-value.
-     * If running a PathChain, this returns true only if at parametric end of last Path in the PathChain.
-     *
-     * @return returns whether the Follower is at the parametric end of its Path.
-     */
-    @Override
-    public boolean atParametricEnd() {
-        if (mFollowingPathChain) {
-            if (mChainIndex == mCurrentPathChain.size() - 1) return mCurrentPath.isAtParametricEnd();
-            return false;
-        }
-        return mCurrentPath.isAtParametricEnd();
-    }
-
-    /**
-     * This returns the t value of the closest point on the current Path to the robot
-     * In the absence of a current Path, it returns 1.0.
-     *
-     * @return returns the current t value.
-     */
-    @Override
-    public double getCurrentTValue() {
-        if (mIsBusy) return mCurrentPath.getClosestPointTValue();
-        return 1.0;
-    }
-
-    /**
-     * This returns the current path number. For following Paths, this will return 0. For PathChains,
-     * this will return the current path number. For holding Points, this will also return 0.
-     *
-     * @return returns the current path number.
-     */
-    @Override
-    public double getCurrentPathNumber() {
-        if (!mFollowingPathChain) return 0;
-        return mChainIndex;
-    }
-
-    /**
-     * This returns a new PathBuilder object for easily building PathChains.
-     *
-     * @return returns a new PathBuilder object.
-     */
-    @Override
-    public PathBuilder pathBuilder() {
-        return new PathBuilder();
-    }
-
-    /**
-     * This writes out information about the various motion Vectors to the Telemetry specified.
-     *
-     */
-    public void telemetryDebug() {
-
-        String log = "follower busy : " + isBusy() +
-                "\nfollower busy : " + mHeadingError +
-                "\nheading vector magnitude : " + mHeadingVector.getMagnitude() +
-                "\ncorrective vector magnitude : " + mCorrectiveVector.getMagnitude() +
-                "\ncorrective vector heading : " + mCorrectiveVector.getTheta() +
-                "\ntranslational error magnitude : " + getTranslationalError().getMagnitude() +
-                "\ntranslational error direction : " + getTranslationalError().getTheta() +
-                "\ntranslational vector magnitude : " + mTranslationalVector.getMagnitude() +
-                "\ntranslational vector heading : " + mTranslationalVector.getTheta() +
-                "\ncentripetal vector magnitude : " + mCentripetalVector.getMagnitude() +
-                "\ncentripetal vector heading : " + mCentripetalVector.getTheta() +
-                "\ndrive error : " + mDriveError +
-                "\ndrive vector magnitude : " + mDriveVector.getMagnitude() +
-                "\ndrive vector heading : " + mDriveVector.getTheta() +
-                "\nx : " + getPose().getX() +
-                "\ny : " + getPose().getY() +
-                "\nheading : " + getPose().getHeading() +
-                "\ntotal heading : " + mPoseUpdater.getTotalHeading() +
-                "\nclosest x : " + mClosestPose.getX() +
-                "\nclosest y : " + mClosestPose.getY() +
-                "\nclosest heading : " + mClosestPose.getHeading() +
-                "\nvelocity magnitude : " + getVelocity().getMagnitude() +
-                "\nvelocity heading : " + getVelocity().getTheta();
-
-        mLogger.debug(log);
-        if (mDrawOnDashboard) { Drawing.drawDebug(this); }
-
-    }
-
-    /**
-     * This returns the total number of radians the robot has turned.
-     *
-     * @return the total heading.
-     */
-    @Override
-    public double getTotalHeading() {
-        return mPoseUpdater.getTotalHeading();
-    }
-
-    /**
-     * This returns the current Path the Follower is following. This can be null.
-     *
-     * @return returns the current Path.
-     */
-    @Override
-    public Path getCurrentPath() {
-        return mCurrentPath;
-    }
-
-    /**
-     * This returns the pose tracker for the robot to draw on the Dashboard.
-     *
-     * @return returns the pose tracker
-     */
-    @Override
-    public DashboardPoseTracker getDashboardPoseTracker() {
-        return mDashboardPoseTracker;
-    }
-
-    /**
-     * This resets the IMU, if applicable.
-     */
-    private void resetIMU() throws InterruptedException {
-        mPoseUpdater.resetIMU();
-    }
-
-    private void debugLog() {
-        mLogger.debug("isAtParametricEnd:" + mCurrentPath.isAtParametricEnd()
-                + " | mIsBusy: " + mIsBusy
-                + " | mClosestPose:" + mClosestPose
-                + " | Pose: " + getPose()
-                + " | t-value: " + String.format("%3.5f",mCurrentPath.getClosestPointTValue())
-                + " | zeroVelocityTimer: " +  String.format("%3.2f",(mZeroVelocityDetectedTimer==null?0.0: mZeroVelocityDetectedTimer.milliseconds()))
-                + " | velocity: " + String.format("%3.2f",mPoseUpdater.getVelocity().getMagnitude())
-                + " | distance: " +  String.format("%3.2f",MathFunctions.distance(mPoseUpdater.getPose(), mClosestPose))
-                + " | heading (degree): " +  String.format("%3.2f",Math.toDegrees(MathFunctions.getSmallestAngleDifference(mPoseUpdater.getPose().getHeading(), mCurrentPath.getClosestPointHeadingGoal())))
-        );
-    }
-
-    //Thanks to team 21229 Quality Control for creating this algorithm to detect if the robot is stuck.
-    /**
-     * @return true if the robot is stuck and false otherwise
-     */
-    @Override
-    public boolean isRobotStuck() {
-        return mZeroVelocityDetectedTimer != null;
-    }
-
-    /**
-     * Draws everything in the debug() method on the dashboard
-     */
-
-    @Override
-    public void drawOnDashBoard() {
-        if (mDrawOnDashboard) { Drawing.drawDebug(this); }
-    }
-
-    @Override
-    public boolean isLocalizationNAN() {
-        return mPoseUpdater.getLocalizer().isNAN();
-    }
-
-    /**
-     * @return The last mCached mVoltage measurement.
-     */
-    @Override
-    public double getVoltage() {
-        if (mVoltageTimer.seconds() > cacheInvalidateSeconds && cacheInvalidateSeconds >= 0) {
-            mCached = false;
-        }
-
-        if (!mCached)
-            refreshVoltage();
-
-        return mVoltage;
-    }
-
-    /**
-     * @return A scalar that normalizes power outputs to the nominal mVoltage from the current mVoltage.
-     */
-    @Override
-    public double getVoltageNormalized() {
-        return Math.min(nominalVoltage / getVoltage(), 1);
-    }
-
-    /**
-     * Overrides the mVoltage cooldown.
-     */
-    @Override
-    public void refreshVoltage() {
-        mCached = true;
-        mVoltage = mVoltageSensor.getVoltage();
-        mVoltageTimer.reset();
-    }
-
-    /** Turns a certain amount of degrees left
-     * @param radians the amount of radians to turn
-     * @param isLeft true if turning left, false if turning right
-     */
-    @Override
-    public void turn(double radians, boolean isLeft) {
-        Pose temp = new Pose(getPose().getX(), getPose().getY(), getPose().getHeading() + (isLeft ? radians : -radians));
-        holdPoint(temp);
-    }
-
-    /** Turns to a specific heading
-     * @param radians the heading in radians to turn to
-     */
-    @Override
-    public void turnTo(double radians) {
-        holdPoint(new Pose(getPose().getX(), getPose().getY(), Math.toRadians(radians)));
-    }
-
-    /** Turns to a specific heading in degrees
-     * @param degrees the heading in degrees to turn to
-     */
-    @Override
-    public void turnToDegrees(double degrees) {
-        turnTo(Math.toRadians(degrees));
-    }
-
-    /** Turns a certain amount of degrees left
-     * @param degrees the amount of degrees to turn
-     * @param isLeft true if turning left, false if turning right
-     */
-    @Override
-    public void                         turnDegrees(double degrees, boolean isLeft) {
-        turn(Math.toRadians(degrees), isLeft);
-    }
-
-    
-    public void                         drawOnDashboard(boolean value) {
-        if (mConfigurationValid) { mDrawOnDashboard = value; }
-    }
-    public void                         useTranslational(boolean value) {
-        if (mConfigurationValid) { mUseTranslational = value; }
-    }
-    public void                         useCentripetal(boolean value) {
-        if (mConfigurationValid) { mUseCentripetal = value; }
-    }
-    public void                         useHeading(boolean value) {
-        if (mConfigurationValid) { mUseHeading = value; }
-    }
-    public void                         useDrive(boolean value) {
-        if (mConfigurationValid) { mUseDrive = value; }
-    }
-    
     /**
      * Determines if the actuator subsystem is configured correctly.
      *
-     * @return True if the component is configured, false otherwise.
+     * @return True if the actuator is configured, false otherwise.
      */
     @Override
     public boolean                      isConfigured() { return mConfigurationValid;}
@@ -1565,10 +251,6 @@ public class MecanumDrive extends Follower implements DriveTrain {
 
         mConfigurationValid     = true;
 
-        mLeftFront              = null;
-        mRightFront             = null;
-        mLeftBack               = null;
-        mRightBack              = null;
         mLocalizer              = null;
 
         try {
@@ -1589,42 +271,54 @@ public class MecanumDrive extends Follower implements DriveTrain {
                 JSONObject wheels  = reader.getJSONObject(sMotorsKey);
 
                 if(wheels.has(sFrontLeftKey)) {
-                    mLeftFrontHwName = wheels.getString(sFrontLeftKey);
-                    if (motors.containsKey(mLeftFrontHwName)) {
-                        mLeftFront = motors.get(mLeftFrontHwName);
-                        if(mLeftFront != null) {
-                            mLeftFront.mode(DcMotor.RunMode.RUN_USING_ENCODER);
-                            mLeftFront.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    FollowerConstants.leftFrontMotorName = wheels.getString(sFrontLeftKey);
+                    if (motors.containsKey(FollowerConstants.leftFrontMotorName)) {
+                        MotorComponent temp = motors.get(FollowerConstants.leftFrontMotorName);
+                        if(temp != null) {
+                            FollowerConstants.leftFrontMotorDirection = temp.getDirection();
+                        }
+                        else {
+                            mLogger.error("Missing left front wheel motor in drive train configuration");
+                            mConfigurationValid = false;
                         }
                     }
                 }
                 if(wheels.has(sBackLeftKey)) {
-                    mLeftBackHwName = wheels.getString(sBackLeftKey);
-                    if (motors.containsKey(mLeftBackHwName)) {
-                        mLeftBack = motors.get(mLeftBackHwName);
-                        if(mLeftBack != null) {
-                            mLeftBack.mode(DcMotor.RunMode.RUN_USING_ENCODER);
-                            mLeftBack.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    FollowerConstants.leftRearMotorName = wheels.getString(sBackLeftKey);
+                    if (motors.containsKey(FollowerConstants.leftRearMotorName)) {
+                        MotorComponent temp = motors.get(FollowerConstants.leftRearMotorName);
+                        if(temp != null) {
+                            FollowerConstants.leftRearMotorDirection = temp.getDirection();
+                        }
+                        else {
+                            mLogger.error("Missing left back wheel motor in drive train configuration");
+                            mConfigurationValid = false;
                         }
                     }
                 }
                 if(wheels.has(sFrontRightKey)) {
-                    mRightFrontHwName = wheels.getString(sFrontRightKey);
-                    if (motors.containsKey(mRightFrontHwName)) {
-                        mRightFront = motors.get(mRightFrontHwName);
-                        if(mRightFront != null ) {
-                            mRightFront.mode(DcMotor.RunMode.RUN_USING_ENCODER);
-                            mRightFront.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    FollowerConstants.rightFrontMotorName = wheels.getString(sFrontRightKey);
+                    if (motors.containsKey(FollowerConstants.rightFrontMotorName)) {
+                        MotorComponent temp = motors.get(FollowerConstants.rightFrontMotorName);
+                        if(temp != null) {
+                            FollowerConstants.rightFrontMotorDirection = temp.getDirection();
+                        }
+                        else {
+                            mLogger.error("Missing right front wheel motor in drive train configuration");
+                            mConfigurationValid = false;
                         }
                     }
                 }
                 if(wheels.has(sBackRightKey)) {
-                    mRightBackHwName = wheels.getString(sBackRightKey);
-                    if (motors.containsKey(mRightBackHwName)) {
-                        mRightBack = motors.get(mRightBackHwName);
-                        if(mRightBack != null) {
-                            mRightBack.mode(DcMotor.RunMode.RUN_USING_ENCODER);
-                            mRightBack.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    FollowerConstants.rightRearMotorName = wheels.getString(sBackRightKey);
+                    if (motors.containsKey(FollowerConstants.rightRearMotorName)) {
+                        MotorComponent temp = motors.get(FollowerConstants.rightRearMotorName);
+                        if(temp != null) {
+                            FollowerConstants.rightRearMotorDirection = temp.getDirection();
+                        }
+                        else {
+                            mLogger.error("Missing right back wheel motor in drive train configuration");
+                            mConfigurationValid = false;
                         }
                     }
                 }
@@ -1917,29 +611,12 @@ public class MecanumDrive extends Follower implements DriveTrain {
         } catch( JSONException e) {
             mLogger.error(e.getMessage());
         }
-
-        if(mLeftFront == null) {
-            mLogger.error("Missing left front wheel motor in drive train configuration");
-            mConfigurationValid = false;
-        }
-        if(mLeftBack == null) {
-            mLogger.error("Missing left back wheel motor in drive train configuration");
-            mConfigurationValid = false;
-        }
-        if(mRightFront == null) {
-            mLogger.error("Missing right front wheel motor in drive train configuration");
-            mConfigurationValid = false;
-        }
-        if(mRightBack == null) {
-            mLogger.error("Missing right back wheel motor in drive train configuration");
-            mConfigurationValid = false;
-        }
         if(mLocalizer == null) {
             mLogger.error("Missing odometer in drive train configuration");
             mConfigurationValid = false;
         }
 
-        if(mConfigurationValid) { initialize(); }
+        if(mConfigurationValid) { initialize(mLocalizer); }
 
     }
 
@@ -1949,8 +626,7 @@ public class MecanumDrive extends Follower implements DriveTrain {
      * @param writer The JSON object to store the configuration settings.
      */
     public void                         write(JSONObject writer) {
-
-        if(mConfigurationValid) {
+       if(mConfigurationValid) {
             try {
 
                 writer.put(sTypeKey, "mecanum-drive");
@@ -1961,10 +637,10 @@ public class MecanumDrive extends Follower implements DriveTrain {
                 if(mDrivingMode == Mode.ROBOT_CENTRIC) { writer.put(sReferenceKey,sRobotCentricKey); }
 
                 JSONObject motors = new JSONObject();
-                motors.put(sFrontLeftKey,mLeftFrontHwName);
-                motors.put(sBackLeftKey,mLeftBackHwName);
-                motors.put(sFrontRightKey,mRightFrontHwName);
-                motors.put(sBackRightKey,mRightBackHwName);
+                motors.put(sFrontLeftKey,FollowerConstants.leftFrontMotorName);
+                motors.put(sBackLeftKey,FollowerConstants.leftRearMotorName);
+                motors.put(sFrontRightKey,FollowerConstants.rightFrontMotorName);
+                motors.put(sBackRightKey,FollowerConstants.rightRearMotorName);
                 writer.put(sMotorsKey, motors);
 
                 writer.put(sLocalizerKey, mLocalizerHwName);
@@ -2112,16 +788,16 @@ public class MecanumDrive extends Follower implements DriveTrain {
                 "<summary style=\"font-size: 10px; font-weight: 500\"> MOTORS </summary>\n" +
                 "<ul>\n" +
                 "<li style=\"padding-left:10px; font-size: 10px\"> Left front wheel : " +
-                mLeftFrontHwName +
+                FollowerConstants.leftFrontMotorName +
                 "</li>\n" +
                 "<li style=\"padding-left:10px; font-size: 10px\"> Left back wheel : " +
-                mLeftBackHwName +
+                FollowerConstants.leftRearMotorName +
                 "</li>\n" +
                 "<li style=\"padding-left:10px; font-size: 10px\"> Right front wheel : " +
-                mRightFrontHwName +
+                FollowerConstants.rightFrontMotorName +
                 "</li>\n" +
                 "<li style=\"padding-left:10px; font-size: 10px\"> Right back wheel : " +
-                mRightBackHwName +
+                FollowerConstants.rightRearMotorName +
                 "</li>\n" +
                 "</ul>\n" +
                 "</details>\n" +
@@ -2359,19 +1035,19 @@ public class MecanumDrive extends Follower implements DriveTrain {
                 "> MOTORS\n" +
                 header +
                 "--> Left front wheel : " +
-                mLeftFrontHwName +
+                FollowerConstants.leftFrontMotorName +
                 "\n" +
                 header +
                 "--> Left back wheel : " +
-                mLeftBackHwName +
+                FollowerConstants.leftRearMotorName +
                 "\n" +
                 header +
                 "--> Right front wheel : " +
-                mRightFrontHwName +
+                FollowerConstants.rightFrontMotorName +
                 "\n" +
                 header +
                 "--> Right back wheel : " +
-                mRightBackHwName +
+                FollowerConstants.rightRearMotorName +
                 "\n" +
 
 
@@ -2657,6 +1333,13 @@ public class MecanumDrive extends Follower implements DriveTrain {
         return result;
 
     }
+
+    /**
+     * Override the initializatiom function which should only be called in default constructor
+     * of the mother class so that it doesn't attempt anything before read has occured
+     */
+    @Override
+    public void                         initialize() { }
 
 }
 

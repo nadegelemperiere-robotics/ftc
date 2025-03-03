@@ -109,7 +109,7 @@ public class LocalizerTwoDeadWheels extends LocalizerComponent {
      * @return The name
      */
     @Override
-    public String                       name() { return mName; }
+    public String                       getName() { return mName; }
 
     /**
      * This returns the current pose estimate.
@@ -383,13 +383,13 @@ public class LocalizerTwoDeadWheels extends LocalizerComponent {
             if(reader.has(sForwardHwMapKey)) {
                 mForwardHwName = reader.getString(sForwardHwMapKey);
                 if(mMotors.containsKey(mForwardHwName)) {
-                    mForwardEncoder = mMotors.get(mForwardHwName).encoder();
+                    mForwardEncoder = mMotors.get(mForwardHwName).getEncoder();
                 }
             }
             if(mMap != null && reader.has(sStrafeHwMapKey)) {
                 mStrafeHwName = reader.getString(sStrafeHwMapKey);
                 if(mMotors.containsKey(mStrafeHwName)) {
-                    mStrafeEncoder = mMotors.get(mStrafeHwName).encoder();
+                    mStrafeEncoder = mMotors.get(mStrafeHwName).getEncoder();
                 }
             }
             if(reader.has(sImuHwMapKey)) {

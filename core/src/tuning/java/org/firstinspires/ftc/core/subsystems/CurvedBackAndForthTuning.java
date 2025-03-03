@@ -98,11 +98,6 @@ public class CurvedBackAndForthTuning extends LinearOpMode implements Tuning {
 
             mDrive = (MecanumDrive)mRobot.subsystem(this, DRIVE_TRAIN);
             if(mDrive != null) {
-                mDrive.useDrive(USE_DRIVE);
-                mDrive.useHeading(USE_HEADING);
-                mDrive.useTranslational(USE_TRANSLATIONAL);
-                mDrive.useCentripetal(USE_CENTRIPETAL);
-                mDrive.drawOnDashboard(true);
                 mDrive.setStartingPose(new Pose(0,0,0));
                 mDrive.setPose(new Pose(0,0,0));
             }

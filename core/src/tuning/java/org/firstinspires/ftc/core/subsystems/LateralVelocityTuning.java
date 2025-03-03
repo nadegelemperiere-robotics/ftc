@@ -171,7 +171,7 @@ public class LateralVelocityTuning extends LinearOpMode implements Tuning {
                 if(!mVelocities.isEmpty()) { mLogger.metric("Average velocity","" + average); }
 
                 /* Manage motor change */
-                if(!Objects.equals(mLeftBack.name(), LEFT_BACK)) {
+                if(!Objects.equals(mLeftBack.getName(), LEFT_BACK)) {
                     stopMotors();
                     if(mHardware.motors().containsKey(LEFT_BACK))   { mLeftBack = mHardware.motors().get(LEFT_BACK);        }
                     if(mLeftBack == null) { mLogger.error("Missing left back motor with name " + LEFT_BACK); }
@@ -179,7 +179,7 @@ public class LateralVelocityTuning extends LinearOpMode implements Tuning {
                     mUpdater.setPose(new Pose(0,0,0));
                     startMotors();
                 }
-                if(!Objects.equals(mLeftFront.name(), LEFT_FRONT)) {
+                if(!Objects.equals(mLeftFront.getName(), LEFT_FRONT)) {
                     stopMotors();
                     if(mHardware.motors().containsKey(LEFT_FRONT))   { mLeftFront = mHardware.motors().get(LEFT_FRONT);        }
                     if(mLeftFront == null) { mLogger.error("Missing left front motor with name " + LEFT_FRONT); }
@@ -187,7 +187,7 @@ public class LateralVelocityTuning extends LinearOpMode implements Tuning {
                     mUpdater.setPose(new Pose(0,0,0));
                     startMotors();
                 }
-                if(!Objects.equals(mRightBack.name(), RIGHT_BACK)) {
+                if(!Objects.equals(mRightBack.getName(), RIGHT_BACK)) {
                     stopMotors();
                     if(mHardware.motors().containsKey(RIGHT_BACK))   { mRightBack = mHardware.motors().get(RIGHT_BACK);        }
                     if(mRightBack == null) { mLogger.error("Missing right back motor with name " + RIGHT_BACK); }
@@ -195,7 +195,7 @@ public class LateralVelocityTuning extends LinearOpMode implements Tuning {
                     mUpdater.setPose(new Pose(0,0,0));
                     startMotors();
                 }
-                if(!Objects.equals(mRightFront.name(), RIGHT_FRONT)) {
+                if(!Objects.equals(mRightFront.getName(), RIGHT_FRONT)) {
                     stopMotors();
                     if(mHardware.motors().containsKey(RIGHT_FRONT))   { mRightFront = mHardware.motors().get(RIGHT_FRONT);        }
                     if(mRightFront == null) { mLogger.error("Missing right front motor with name " + RIGHT_FRONT); }
@@ -203,7 +203,7 @@ public class LateralVelocityTuning extends LinearOpMode implements Tuning {
                     mUpdater.setPose(new Pose(0,0,0));
                     startMotors();
                 }
-                if(!Objects.equals(mLocalizer.name(), LOCALIZER)) {
+                if(!Objects.equals(mLocalizer.getName(), LOCALIZER)) {
                     stopMotors();
                     if(mHardware.localizers().containsKey(LOCALIZER)) { mLocalizer = mHardware.localizers().get(LOCALIZER);        }
                     if(mLocalizer == null) { mLogger.error("Missing localizer with name " + LOCALIZER); }
@@ -265,31 +265,31 @@ public class LateralVelocityTuning extends LinearOpMode implements Tuning {
     }
 
     private void stopMotors() {
-        if(mRightFront != null) { mRightFront.power(0); }
-        if(mRightFront != null) { mRightFront.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); }
-        if(mLeftFront != null) { mLeftFront.power(0); }
-        if(mLeftFront != null) { mLeftFront.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); }
-        if(mRightBack != null) { mRightBack.power(0); }
-        if(mRightBack != null) { mRightBack.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); }
-        if(mLeftBack != null) { mLeftBack.power(0); }
-        if(mLeftBack != null) { mLeftBack.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); }
+        if(mRightFront != null) { mRightFront.setPower(0); }
+        if(mRightFront != null) { mRightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); }
+        if(mLeftFront != null) { mLeftFront.setPower(0); }
+        if(mLeftFront != null) { mLeftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); }
+        if(mRightBack != null) { mRightBack.setPower(0); }
+        if(mRightBack != null) { mRightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); }
+        if(mLeftBack != null) { mLeftBack.setPower(0); }
+        if(mLeftBack != null) { mLeftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); }
     }
 
     private void startMotors() {
 
         if(mRightFront != null && mRightBack != null && mLeftFront != null && mLeftBack != null) {
-            mRightFront.power(-1.0);
-            mRightFront.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            mRightFront.achieveableMaxRPMFraction(1.0);
-            mLeftFront.power(1.0);
-            mLeftFront.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            mLeftFront.achieveableMaxRPMFraction(1.0);
-            mRightBack.power(1.0);
-            mRightBack.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            mRightBack.achieveableMaxRPMFraction(1.0);
-            mLeftBack.power(-1.0);
-            mLeftBack.zeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            mLeftBack.achieveableMaxRPMFraction(1.0);
+            mRightFront.setPower(-1.0);
+            mRightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            mRightFront.setAchieveableMaxRPMFraction(1.0);
+            mLeftFront.setPower(1.0);
+            mLeftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            mLeftFront.setAchieveableMaxRPMFraction(1.0);
+            mRightBack.setPower(1.0);
+            mRightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            mRightBack.setAchieveableMaxRPMFraction(1.0);
+            mLeftBack.setPower(-1.0);
+            mLeftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            mLeftBack.setAchieveableMaxRPMFraction(1.0);
         }
     }
 

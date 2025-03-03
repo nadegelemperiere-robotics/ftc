@@ -4,16 +4,18 @@
    -------------------------------------------------------
    Controller managing  single component servo
    ------------------------------------------------------- */
-package org.firstinspires.ftc.core.components.servos;
+package org.firstinspires.ftc.core.components.motors;
 
 /* Qualcomm includes */
-import com.qualcomm.robotcore.hardware.ServoController;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
 
-public class ServoControllerSingle implements ServoControllerComponent {
+public class MotorControllerSingle implements MotorControllerComponent {
 
     final LogManager        mLogger;
 
@@ -21,11 +23,10 @@ public class ServoControllerSingle implements ServoControllerComponent {
 
     final String            mName;
 
-    final ServoController   mController;
+    final DcMotorController mController;
 
     /* -------------- Constructors --------------- */
-
-    public ServoControllerSingle(ServoController controller, String name, LogManager logger)
+    public MotorControllerSingle(DcMotorController controller, String name, LogManager logger)
     {
         mConfigurationValid      = true;
 
@@ -50,13 +51,8 @@ public class ServoControllerSingle implements ServoControllerComponent {
 
     /* ------------------ HardwareDevice functions ----------------- */
 
-    /**
-     * Returns an indication of the manufacturer of this device.
-     * @return the manufacturer
-     */
     @Override
-    public Manufacturer                 getManufacturer()
-    {
+    public Manufacturer                 getManufacturer() {
         Manufacturer result = Manufacturer.Unknown;
         if(mConfigurationValid) {
             result = mController.getManufacturer();
@@ -64,13 +60,8 @@ public class ServoControllerSingle implements ServoControllerComponent {
         return result;
     }
 
-    /**
-     * Returns a string suitable for display to the user as to the type of device.Note that this is a device-type-specific name; it has nothing to do with the name by which a user might have configured the device in a robot configuration.
-     * @return the device name
-     */
     @Override
-    public String                       getDeviceName()
-    {
+    public String                       getDeviceName() {
         String result = "";
         if(mConfigurationValid) {
             result = mController.getDeviceName();
@@ -78,10 +69,6 @@ public class ServoControllerSingle implements ServoControllerComponent {
         return result;
     }
 
-    /**
-     * Get connection information about this device in a human readable format
-     * @return connection information
-     */
     @Override
     public String                       getConnectionInfo() {
         String result = "";
@@ -91,9 +78,6 @@ public class ServoControllerSingle implements ServoControllerComponent {
         return result;
     }
 
-    /**
-     * Version
-     */
     @Override
     public int                          getVersion() {
         int result = -1;
@@ -103,9 +87,6 @@ public class ServoControllerSingle implements ServoControllerComponent {
         return result;
     }
 
-    /**
-     * Resets the device's configuration to that which is expected at the beginning of an OpMode.For example, motors will reset the their direction to 'forward'.
-     */
     @Override
     public void                         resetDeviceConfigurationForOpMode() {
         if(mConfigurationValid) {
@@ -117,53 +98,44 @@ public class ServoControllerSingle implements ServoControllerComponent {
      * Closes this device
      */
     @Override
-    public void                         close()
-    {
+    public void                         close(){
         if(mConfigurationValid) {
             mController.close();
         }
     }
-    
 
-    /* ----------------- ServoController functions ----------------- */
-
-    /**
-     * Enables all of the servos connected to this controller
-     */
-    @Override
-    public void	                        pwmEnable(){
-        if(mConfigurationValid) {
-            mController.pwmEnable();
-        }
-    }
-
-    /**
-     * Disables all of the servos connected to this controller
-     */
-    @Override
-    public void	                        pwmDisable(){
-        if(mConfigurationValid) {
-            mController.pwmDisable();
-        }
-    }
-
-    /**
-     * Returns the enablement status of the collective set of servos connected to this controller
-     * @return the enablement status of the collective set of servos connected to this controller
-     */
-    @Override
-    public ServoController.PwmStatus	getPwmStatus(){
-        ServoController.PwmStatus result = ServoController.PwmStatus.DISABLED;
-        if(mConfigurationValid) {
-            result = mController.getPwmStatus();
-        }
-        return result;
-    }
+    /* ---------------- DcMotorController functions ---------------- */
 
     @Override
-    public void                         setServoPosition(int servo, double position) {}
+    public MotorConfigurationType       getMotorType(int motor) { return null; }
+    @Override
+    public DcMotor.RunMode	            getMotorMode(int motor) { return DcMotor.RunMode.RUN_WITHOUT_ENCODER; }
+    @Override
+    public double	                    getMotorPower(int motor) { return 0; }
+    @Override
+    public boolean	                    isBusy(int motor) { return false; }
+    @Override
+    public DcMotor.ZeroPowerBehavior	getMotorZeroPowerBehavior(int motor) { return DcMotor.ZeroPowerBehavior.UNKNOWN; }
+    @Override
+    public boolean	                    getMotorPowerFloat(int motor) { return false; }
+    @Override
+    public int                          getMotorTargetPosition(int motor) { return 0; }
+    @Override
+    public int	                        getMotorCurrentPosition(int motor) { return 0; }
 
     @Override
-    public double	                    getServoPosition(int servo) { return -1;}
+    public void                         setMotorType(int motor, MotorConfigurationType motorType) {}
+    @Override
+    public void	                        setMotorMode(int motor, DcMotor.RunMode mode) {}
+    @Override
+    public void	                        setMotorPower(int motor, double power) {}
+    @Override
+    public void	                        setMotorZeroPowerBehavior(int motor, DcMotor.ZeroPowerBehavior zeroPowerBehavior) {}
+    @Override
+    public void	                        setMotorTargetPosition(int motor, int position) {}
+    @Override
+    public void	                        resetDeviceConfigurationForOpMode(int motor) {}
+
+
 
 }

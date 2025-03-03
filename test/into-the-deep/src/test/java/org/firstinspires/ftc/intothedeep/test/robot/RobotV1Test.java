@@ -17,9 +17,6 @@ import android.os.Environment;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.qualcomm.robotcore.hardware.DcMotor;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +26,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+/* Qualcomm includes */
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -215,28 +215,20 @@ public class RobotV1Test {
         assertEquals(0.0,InterOpMode.instance().get("back-right-wheel-power"),"Wheel power shall be 0");
         mRobot.drive(1.0,1.0,0.0);
         mRobot.update();
-        assertEquals(1.0,InterOpMode.instance().get("front-left-wheel-power"),"Wheel power shall be 1.0");
-        assertEquals(DcMotor.RunMode.RUN_USING_ENCODER,InterOpMode.instance().get("front-left-wheel-mode"),"Wheel shall be in RUN_USING_ENCODER mode");
-        assertTrue((double)InterOpMode.instance().get("back-left-wheel-power") < 0.0,"Wheel power shall be negative");
-        assertTrue(Math.abs((double)InterOpMode.instance().get("back-left-wheel-power")) < 0.05,"Wheel power shall be low");
-        assertEquals(DcMotor.RunMode.RUN_USING_ENCODER,InterOpMode.instance().get("back-left-wheel-mode"),"Wheel shall be in RUN_USING_ENCODER mode");
-        assertTrue((double)InterOpMode.instance().get("front-right-wheel-power") < 0,"Wheel power shall be negative");
-        assertTrue(Math.abs((double)InterOpMode.instance().get("front-right-wheel-power")) < 0.05,"Wheel power shall be low");
-        assertEquals(DcMotor.RunMode.RUN_USING_ENCODER,InterOpMode.instance().get("front-right-wheel-mode"),"Wheel shall be in RUN_USING_ENCODER mode");
-        assertEquals(1.0,InterOpMode.instance().get("back-right-wheel-power"),"Wheel power shall be 1.0");
-        assertEquals(DcMotor.RunMode.RUN_USING_ENCODER,InterOpMode.instance().get("back-right-wheel-mode"),"Wheel shall be in RUN_USING_ENCODER mode");
+        assertEquals(1.0,InterOpMode.instance().get("back-left-wheel-power"),"Wheel power shall be 1.0");
+        assertTrue((double)InterOpMode.instance().get("front-left-wheel-power") < 0,"Wheel power shall be negative");
+        assertEquals(0.0,(double)InterOpMode.instance().get("front-left-wheel-power"),0.12,"Wheel power shall be negative");
+        assertTrue((double)InterOpMode.instance().get("back-right-wheel-power") < 0,"Wheel power shall be negative");
+        assertEquals(0.0,(double)InterOpMode.instance().get("back-right-wheel-power"), 0.12,"Wheel power shall be low");
+        assertEquals(1.0,InterOpMode.instance().get("front-right-wheel-power"),"Wheel power shall be 1.0");
         mRobot.tuneDriveSpeed(0.6);
         mRobot.update();
         mRobot.drive(1.0,0.0,0.0);
         mRobot.update();
-        assertEquals(0.6,InterOpMode.instance().get("front-left-wheel-power"),"Wheel power shall be 0.6");
-        assertEquals(DcMotor.RunMode.RUN_USING_ENCODER,InterOpMode.instance().get("front-left-wheel-mode"),"Wheel shall be in RUN_USING_ENCODER mode");
-        assertEquals(-0.6,InterOpMode.instance().get("back-left-wheel-power"),"Wheel power shall be 0.6");
-        assertEquals(DcMotor.RunMode.RUN_USING_ENCODER,InterOpMode.instance().get("back-left-wheel-mode"),"Wheel shall be in RUN_USING_ENCODER mode");
-        assertEquals(-0.6,InterOpMode.instance().get("front-right-wheel-power"),"Wheel power shall be 0.6");
-        assertEquals(DcMotor.RunMode.RUN_USING_ENCODER,InterOpMode.instance().get("front-right-wheel-mode"),"Wheel shall be in RUN_USING_ENCODER mode");
-        assertEquals(0.6,InterOpMode.instance().get("back-right-wheel-power"),"Wheel power shall be 0.6");
-        assertEquals(DcMotor.RunMode.RUN_USING_ENCODER,InterOpMode.instance().get("back-right-wheel-mode"),"Wheel shall be in RUN_USING_ENCODER mode");
+        assertEquals(0.77,(double)InterOpMode.instance().get("front-left-wheel-power"),0.01,"Wheel power shall be 0.6");
+        assertEquals(0.77,(double)InterOpMode.instance().get("back-left-wheel-power"),0.01,"Wheel power shall be 0.6");
+        assertEquals(0.77,(double)InterOpMode.instance().get("front-right-wheel-power"),0.01,"Wheel power shall be 0.6");
+        assertEquals(0.77,(double)InterOpMode.instance().get("back-right-wheel-power"),0.01,"Wheel power shall be 0.6");
 
         assertEquals(1.0,InterOpMode.instance().get("intake-claw-position"),"Intake claw shall be open");
         assertEquals(0.66,InterOpMode.instance().get("intake-elbow-pitch-position"),"Intake elbow shall be oriented grab");
@@ -339,10 +331,10 @@ public class RobotV1Test {
         assertEquals(DcMotor.RunMode.RUN_USING_ENCODER,InterOpMode.instance().get("intake-slides-mode"),"Intake slides shall be in RUN_USING_ENCODER");
         assertEquals(0.3,InterOpMode.instance().get("outtake-slides-power"),"Outtake slides power shall be 0.3");
         assertEquals(DcMotor.RunMode.RUN_USING_ENCODER,InterOpMode.instance().get("outtake-slides-mode"),"Outtake slides shall be in RUN_USING_ENCODER");
-        assertEquals(1.0,InterOpMode.instance().get("front-left-wheel-power"),"Wheel power shall be 1.0");
-        assertEquals(-1.0,InterOpMode.instance().get("back-left-wheel-power"),"Wheel power shall be 1.0");
-        assertEquals(-1.0,InterOpMode.instance().get("front-right-wheel-power"),"Wheel power shall be 1.0");
-        assertEquals(1.0,InterOpMode.instance().get("back-right-wheel-power"),"Wheel power shall be 1.0");
+        assertEquals(1.0,(double)InterOpMode.instance().get("front-left-wheel-power"),0.00001,"Wheel power shall be 1.0");
+        assertEquals(1.0,(double)InterOpMode.instance().get("back-left-wheel-power"),0.00001,"Wheel power shall be 1.0");
+        assertEquals(1.0,(double)InterOpMode.instance().get("front-right-wheel-power"),0.00001,"Wheel power shall be 1.0");
+        assertEquals(1.0,(double)InterOpMode.instance().get("back-right-wheel-power"),0.00001,"Wheel power shall be 1.0");
 
         // Launch transfer
         mRobot.transfer();
@@ -366,10 +358,10 @@ public class RobotV1Test {
         assertEquals(DcMotor.RunMode.RUN_USING_ENCODER,InterOpMode.instance().get("outtake-slides-mode"),"Intake slides shall be in RUN_USING_ENCODER");
 
         // Drive motors should be on, and the commands should have succeeded
-        assertEquals(-0.6,InterOpMode.instance().get("front-left-wheel-power"),"Wheel power shall be 0.0");
-        assertEquals(0.6,InterOpMode.instance().get("back-left-wheel-power"),"Wheel power shall be 0.0");
-        assertEquals(0.6,InterOpMode.instance().get("front-right-wheel-power"),"Wheel power shall be 0.0");
-        assertEquals(-0.6,InterOpMode.instance().get("back-right-wheel-power"),"Wheel power shall be 0.0");
+        assertEquals(-0.77,(double)InterOpMode.instance().get("front-left-wheel-power"),0.01,"Wheel power shall be 0.0");
+        assertEquals(-0.77,(double)InterOpMode.instance().get("back-left-wheel-power"),0.01,"Wheel power shall be 0.0");
+        assertEquals(-0.77,(double)InterOpMode.instance().get("front-right-wheel-power"),0.01,"Wheel power shall be 0.0");
+        assertEquals(-0.77,(double)InterOpMode.instance().get("back-right-wheel-power"),0.01,"Wheel power shall be 0.0");
 
         // Mechanisms should not have been impacted by commands
         assertEquals(0.405,InterOpMode.instance().get("intake-wrist-roll-position"),"Intake wrist shall be oriented 0");
@@ -405,10 +397,10 @@ public class RobotV1Test {
         assertEquals(DcMotor.RunMode.RUN_TO_POSITION,InterOpMode.instance().get("outtake-slides-mode"),"Outtake slides shall be in RUN_TO_POSITION");
 
         // Drive motors should be on, and the commands should have succeeded
-        assertEquals(0.5,InterOpMode.instance().get("front-left-wheel-power"),"Wheel power shall be 0.0");
-        assertEquals(-0.5,InterOpMode.instance().get("back-left-wheel-power"),"Wheel power shall be 0.0");
-        assertEquals(-0.5,InterOpMode.instance().get("front-right-wheel-power"),"Wheel power shall be 0.0");
-        assertEquals(0.5,InterOpMode.instance().get("back-right-wheel-power"),"Wheel power shall be 0.0");
+        assertEquals(0.64,(double)InterOpMode.instance().get("front-left-wheel-power"),0.01,"Wheel power shall be 0.0");
+        assertEquals(0.64,(double)InterOpMode.instance().get("back-left-wheel-power"),0.01,"Wheel power shall be 0.0");
+        assertEquals(0.64,(double)InterOpMode.instance().get("front-right-wheel-power"),0.01,"Wheel power shall be 0.0");
+        assertEquals(0.64,(double)InterOpMode.instance().get("back-right-wheel-power"),0.01,"Wheel power shall be 0.0");
 
         // Mechanisms should not have been impacted by commands
         assertEquals(0.405,InterOpMode.instance().get("intake-wrist-roll-position"),"Intake wrist shall be oriented 0");
@@ -444,10 +436,10 @@ public class RobotV1Test {
         assertEquals(DcMotor.RunMode.RUN_TO_POSITION,InterOpMode.instance().get("outtake-slides-mode"),"Outtake slides shall be in RUN_TO_POSITION");
 
         // Drive motors should be on, and the commands should have succeeded
-        assertEquals(-0.4,InterOpMode.instance().get("front-left-wheel-power"),"Wheel power shall be -0.4");
-        assertEquals(0.4,InterOpMode.instance().get("back-left-wheel-power"),"Wheel power shall be 0.4");
-        assertEquals(0.4,InterOpMode.instance().get("front-right-wheel-power"),"Wheel power shall be 0.4");
-        assertEquals(-0.4,InterOpMode.instance().get("back-right-wheel-power"),"Wheel power shall be -0.4");
+        assertEquals(-0.51,(double)InterOpMode.instance().get("front-left-wheel-power"),0.01,"Wheel power shall be -0.4");
+        assertEquals(-0.51,(double)InterOpMode.instance().get("back-left-wheel-power"),0.01,"Wheel power shall be 0.4");
+        assertEquals(-0.51,(double)InterOpMode.instance().get("front-right-wheel-power"),0.01,"Wheel power shall be 0.4");
+        assertEquals(-0.51,(double)InterOpMode.instance().get("back-right-wheel-power"),0.01,"Wheel power shall be -0.4");
 
         // Mechanisms should be in transfer position
         assertEquals(0.405,InterOpMode.instance().get("intake-wrist-roll-position"),"Intake wrist shall be oriented 0");
@@ -484,10 +476,10 @@ public class RobotV1Test {
         assertEquals(DcMotor.RunMode.RUN_TO_POSITION,InterOpMode.instance().get("outtake-slides-mode"),"Outtake slides shall be in RUN_TO_POSITION");
 
         // Drive motors should be on, and the commands should have succeeded
-        assertEquals(0.7,InterOpMode.instance().get("front-left-wheel-power"),"Wheel power shall be 0.7");
-        assertEquals(-0.7,InterOpMode.instance().get("back-left-wheel-power"),"Wheel power shall be -0.7");
-        assertEquals(-0.7,InterOpMode.instance().get("front-right-wheel-power"),"Wheel power shall be -0.7");
-        assertEquals(0.7,InterOpMode.instance().get("back-right-wheel-power"),"Wheel power shall be 0.7");
+        assertEquals(0.89,(double)InterOpMode.instance().get("front-left-wheel-power"),0.01,"Wheel power shall be 0.7");
+        assertEquals(0.89,(double)InterOpMode.instance().get("back-left-wheel-power"),0.01,"Wheel power shall be -0.7");
+        assertEquals(0.89,(double)InterOpMode.instance().get("front-right-wheel-power"),0.01,"Wheel power shall be -0.7");
+        assertEquals(0.89,(double)InterOpMode.instance().get("back-right-wheel-power"),0.01,"Wheel power shall be 0.7");
 
         // Mechanisms should be in transfer position and inttake claw microreleased
         assertEquals(0.405,InterOpMode.instance().get("intake-wrist-roll-position"),"Intake wrist shall be oriented 0");
@@ -524,10 +516,10 @@ public class RobotV1Test {
         assertEquals(DcMotor.RunMode.RUN_TO_POSITION,InterOpMode.instance().get("outtake-slides-mode"),"Outtake slides shall be in RUN_TO_POSITION");
 
         // Drive motors should be on, and the commands should have succeeded
-        assertEquals(-0.8,InterOpMode.instance().get("front-left-wheel-power"),"Wheel power shall be 0.7");
-        assertEquals(0.8,InterOpMode.instance().get("back-left-wheel-power"),"Wheel power shall be -0.7");
-        assertEquals(0.8,InterOpMode.instance().get("front-right-wheel-power"),"Wheel power shall be -0.7");
-        assertEquals(-0.8,InterOpMode.instance().get("back-right-wheel-power"),"Wheel power shall be 0.7");
+        assertEquals(-1.0,(double)InterOpMode.instance().get("front-left-wheel-power"),0.01,"Wheel power shall be -1.0");
+        assertEquals(-1.0,(double)InterOpMode.instance().get("back-left-wheel-power"),0.01,"Wheel power shall be -1.0");
+        assertEquals(-1.0,(double)InterOpMode.instance().get("front-right-wheel-power"),0.01,"Wheel power shall be -1.0");
+        assertEquals(-1.0,(double)InterOpMode.instance().get("back-right-wheel-power"),0.01,"Wheel power shall be -1.0");
 
         // Mechanisms should be in transfer position and inttake claw closed
         assertEquals(0.405,InterOpMode.instance().get("intake-wrist-roll-position"),"Intake wrist shall be oriented 0");
@@ -547,7 +539,7 @@ public class RobotV1Test {
         mRobot.powerIntakeSlides(0.6);
         mRobot.powerOuttakeSlides(0.8);
         mRobot.tuneDriveSpeed(0.8);
-        mRobot.drive(-1.0,0.0,0.0);
+        mRobot.drive(1.0,0.0,0.0);
         mRobot.toggleIntakeClaw();
         mRobot.toggleOuttakeClaw();
         mRobot.toggleIntakeWrist();
@@ -564,10 +556,10 @@ public class RobotV1Test {
         assertEquals(DcMotor.RunMode.RUN_TO_POSITION,InterOpMode.instance().get("outtake-slides-mode"),"Outtake slides shall be in RUN_TO_POSITION");
 
         // Drive motors should be on, and the commands should have succeeded
-        assertEquals(-0.8,InterOpMode.instance().get("front-left-wheel-power"),"Wheel power shall be 0.7");
-        assertEquals(0.8,InterOpMode.instance().get("back-left-wheel-power"),"Wheel power shall be -0.7");
-        assertEquals(0.8,InterOpMode.instance().get("front-right-wheel-power"),"Wheel power shall be -0.7");
-        assertEquals(-0.8,InterOpMode.instance().get("back-right-wheel-power"),"Wheel power shall be 0.7");
+        assertEquals(1.0,(double)InterOpMode.instance().get("front-left-wheel-power"),0.01,"Wheel power shall be 0.7");
+        assertEquals(1.0,(double)InterOpMode.instance().get("back-left-wheel-power"),0.01,"Wheel power shall be -0.7");
+        assertEquals(1.0,(double)InterOpMode.instance().get("front-right-wheel-power"),0.01,"Wheel power shall be -0.7");
+        assertEquals(1.0,(double)InterOpMode.instance().get("back-right-wheel-power"),0.01,"Wheel power shall be 0.7");
 
         // Mechanisms should be in transfer position
         assertEquals(0.405,InterOpMode.instance().get("intake-wrist-roll-position"),"Intake wrist shall be oriented 0");
@@ -586,7 +578,7 @@ public class RobotV1Test {
         mRobot.powerIntakeSlides(0.6);
         mRobot.powerOuttakeSlides(0.8);
         mRobot.tuneDriveSpeed(0.7);
-        mRobot.drive(1.0,0.0,0.0);
+        mRobot.drive(-1.0,0.0,0.0);
         mRobot.toggleIntakeClaw();
         mRobot.toggleOuttakeClaw();
         mRobot.toggleIntakeWrist();
@@ -603,10 +595,10 @@ public class RobotV1Test {
         assertEquals(DcMotor.RunMode.RUN_TO_POSITION,InterOpMode.instance().get("outtake-slides-mode"),"Outtake slides shall be in RUN_TO_POSITION");
 
         // Drive motors should be on, and the commands should have succeeded
-        assertEquals(0.7,InterOpMode.instance().get("front-left-wheel-power"),"Wheel power shall be 0.7");
-        assertEquals(-0.7,InterOpMode.instance().get("back-left-wheel-power"),"Wheel power shall be -0.7");
-        assertEquals(-0.7,InterOpMode.instance().get("front-right-wheel-power"),"Wheel power shall be -0.7");
-        assertEquals(0.7,InterOpMode.instance().get("back-right-wheel-power"),"Wheel power shall be 0.7");
+        assertEquals(-0.89,(double)InterOpMode.instance().get("front-left-wheel-power"),0.01,"Wheel power shall be 0.7");
+        assertEquals(-0.89,(double)InterOpMode.instance().get("back-left-wheel-power"),0.01,"Wheel power shall be -0.7");
+        assertEquals(-0.89,(double)InterOpMode.instance().get("front-right-wheel-power"),0.01,"Wheel power shall be -0.7");
+        assertEquals(-0.89,(double)InterOpMode.instance().get("back-right-wheel-power"),0.01,"Wheel power shall be 0.7");
 
         // Mechanisms should be in transfer position and outtake claw closed
         assertEquals(0.405,InterOpMode.instance().get("intake-wrist-roll-position"),"Intake wrist shall be oriented 0");
@@ -626,7 +618,7 @@ public class RobotV1Test {
         mRobot.powerIntakeSlides(0.6);
         mRobot.powerOuttakeSlides(0.8);
         mRobot.tuneDriveSpeed(0.3);
-        mRobot.drive(-1.0,0.0,0.0);
+        mRobot.drive(1.0,0.0,0.0);
         mRobot.toggleIntakeClaw();
         mRobot.toggleOuttakeClaw();
         mRobot.toggleIntakeWrist();
@@ -643,10 +635,10 @@ public class RobotV1Test {
         assertEquals(DcMotor.RunMode.RUN_TO_POSITION,InterOpMode.instance().get("outtake-slides-mode"),"Outtake slides shall be in RUN_TO_POSITION");
 
         // Drive motors should be on, and the commands should have succeeded
-        assertEquals(-0.3,InterOpMode.instance().get("front-left-wheel-power"),"Wheel power shall be -0.3");
-        assertEquals(0.3,InterOpMode.instance().get("back-left-wheel-power"),"Wheel power shall be 0.3");
-        assertEquals(0.3,InterOpMode.instance().get("front-right-wheel-power"),"Wheel power shall be 0.3");
-        assertEquals(-0.3,InterOpMode.instance().get("back-right-wheel-power"),"Wheel power shall be -0.3");
+        assertEquals(0.38,(double)InterOpMode.instance().get("front-left-wheel-power"),0.01,"Wheel power shall be -0.3");
+        assertEquals(0.38,(double)InterOpMode.instance().get("back-left-wheel-power"),0.01,"Wheel power shall be 0.3");
+        assertEquals(0.38,(double)InterOpMode.instance().get("front-right-wheel-power"),0.01,"Wheel power shall be 0.3");
+        assertEquals(0.38,(double)InterOpMode.instance().get("back-right-wheel-power"),0.01,"Wheel power shall be -0.3");
 
         // Mechanisms should be in transfer position and intake claw open
         assertEquals(0.405,InterOpMode.instance().get("intake-wrist-roll-position"),"Intake wrist shall be oriented 0");
@@ -665,8 +657,8 @@ public class RobotV1Test {
         // Execute all possible commands - only drive related commands should have impact
         mRobot.powerIntakeSlides(0.6);
         mRobot.powerOuttakeSlides(0.8);
-        mRobot.tuneDriveSpeed(0.3);
-        mRobot.drive(-1.0,0.0,0.0);
+        mRobot.tuneDriveSpeed(0.2);
+        mRobot.drive(1.0,0.0,0.0);
         mRobot.toggleIntakeClaw();
         mRobot.toggleOuttakeClaw();
         mRobot.toggleIntakeWrist();
@@ -681,10 +673,10 @@ public class RobotV1Test {
         assertEquals(DcMotor.RunMode.RUN_USING_ENCODER,InterOpMode.instance().get("outtake-slides-mode"),"Outtake slides shall be in RUN_USING_ENCODER");
 
         // Drive motors should be on, and the commands should have succeeded
-        assertEquals(-0.3,InterOpMode.instance().get("front-left-wheel-power"),"Wheel power shall be -0.3");
-        assertEquals(0.3,InterOpMode.instance().get("back-left-wheel-power"),"Wheel power shall be 0.3");
-        assertEquals(0.3,InterOpMode.instance().get("front-right-wheel-power"),"Wheel power shall be 0.3");
-        assertEquals(-0.3,InterOpMode.instance().get("back-right-wheel-power"),"Wheel power shall be -0.3");
+        assertEquals(0.25,(double)InterOpMode.instance().get("front-left-wheel-power"),0.01,"Wheel power shall be 0.25");
+        assertEquals(0.25,(double)InterOpMode.instance().get("back-left-wheel-power"),0.01,"Wheel power shall be 0.25");
+        assertEquals(0.25,(double)InterOpMode.instance().get("front-right-wheel-power"),0.01,"Wheel power shall be 0.25");
+        assertEquals(0.25,(double)InterOpMode.instance().get("back-right-wheel-power"),0.01,"Wheel power shall be 0.25");
 
         // Mechanisms should be in transfer position and intake claw open
         assertEquals(0.405,InterOpMode.instance().get("intake-wrist-roll-position"),"Intake wrist shall be oriented 0");

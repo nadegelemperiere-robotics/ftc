@@ -18,6 +18,7 @@ import org.json.JSONException;
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -25,7 +26,7 @@ import org.firstinspires.ftc.core.tools.LogManager;
 /* Configuration includes */
 import org.firstinspires.ftc.core.configuration.Configurable;
 
-public interface ServoComponent extends Configurable {
+public interface ServoComponent extends Configurable, Servo {
 
     String sHwMapKey      = "hwmap";
     String sReverseKey    = "reverse";
@@ -59,7 +60,7 @@ public interface ServoComponent extends Configurable {
 
     /* --------------------- Custom functions ---------------------- */
 
-    String                      name();
+    String                      getName();
     void                        log();
 
     /* ------------------ Configurable functions ------------------- */
@@ -70,15 +71,23 @@ public interface ServoComponent extends Configurable {
     String                      logConfigurationHTML();
     String                      logConfigurationText(String header);
 
+    /* ------------------ HardwareDevice functions ----------------- */
+
+    Manufacturer                getManufacturer();
+    String                      getDeviceName();
+    String                      getConnectionInfo();
+    int                         getVersion();
+    void                        resetDeviceConfigurationForOpMode();
+    void                        close();
+
     /* ------------------- Servo methods override ------------------ */
 
-    ServoControllerComponent    controller();
+    ServoController             getController();
+    Servo.Direction             getDirection();
+    double	                    getPosition();
 
-    Servo.Direction             direction();
-    double	                    position();
+    void	                    setDirection(Servo.Direction direction);
+    void	                    setPosition(double position);
     void	                    scaleRange(double min, double max);
-
-    void	                    direction(Servo.Direction direction);
-    void	                    position(double position);
 
 }

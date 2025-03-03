@@ -22,8 +22,15 @@ import org.json.JSONException;
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
+
+/* FTC controller includes */
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -31,8 +38,12 @@ import org.firstinspires.ftc.core.tools.LogManager;
 /* Configuration includes */
 import org.firstinspires.ftc.core.configuration.Configurable;
 
-public interface MotorComponent extends Configurable {
+/**
+ * Motor component wrapper to handle motor mocking and motor coupling
+ */
+public interface MotorComponent extends Configurable, DcMotorEx {
 
+    // Configuration parsng keys
     String sHwMapKey          = "hwmap";
     String sDirectionKey      = "direction";
     String sEncoderReverseKey = "encoder-reverse";
@@ -47,6 +58,14 @@ public interface MotorComponent extends Configurable {
             DcMotor.Direction.FORWARD,"forward"
     );
 
+    /**
+     * Motor building factory.
+     * @param name Name to give to the motor
+     * @param reader JSON object to read configuration from
+     * @param map Raw hardware map to retrieve motor info from
+     * @param logger Logger
+     * @return The created motor - null if creation failed.
+     */
     static MotorComponent factory(String name, JSONArray reader, HardwareMap map, LogManager logger) {
 
         MotorComponent result = null;
@@ -75,11 +94,12 @@ public interface MotorComponent extends Configurable {
 
     /* --------------------- Custom functions ---------------------- */
 
-    String                      name();
+    String                      getName();
     void                        log();
-    boolean                     encoderCorrection();
-    void                        encoderCorrection(boolean value);
-    EncoderComponent            encoder();
+    boolean                     getEncoderCorrection();
+    void                        setEncoderCorrection(boolean value);
+    EncoderComponent            getEncoder();
+    void                        setAchieveableMaxRPMFraction(double rate);
 
     /* ------------------ Configurable functions ------------------- */
 
@@ -89,31 +109,58 @@ public interface MotorComponent extends Configurable {
     String                      logConfigurationHTML();
     String                      logConfigurationText(String header);
 
+    /* ------------------ HardwareDevice functions ----------------- */
+
+    Manufacturer                getManufacturer();
+    String                      getDeviceName();
+    String                      getConnectionInfo();
+    int                         getVersion();
+    void                        resetDeviceConfigurationForOpMode();
+    void                        close();
+
     /* --------------------- DcMotor functions --------------------- */
 
     boolean	                    isBusy();
 
-    int	                        currentPosition();
-    DcMotor.RunMode	            mode();
-    int	                        targetPosition();
-    DcMotorSimple.Direction     direction();
-    DcMotor.ZeroPowerBehavior	zeroPowerBehavior();
-    double                      power();
+    int	                        getCurrentPosition();
+    DcMotor.RunMode	            getMode();
+    int	                        getTargetPosition();
+    DcMotorSimple.Direction     getDirection();
+    DcMotor.ZeroPowerBehavior	getZeroPowerBehavior();
+    double                      getPower();
+    boolean                     getPowerFloat();
+    DcMotorController           getController();
+    int                         getPortNumber();
 
-    void	                    mode(DcMotor.RunMode mode);
-    void	                    direction(DcMotorSimple.Direction direction);
-    void	                    targetPosition(int position);
-    void	                    zeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior);
-    void                        power(double power);
+    void	                    setMode(DcMotor.RunMode mode);
+    void	                    setDirection(DcMotorSimple.Direction direction);
+    void	                    setTargetPosition(int position);
+    void	                    setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior);
+    void                        setPower(double power);
+    void                        setPowerFloat();
 
     /* -------------------- DcMotorEx functions -------------------- */
 
-    void                        PIDFCoefficients(DcMotor.RunMode mode, PIDFCoefficients pidfCoefficients);
-    PIDFCoefficients            PIDFCoefficients(DcMotor.RunMode mode);
-    void                        targetPositionTolerance(int tolerance);
-    int                         targetPositionTolerance();
-    double                      velocity();
-    void                        achieveableMaxRPMFraction(double value);
+    double                      getCurrent(CurrentUnit unit);
+    double                      getCurrentAlert(CurrentUnit unit);
+    boolean                     isOverCurrent();
+    PIDFCoefficients            getPIDFCoefficients(DcMotor.RunMode mode);
+    PIDCoefficients             getPIDCoefficients(DcMotor.RunMode mode);
+    int                         getTargetPositionTolerance();
+    double                      getVelocity();
+    double                      getVelocity(AngleUnit unit);
+    boolean                     isMotorEnabled();
+
+    void                        setCurrentAlert(double alert, CurrentUnit unit);
+    void                        setPIDFCoefficients(DcMotor.RunMode mode, PIDFCoefficients pidfCoefficients);
+    void                        setPIDCoefficients(DcMotor.RunMode mode, PIDCoefficients pidCoefficients);
+    void                        setPositionPIDFCoefficients(double p);
+    void                        setVelocityPIDFCoefficients(double p, double i, double d, double f);
+    void                        setTargetPositionTolerance(int tolerance);
+    void                        setVelocity(double ticks);
+    void                        setVelocity(double angularRate, AngleUnit unit);
+    void                        setMotorEnable();
+    void                        setMotorDisable();
 
 
 }

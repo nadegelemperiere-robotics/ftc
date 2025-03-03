@@ -93,7 +93,7 @@ public class LocalizerPinPoint extends LocalizerComponent {
      * @return The name
      */
     @Override
-    public String                       name() { return mName; }
+    public String                       getName() { return mName; }
 
 
     /**
@@ -255,7 +255,7 @@ public class LocalizerPinPoint extends LocalizerComponent {
      * This resets the IMU. Does not change heading estimation.
      */
     @Override
-    public void                         resetIMU() throws InterruptedException {
+    public void                         resetIMU() {
         mPinPoint.recalibrateIMU();
     }
 

@@ -11,7 +11,7 @@ package org.firstinspires.ftc.core.components.servos;
 import com.qualcomm.robotcore.hardware.ServoController;
 
 
-public interface ServoControllerComponent {
+public interface ServoControllerComponent extends ServoController {
 
     /* --------------------- Custom functions ---------------------- */
 
@@ -21,7 +21,7 @@ public interface ServoControllerComponent {
 
     void	                    pwmEnable()	;
     void	                    pwmDisable();
-    ServoController.PwmStatus	pwmStatus();
+    ServoController.PwmStatus	getPwmStatus();
 
 
 }

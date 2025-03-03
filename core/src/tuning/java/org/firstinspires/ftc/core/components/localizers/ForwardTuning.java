@@ -205,7 +205,7 @@ public class ForwardTuning extends LinearOpMode implements Tuning {
         if (mSelectedLocalizer != null) {
 
             // Log localizer state
-            logger.info("-----> HwMap : " + mSelectedLocalizer.name());
+            logger.info("-----> HwMap : " + mSelectedLocalizer.getName());
             logger.info("-----> Pose : " + mSelectedLocalizer.getPose());
             logger.info("-----> Velocity : " + mSelectedLocalizer.getVelocity());
             logger.info("-----> Multiplier : " + mSelectedLocalizer.getForwardMultiplier());

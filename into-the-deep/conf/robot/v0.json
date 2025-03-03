@@ -2,6 +2,7 @@
     "logging"   : { "file" : true, "driver-station" : true, "dashboard" : true, "level" : "trace" },
     "robot"     : {
         "hardware" : {
+            "voltage" : "built-in",
             "motors": {
                 "front-left-wheel":  [ { "hwmap": "frontLeft", "direction": "reverse" } ],
                 "front-right-wheel": [ { "hwmap": "frontRight" } ],
@@ -23,8 +24,8 @@
                 "otos": {
                     "hwmap"             : "otos",
                     "x-offset"          : 0,
-                    "y-offset"          : 3.292053703248031,
-                    "heading-offset"    : 0,
+                    "y-offset"          : 0.282347672,
+                    "heading-offset"    : -1.57079635,
                     "heading-ratio"     : 0.9964,
                     "position-ratio"    : 1.0
                 }
@@ -176,9 +177,9 @@
                     "y-movement" : 51.65520615465059,
                     "forward-0-power-acceleration" : -20.654845691222988,
                     "strafe-0-power-acceleration" : -21.114626907838524,
-                    "translation-pidf" : { "p" : 0.5 , "i" : 0 , "d" : 0.02,  "f" : 0 },
-                    "translation-pidf-feed-forward" : 0.015,
-                    "heading-pidf" : { "p" : 0.8, "i" : 0.0 , "d" : 0.01,  "f" : 0 },
+                    "translation-pidf" : { "p" : 0.3 , "i" : 0 , "d" : 0.01,  "f" : 0 },
+                    "translation-pidf-feed-forward" : 0.01,
+                    "heading-pidf" : { "p" : 1.0, "i" : 0.0 , "d" : 0.01,  "f" : 0 },
                     "heading-pidf-feed-forward" : 0.01
                 }
             }

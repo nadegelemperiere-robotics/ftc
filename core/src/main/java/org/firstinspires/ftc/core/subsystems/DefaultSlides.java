@@ -47,16 +47,16 @@ public class DefaultSlides extends Actuator {
     public void                         power(double power) {
 
         if(mMotor != null && this.hasFinished()) {
-            mMotor.mode(DcMotor.RunMode.RUN_USING_ENCODER);
+            mMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             mPosition = "none";
-            if(power < 0 && (mMotor.currentPosition() + mOffset) > mMinPosition) {
-                mMotor.power(power);
+            if(power < 0 && (mMotor.getCurrentPosition() + mOffset) > mMinPosition) {
+                mMotor.setPower(power);
             }
-            else if(power > 0 && (mMotor.currentPosition() + mOffset) < mMaxPosition) {
-                mMotor.power(power);
+            else if(power > 0 && (mMotor.getCurrentPosition() + mOffset) < mMaxPosition) {
+                mMotor.setPower(power);
             }
             else {
-                mMotor.power(0);
+                mMotor.setPower(0);
             }
         }
 

@@ -37,6 +37,7 @@ public class InitState extends RobotState {
                             ((SharedData)mData).intakeSlides.power(0);
                             ((SharedData)mData).outtakeArm.position(OuttakeArm.Position.INIT);
                             ((SharedData)mData).outtakeSlides.power(0);
+                            ((SharedData)mData).chassis.startTeleopDrive();
                             ((SharedData)mData).chassis.drive(0,0,0);
                         },
                         Condition.and(

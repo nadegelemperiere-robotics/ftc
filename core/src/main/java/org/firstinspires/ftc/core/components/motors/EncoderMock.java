@@ -39,8 +39,8 @@ public class EncoderMock extends EncoderComponent {
 
         if(mEncoder == null) { mConfigurationValid = false; }
         else {
-            mPreviousPosition = mEncoder.currentPosition();
-            mCurrentPosition = mEncoder.currentPosition();
+            mPreviousPosition = mEncoder.getCurrentPosition();
+            mCurrentPosition = mEncoder.getCurrentPosition();
         }
 
     }
@@ -80,7 +80,7 @@ public class EncoderMock extends EncoderComponent {
     public void    update() {
         if(mConfigurationValid) {
             mPreviousPosition = mCurrentPosition;
-            mCurrentPosition = mEncoder.currentPosition();
+            mCurrentPosition = mEncoder.getCurrentPosition();
         }
     }
 

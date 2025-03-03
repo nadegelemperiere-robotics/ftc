@@ -75,7 +75,7 @@ public abstract class LocalizerComponent extends Localizer implements Configurab
 
     /* ------------------ Custom functions ------------------------- */
     public abstract void    log();
-    public abstract String  name();
+    public abstract String  getName();
 
     /* ------------------ Localizer functions ---------------------- */
     public abstract Pose    getPose();

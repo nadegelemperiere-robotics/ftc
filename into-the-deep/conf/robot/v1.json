@@ -2,6 +2,7 @@
     "logging"   : { "file" : true, "driver-station" : true, "dashboard" : true, "level" : "info" },
     "robot"     : {
         "hardware" : {
+            "voltage" : "built-in",
             "motors": {
                 "front-left-wheel":  [ { "hwmap": "frontLeft" } ],
                 "front-right-wheel": [ { "hwmap": "frontRight" } ],

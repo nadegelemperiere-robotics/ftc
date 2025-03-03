@@ -261,7 +261,7 @@ public class ServoTuning extends LinearOpMode implements Tuning {
         for (int i_servo = 0; i_servo < mCurrentServoHw.size(); i_servo++) {
             ServoComponent hwServo = mCurrentServoHw.get(i_servo);
             if (hwServo != null) {
-                hwServo.controller().pwmDisable();
+                hwServo.getController().pwmDisable();
             }
         }
     }
@@ -271,7 +271,7 @@ public class ServoTuning extends LinearOpMode implements Tuning {
         for (int i_servo = 0; i_servo < mCurrentServoHw.size(); i_servo++) {
             ServoComponent hwServo = mCurrentServoHw.get(i_servo);
             if (hwServo != null) {
-                hwServo.controller().pwmEnable();
+                hwServo.getController().pwmEnable();
             }
         }
     }
@@ -285,18 +285,18 @@ public class ServoTuning extends LinearOpMode implements Tuning {
                 // Depending on the coupled servo management mode, pilot the required servos
                 if(i_servo == 0) {
                     if (mMode.get() == Mode.FIRST || mMode.get() == Mode.BOTH){
-                        hwServo.position(position);
+                        hwServo.setPosition(position);
                     }
                     else{
-                        hwServo.controller().pwmDisable();
+                        hwServo.getController().pwmDisable();
                     }
                 }
                 if(i_servo == 1) {
                     if (mMode.get() == Mode.SECOND || mMode.get() == Mode.BOTH){
-                        hwServo.position(position);
+                        hwServo.setPosition(position);
                     }
                     else{
-                        hwServo.controller().pwmDisable();
+                        hwServo.getController().pwmDisable();
                     }
                 }
             }
@@ -314,12 +314,12 @@ public class ServoTuning extends LinearOpMode implements Tuning {
                 // Depending on the coupled servo management mode, pilot the required servos
                 if (i_servo == 0) {
                     if (mMode.get() == Mode.FIRST || mMode.get() == Mode.BOTH) {
-                        result = hwServo.position();
+                        result = hwServo.getPosition();
                     }
                 }
                 if (i_servo == 1) {
                     if (mMode.get() == Mode.SECOND || mMode.get() == Mode.BOTH) {
-                        result = hwServo.position();
+                        result = hwServo.getPosition();
                     }
                 }
             }
@@ -337,10 +337,10 @@ public class ServoTuning extends LinearOpMode implements Tuning {
 
                 // Log servo state
                 logger.info("--> Servo " + i_servo);
-                logger.info("-----> HwMap : " + hwServo.name());
-                logger.info("-----> Direction : " + hwServo.direction());
-                logger.info("-----> Position : " + hwServo.position());
-                logger.info("-----> Power : " + hwServo.controller().pwmStatus());
+                logger.info("-----> HwMap : " + hwServo.getName());
+                logger.info("-----> Direction : " + hwServo.getDirection());
+                logger.info("-----> Position : " + hwServo.getPosition());
+                logger.info("-----> Power : " + hwServo.getController().getPwmStatus());
             }
         }
     }
@@ -390,11 +390,11 @@ public class ServoTuning extends LinearOpMode implements Tuning {
             mServo = servo;
         }
         @Override
-        public Boolean get()           { return mServo.direction() == Servo.Direction.REVERSE; }
+        public Boolean get()           { return mServo.getDirection() == Servo.Direction.REVERSE; }
         @Override
         public void set(Boolean Value) {
-            if (Value) { mServo.direction(Servo.Direction.REVERSE); }
-            else { mServo.direction(Servo.Direction.FORWARD);       }
+            if (Value) { mServo.setDirection(Servo.Direction.REVERSE); }
+            else { mServo.setDirection(Servo.Direction.FORWARD);       }
         }
     }
 

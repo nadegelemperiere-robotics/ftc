@@ -20,12 +20,14 @@ package org.firstinspires.ftc.core.components.servos;
 
 
 /* JSON includes */
+import org.firstinspires.ftc.core.components.motors.MotorControllerCoupled;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -77,7 +79,7 @@ public class ServoCoupled implements ServoComponent {
      * @return the servo name
      */
     @Override
-    public String                       name() { return mName; }
+    public String                       getName() { return mName; }
 
     /**
      * Logs the current servo position.
@@ -142,17 +144,19 @@ public class ServoCoupled implements ServoComponent {
                 }
                 else if(mSecond != null) { mSecond.setDirection(Servo.Direction.FORWARD);  }
 
-                if(mFirst != null && mSecond != null ) {
-                    mController             = new ServoControllerCoupled(mFirst.getController(), mSecond.getController(), mName, mLogger);
-                }
-
-
             }
             catch(JSONException e) { mLogger.error(e.getMessage()); }
         }
 
         if (mFirst == null) { mConfigurationValid = false; }
         if (mSecond == null) { mConfigurationValid = false; }
+
+        if(mConfigurationValid) {
+            mController = new ServoControllerCoupled(mFirst.getController(), mSecond.getController(), mName, mLogger);
+            if(!mFirst.getManufacturer().equals(mSecond.getManufacturer())) {
+                mLogger.warning("Coupled servo does not have the same manufacturer");
+            }
+        }
 
     }
 
@@ -266,6 +270,86 @@ public class ServoCoupled implements ServoComponent {
     }
 
 
+    /* ------------------ HardwareDevice functions ----------------- */
+
+    /* ------------------ HardwareDevice functions ----------------- */
+
+    /**
+     * Returns an indication of the manufacturer of this device.
+     * @return the manufacturer
+     */
+    @Override
+    public Manufacturer                 getManufacturer() {
+        Manufacturer result = Manufacturer.Unknown;
+        if(mConfigurationValid) {
+            result = mFirst.getManufacturer();
+        }
+        return result;
+    }
+
+    /**
+     * Returns a string suitable for display to the user as to the type of device.Note that this is a device-type-specific name; it has nothing to do with thename by which a user might have configured the device in a robot configuration.
+     * @return the device name
+     */
+    @Override
+    public String                       getDeviceName() {
+        String result = "";
+        if(mConfigurationValid) {
+            result = mFirst.getDeviceName() + " coupled with " + mSecond.getDeviceName();
+        }
+        return result;
+    }
+
+    /**
+     * Get connection information about this device in a human readable format
+     * @return connection information
+     */
+    @Override
+    public String                       getConnectionInfo() {
+        String result = "";
+        if(mConfigurationValid) {
+            result = "First : " + mFirst.getConnectionInfo();
+            result += "\nSecond : " + mSecond.getConnectionInfo();
+        }
+        return result;
+    }
+
+    /**
+     * Version
+     */
+    @Override
+    public int                          getVersion() {
+        int result = -1;
+        if(mConfigurationValid) {
+            result = mFirst.getVersion();
+        }
+        return result;
+    }
+
+    /**
+     * Resets the device's configuration to that which is expected at the beginning of an OpMode.For example, motors will reset the their direction to 'forward'.
+     */
+    @Override
+    public void                         resetDeviceConfigurationForOpMode() {
+        if(mConfigurationValid) {
+            mFirst.resetDeviceConfigurationForOpMode();
+            mSecond.resetDeviceConfigurationForOpMode();
+        }
+    }
+
+    /**
+     * Closes this device
+     */
+    @Override
+    public void                         close()
+    {
+        if(mConfigurationValid) {
+            mFirst.close();
+            mSecond.close();
+        }
+    }
+
+
     /* ---------------------- Servo functions ---------------------- */
 
     /**
@@ -274,7 +358,7 @@ public class ServoCoupled implements ServoComponent {
      * @return The associated ServoControllerComponent.
      */
     @Override
-    public ServoControllerComponent     controller() {
+    public ServoController              getController() {
         return mController;
     }
 
@@ -284,7 +368,7 @@ public class ServoCoupled implements ServoComponent {
      * @return The direction of the servo (FORWARD or REVERSE).
      */
     @Override
-    public Servo.Direction	            direction()
+    public Servo.Direction	            getDirection()
     {
         return mDirection;
     }
@@ -295,7 +379,7 @@ public class ServoCoupled implements ServoComponent {
      * @return The servo position in the range [0,1], or -1 if not configured.
      */
     @Override
-    public double	                    position()
+    public double	                    getPosition()
     {
         double result = -1;
         if(mConfigurationValid) {
@@ -305,18 +389,12 @@ public class ServoCoupled implements ServoComponent {
     }
 
     /**
-     * Scales the range of motion for the servos.
-     *
-     * @param min The new minimum position (0.0 to 1.0).
-     * @param max The new maximum position (0.0 to 1.0).
+     * Unable to provide this method since each servo has a difference port
+     * @return -1
      */
     @Override
-    public void	                        scaleRange(double min, double max)
-    {
-        if(mConfigurationValid) {
-            mFirst.scaleRange(min, max);
-            mSecond.scaleRange(min, max);
-        }
+    public int                          getPortNumber() {
+        return -1;
     }
 
     /**
@@ -325,7 +403,7 @@ public class ServoCoupled implements ServoComponent {
      * @param direction The new direction (FORWARD or REVERSE).
      */
     @Override
-    public void	                        direction(Servo.Direction direction)
+    public void	                        setDirection(Servo.Direction direction)
     {
         if(direction != mDirection && mConfigurationValid) {
 
@@ -346,11 +424,26 @@ public class ServoCoupled implements ServoComponent {
      * @param position The new position to reach
      */
     @Override
-    public void	                        position(double position)
+    public void	                        setPosition(double position)
     {
         if(mConfigurationValid) {
             mFirst.setPosition(position);
             mSecond.setPosition(position);
+        }
+    }
+
+    /**
+     * Scales the range of motion for the servos.
+     *
+     * @param min The new minimum position (0.0 to 1.0).
+     * @param max The new maximum position (0.0 to 1.0).
+     */
+    @Override
+    public void	                        scaleRange(double min, double max)
+    {
+        if(mConfigurationValid) {
+            mFirst.scaleRange(min, max);
+            mSecond.scaleRange(min, max);
         }
     }
 }

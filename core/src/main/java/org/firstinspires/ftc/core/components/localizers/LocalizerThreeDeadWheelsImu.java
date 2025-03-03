@@ -121,7 +121,7 @@ public class LocalizerThreeDeadWheelsImu extends LocalizerComponent {
      * @return The name
      */
     @Override
-    public String                       name() { return mName; }
+    public String                       getName() { return mName; }
 
     /**
      * This returns the current pose estimate.
@@ -401,19 +401,19 @@ public class LocalizerThreeDeadWheelsImu extends LocalizerComponent {
             if(reader.has(sLeftHwMapKey)) {
                 mLeftHwMapName = reader.getString(sLeftHwMapKey);
                 if(mMotors.containsKey(mLeftHwMapName)) {
-                    mLeftEncoder = mMotors.get(mLeftHwMapName).encoder();
+                    mLeftEncoder = mMotors.get(mLeftHwMapName).getEncoder();
                 }
             }
             if(reader.has(sRightHwMapKey)) {
                 mRightHwMapName = reader.getString(sRightHwMapKey);
                 if(mMotors.containsKey(mRightHwMapName)) {
-                    mRightEncoder= mMotors.get(mRightHwMapName).encoder();
+                    mRightEncoder= mMotors.get(mRightHwMapName).getEncoder();
                 }
             }
             if(reader.has(sStrafeHwMapKey)) {
                 mStrafeHwMapName = reader.getString(sStrafeHwMapKey);
                 if(mMotors.containsKey(mStrafeHwMapName)) {
-                    mStrafeEncoder = mMotors.get(mStrafeHwMapName).encoder();
+                    mStrafeEncoder = mMotors.get(mStrafeHwMapName).getEncoder();
                 }
             }
             if(reader.has(sImuHwMapKey)) {

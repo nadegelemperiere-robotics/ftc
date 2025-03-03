@@ -1,6 +1,7 @@
 {
     "robot"     : {
         "hardware" : {
+	    "voltage" : "mock",
             "motors": {
                 "front-left-wheel":    [ ],
                 "front-right-wheel":   [ ],
@@ -18,7 +19,7 @@
                 "intake-arm-pitch":    [ ],
                 "outtake-elbow-pitch": [ ]
             },
-            "odometers": {
+            "localizers": {
                 "mock": {  }
             },
             "imus": {
@@ -137,14 +138,15 @@
                 }
             },
             "drive-train" : {
-                "type" : "mecanum-drive",
+                "type" 	 : "mecanum-drive",
+                "short"  : "DRV",
                 "motors" : {
                     "front-left-wheel":  "front-left-wheel",
                     "front-right-wheel": "front-right-wheel",
                     "back-left-wheel":   "back-left-wheel",
                     "back-right-wheel":  "back-right-wheel"
                 },
-                "odometer" : "mock",
+                "localizer" : "mock",
                 "reference" : "field-centric",
                 "physics" : {
                     "in-per-tick"               : 1,

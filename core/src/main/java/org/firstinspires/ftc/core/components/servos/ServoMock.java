@@ -61,7 +61,7 @@ public class ServoMock implements ServoComponent {
      * @return the servo name
      */
     @Override
-    public String                       name() { return mName; }
+    public String                       getName() { return mName; }
 
     /**
      * Logs the current servo position.
@@ -114,6 +114,46 @@ public class ServoMock implements ServoComponent {
     @Override
     public String                       logConfigurationText(String header) {   return header + "> Mock\n"; }
 
+    /* ------------------ HardwareDevice functions ----------------- */
+
+    /**
+     * Returns an indication of the manufacturer of this device.
+     * @return the manufacturer
+     */
+    @Override
+    public Manufacturer                 getManufacturer() { return Manufacturer.Other; }
+
+    /**
+     * Returns a string suitable for display to the user as to the type of device.Note that this is a device-type-specific name; it has nothing to do with the name by which a user might have configured the device in a robot configuration.
+     * @return the device name
+     */
+    @Override
+    public String                       getDeviceName() { return "Servo Mock"; }
+
+    /**
+     * Get connection information about this device in a human readable format
+     * @return connection information
+     */
+    @Override
+    public String                       getConnectionInfo() { return ""; }
+
+    /**
+     * Version
+     */
+    @Override
+    public int                          getVersion() { return 0; }
+
+    /**
+     * Resets the device's configuration to that which is expected at the beginning of an OpMode.For example, motors will reset the their direction to 'forward'.
+     */
+    @Override
+    public void                         resetDeviceConfigurationForOpMode() {}
+
+    /**
+     * Closes this device
+     */
+    @Override
+    public void                         close() {}
 
     /* ---------------------- Servo functions ---------------------- */
     /**
@@ -122,7 +162,14 @@ public class ServoMock implements ServoComponent {
      * @return The associated ServoControllerComponent.
      */
     @Override
-    public ServoControllerComponent     controller() { return mController; }
+    public ServoControllerComponent     getController() { return mController; }
+
+    /**
+     * Unable to provide this method since each motor has a difference port
+     * @return -1
+     */
+    @Override
+    public int                          getPortNumber() { return -1; }
 
     /**
      * Retrieves the current direction of the servo.
@@ -130,7 +177,7 @@ public class ServoMock implements ServoComponent {
      * @return The direction of the servo (FORWARD or REVERSE).
      */
     @Override
-    public Servo.Direction	            direction()  { return mDirection;  }
+    public Servo.Direction	            getDirection()  { return mDirection;  }
 
     /**
      * Retrieves the position of the servo.
@@ -138,7 +185,7 @@ public class ServoMock implements ServoComponent {
      * @return The servo position in the range [0,1], or -1 if not configured.
      */
     @Override
-    public double	                    position()   { return mPosition;   }
+    public double	                    getPosition()   { return mPosition;   }
 
     /**
      * Scales the range of motion for the servos.
@@ -159,7 +206,7 @@ public class ServoMock implements ServoComponent {
      * @param direction The new direction (FORWARD or REVERSE).
      */
     @Override
-    public void	                        direction(Servo.Direction direction) { mDirection = direction; }
+    public void	                        setDirection(Servo.Direction direction) { mDirection = direction; }
 
     /**
      * Sets the position of the servos.
@@ -167,7 +214,7 @@ public class ServoMock implements ServoComponent {
      * @param position The new position to reach
      */
     @Override
-    public void	                        position(double position)
+    public void	                        setPosition(double position)
     {
         mPosition = min(position,mMax);
         mPosition = max(mPosition,mMin);

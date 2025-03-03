@@ -159,19 +159,19 @@ public class LocalizerTest extends LinearOpMode implements Tuning {
                 }
 
                 /* Manage motor change */
-                if(!Objects.equals(mLeftBack.name(), LEFT_BACK)) {
+                if(!Objects.equals(mLeftBack.getName(), LEFT_BACK)) {
                     if(mHardware.motors().containsKey(LEFT_BACK))   { mLeftBack = mHardware.motors().get(LEFT_BACK);        }
                     if(mLeftBack == null) { mLogger.error("Missing left back motor with name " + LEFT_BACK); }
                 }
-                if(!Objects.equals(mLeftFront.name(), LEFT_FRONT)) {
+                if(!Objects.equals(mLeftFront.getName(), LEFT_FRONT)) {
                     if(mHardware.motors().containsKey(LEFT_FRONT))   { mLeftFront = mHardware.motors().get(LEFT_FRONT);        }
                     if(mLeftFront == null) { mLogger.error("Missing left front motor with name " + LEFT_FRONT); }
                 }
-                if(!Objects.equals(mRightBack.name(), RIGHT_BACK)) {
+                if(!Objects.equals(mRightBack.getName(), RIGHT_BACK)) {
                     if(mHardware.motors().containsKey(RIGHT_BACK))   { mRightBack = mHardware.motors().get(RIGHT_BACK);        }
                     if(mRightBack == null) { mLogger.error("Missing right back motor with name " + RIGHT_BACK); }
                 }
-                if(!Objects.equals(mRightFront.name(), RIGHT_FRONT)) {
+                if(!Objects.equals(mRightFront.getName(), RIGHT_FRONT)) {
                     if(mHardware.motors().containsKey(RIGHT_FRONT))   { mRightFront = mHardware.motors().get(RIGHT_FRONT);        }
                     if(mRightFront == null) { mLogger.error("Missing right front motor with name " + RIGHT_FRONT); }
                 }
@@ -189,10 +189,10 @@ public class LocalizerTest extends LinearOpMode implements Tuning {
                 double rightFrontPower = (y - x - rx) / denominator;
                 double rightRearPower = (y + x - rx) / denominator;
 
-                if(mLeftFront != null)  { mLeftFront.power(leftFrontPower); }
-                if(mRightFront != null) { mRightFront.power(rightFrontPower); }
-                if(mLeftBack != null)   { mLeftBack.power(leftRearPower); }
-                if(mRightBack != null)  { mRightBack.power(rightRearPower); }
+                if(mLeftFront != null)  { mLeftFront.setPower(leftFrontPower); }
+                if(mRightFront != null) { mRightFront.setPower(rightFrontPower); }
+                if(mLeftBack != null)   { mLeftBack.setPower(leftRearPower); }
+                if(mRightBack != null)  { mRightBack.setPower(rightRearPower); }
 
                 if(mSelectedLocalizer != null)      { mSelectedLocalizer.update(); }
                 if(mDashboardPoseTracker != null)   {mSelectedUpdater.update(); }

@@ -55,7 +55,7 @@ public class LocalizerMock extends LocalizerComponent {
      * @return The name
      */
     @Override
-    public String                       name() { return mName; }
+    public String                       getName() { return mName; }
 
     /**
      * This returns the current pose estimate.

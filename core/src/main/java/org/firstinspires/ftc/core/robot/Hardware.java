@@ -19,6 +19,9 @@ import org.json.JSONArray;
 
 /* Qualcomm includes */
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
@@ -37,10 +40,12 @@ import org.firstinspires.ftc.core.components.motors.MotorCoupled;
 import org.firstinspires.ftc.core.components.servos.ServoComponent;
 import org.firstinspires.ftc.core.components.servos.ServoCoupled;
 import org.firstinspires.ftc.core.components.imus.ImuComponent;
+import org.firstinspires.ftc.core.components.voltage.VoltageSensorComponent;
 import org.firstinspires.ftc.core.components.localizers.LocalizerComponent;
 
-public class Hardware implements Configurable {
+public class Hardware extends HardwareMap implements Configurable {
 
+    static final protected String   sVoltageKey     = "voltage";
     static final protected String   sMotorsKey      = "motors";
     static final protected String   sImusKey        = "imus";
     static final protected String   sServosKey      = "servos";
@@ -56,7 +61,8 @@ public class Hardware implements Configurable {
     final protected Map<String, ServoComponent>     mServos;
     final protected Map<String, ImuComponent>       mImus;
     final protected Map<String, LocalizerComponent> mLocalizers;
-    VoltageSensor                                   mVoltageSensor;
+    VoltageSensorComponent                          mVoltageSensor;
+    String                                          mVoltageSensorName;
 
     /**
      * Constructor
@@ -65,6 +71,7 @@ public class Hardware implements Configurable {
      * @param logger The logger to report events
      */
     public Hardware(HardwareMap map, LogManager logger) {
+        super(null, null);
 
         mLogger = logger;
 
@@ -84,6 +91,7 @@ public class Hardware implements Configurable {
         mImus           = new LinkedHashMap<>();
         mLocalizers     = new LinkedHashMap<>();
         mVoltageSensor  = null;
+        mVoltageSensorName = "";
 
     }
 
@@ -91,7 +99,7 @@ public class Hardware implements Configurable {
     public Map<String,ServoComponent>       servos() { return mServos; }
     public Map<String,ImuComponent>         imus() { return mImus; }
     public Map<String,LocalizerComponent>   localizers() { return mLocalizers; }
-    public VoltageSensor                    voltageSensor() { return mVoltageSensor; }
+    public VoltageSensorComponent           voltageSensor() { return mVoltageSensor; }
 
 
 
@@ -105,19 +113,19 @@ public class Hardware implements Configurable {
         }
         // Call other components at least once to trigger bulk caching
         for (Map.Entry<String, MotorComponent> motor : mMotors.entrySet()) {
-            motor.getValue().currentPosition();
+            motor.getValue().getCurrentPosition();
         }
         for (Map.Entry<String, ServoComponent> servo : mServos.entrySet()) {
-            servo.getValue().position();
+            servo.getValue().getPosition();
         }
         mLogger.info(LogManager.Target.FILE, "stop");
     }
-
 
     public void                             read(JSONObject reader) {
 
         mConfigurationValid = true;
         mVoltageSensor      = null;
+        mVoltageSensorName  = "";
         mMotors.clear();
         mImus.clear();
         mServos.clear();
@@ -125,13 +133,22 @@ public class Hardware implements Configurable {
 
         try {
 
-            // Read voltage sensor
-            mVoltageSensor = mMap.voltageSensor.iterator().next();
-            if(mVoltageSensor == null) {
-                mLogger.warning("Voltage sensor not found");
-                mConfigurationValid = false;
+            if (reader.has(sVoltageKey)) {
+                mVoltageSensorName = reader.getString(sVoltageKey);
+                mVoltageSensor = VoltageSensorComponent.factory(mVoltageSensorName, reader, mMap, mLogger);
+                if(mVoltageSensor == null) {
+                    mLogger.warning("Voltage sensor type " + mVoltageSensorName + " not recognized by factory");
+                    mConfigurationValid = false;
+                }
+                else if (!mVoltageSensor.isConfigured()) {
+                    mLogger.warning("Voltage sensor type " + mVoltageSensorName + " configuration is invalid");
+                    mConfigurationValid = false;
+                }
+                else {
+                    voltageSensor = new DeviceMapping(VoltageSensor.class);
+                    voltageSensor.put(mVoltageSensorName, mVoltageSensor);
+                }
             }
-
 
             // Read Motors
             if (reader.has(sMotorsKey)) {
@@ -229,6 +246,9 @@ public class Hardware implements Configurable {
 
         try {
 
+            // Write voltage sensor
+            writer.put(sVoltageKey,mVoltageSensorName);
+
             // Write motors
             JSONObject motors = new JSONObject();
             for (Map.Entry<String, MotorComponent> motor : mMotors.entrySet()) {
@@ -295,6 +315,11 @@ public class Hardware implements Configurable {
         result.append("<details style=\"margin-left:10px\">\n");
         result.append("<summary style=\"font-size: 12px; font-weight: 500\"> HARDWARE </summary>\n");
         result.append("<ul>\n");
+
+        // Log voltage sensor
+        result.append("<p style=\"font-size: 12px; font-weight: 500\"> VOLTAGE")
+                .append(mVoltageSensorName)
+                .append("</p>");
 
         // Log motors
         result.append("<details style=\"margin-left:10px\">\n");
@@ -369,6 +394,12 @@ public class Hardware implements Configurable {
     {
         StringBuilder result = new StringBuilder();
 
+        // Log voltage sensor
+        result.append(header)
+                .append("> VOLTAGE : ")
+                .append(mVoltageSensorName)
+                .append("\n");
+
         // Log motors
         result.append(header)
                 .append("> MOTORS\n");
@@ -411,5 +442,49 @@ public class Hardware implements Configurable {
 
         return result.toString();
 
+    }
+
+    /**
+     * Retrieves the (first) device with the indicated name which is also an instance of theindicated class or interface. If no such device is found, an exception is thrown.
+     * @param classOrInterface the class or interface indicating the type of the device object to be retrieved
+     * @param deviceName name of the device
+     * @return Found device
+     */
+    @Override
+    public <T> T get(Class<? extends T> classOrInterface, String deviceName){
+        T result = tryGet(classOrInterface, deviceName);
+        if (result == null) throw new IllegalArgumentException(
+                String.format("No %s named %s is found.", classOrInterface.getName(), deviceName)
+        );
+        return result;
+    }
+
+    /**
+     * Retrieves the (first) device with the indicated name which is also an instance of theindicated class or interface. If no such device is found, result is null
+     * @param classOrInterface the class or interface indicating the type of the device object to be retrieved
+     * @param deviceName name of the device
+     * @return found device - null if not found
+     */
+    @Override
+    public <T> T tryGet(Class<? extends T> classOrInterface, String deviceName){
+
+        T result = null;
+        if(mConfigurationValid) {
+            if ((classOrInterface == DcMotor.class) || (classOrInterface == DcMotorEx.class)) {
+                if (mMotors.containsKey(deviceName)) {
+                    result = classOrInterface.cast(mMotors.get(deviceName));
+                }
+            }
+            if (classOrInterface == Servo.class) {
+                if (mServos.containsKey(deviceName)) {
+                    result = classOrInterface.cast(mServos.get(deviceName));
+                }
+            }
+            if (classOrInterface == VoltageSensor.class) {
+                result = classOrInterface.cast(mVoltageSensor);
+            }
+        }
+
+        return result;
     }
 }
