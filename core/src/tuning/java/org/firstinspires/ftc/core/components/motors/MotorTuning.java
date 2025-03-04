@@ -57,14 +57,12 @@ public class MotorTuning extends LinearOpMode implements Tuning {
     }
 
     /* -------- Configuration variables -------- */
-    public static String                CONFIGURATION   = "test";
     public static int                   TARGET_POSITION = 0;
 
     /* ---------------- Members ---------------- */
     private LogManager                  mLogger;
 
     private Configuration               mConfiguration;
-    private String                      mConfigurationName;
     private Hardware                    mHardware;
 
     private ModeProvider                mMode;
@@ -108,11 +106,9 @@ public class MotorTuning extends LinearOpMode implements Tuning {
             mMode.set(Mode.FIRST);
             mTargetPosition = TARGET_POSITION;
 
-            mConfigurationName = CONFIGURATION;
             mConfiguration = new Configuration(mLogger);
             mConfiguration.register("robot.hardware", mHardware);
-            mConfiguration.read(Environment.getExternalStorageDirectory().getPath()
-                    + "/FIRST/" + mConfigurationName + ".json");
+            mConfiguration.read();
             mConfiguration.log();
 
             mMotorsHw = mHardware.mappingMotors(this);

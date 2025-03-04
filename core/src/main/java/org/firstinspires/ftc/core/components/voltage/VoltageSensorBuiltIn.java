@@ -50,11 +50,7 @@
 
 package org.firstinspires.ftc.core.components.voltage;
 
-/* System includes */
-import java.util.Map;
-
 /* JSON includes */
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /* Qualcomm includes */
@@ -67,15 +63,15 @@ import org.firstinspires.ftc.core.tools.LogManager;
 
 public class VoltageSensorBuiltIn implements VoltageSensorComponent {
 
-    public static final String sTypeKey    = "built-in";
+    public static final String  sTypeKey    = "built-in";
 
-    final LogManager                                mLogger;
+    final LogManager            mLogger;
 
-    boolean                                         mConfigurationValid;
-    final String                                    mName;
+    boolean                     mConfigurationValid;
+    final String                mName;
 
-    final HardwareMap                               mMap;
-    VoltageSensor                                   mVoltageSensor;
+    final HardwareMap           mMap;
+    VoltageSensor               mVoltageSensor;
 
 
     /* ----------------------- Constructors ------------------------ */
@@ -93,9 +89,7 @@ public class VoltageSensorBuiltIn implements VoltageSensorComponent {
         mMap                = hwMap;
         if(mMap != null) {
             mVoltageSensor      = mMap.voltageSensor.iterator().next();
-        }
-        else {
-            mConfigurationValid = false;
+            mConfigurationValid = true;
         }
     }
 

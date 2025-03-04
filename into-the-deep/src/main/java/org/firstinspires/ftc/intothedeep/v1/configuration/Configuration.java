@@ -7,7 +7,9 @@
 
 package org.firstinspires.ftc.intothedeep.v1.configuration;
 
-/* Tools includes */
+
+/* ACME robotics */
+import com.acmerobotics.dashboard.FtcDashboard;
 
 
 
@@ -16,7 +18,10 @@ public class Configuration extends org.firstinspires.ftc.core.configuration.Conf
     static protected Configuration  sInstance = null;
 
     static {
-        sDefaultConfiguration = "test";
+        if(CONFIGURATION.isEmpty()) {
+            CONFIGURATION = "v0";
+            FtcDashboard.getInstance().updateConfig();
+        }
     }
 
     public  static  Configuration getInstance() {

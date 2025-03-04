@@ -56,13 +56,11 @@ public class ServoTuning extends LinearOpMode implements Tuning {
     public static long                  SLEEP_MS        = 200;
     public static double                TARGET_POS      = 0.0;
     public static boolean               HOLD_POSITION   = false;
-    public static String                CONFIGURATION   = "test";
 
     /* ---------------- Members ---------------- */
     private LogManager                  mLogger;
 
     private Configuration               mConfiguration;
-    private String                      mConfigurationName;
     private Hardware                    mHardware;
 
     private ModeProvider                mMode;
@@ -104,11 +102,9 @@ public class ServoTuning extends LinearOpMode implements Tuning {
             mMode = new ModeProvider();
             mMode.set(Mode.FIRST);
 
-            mConfigurationName = CONFIGURATION;
             mConfiguration = new Configuration(mLogger);
             mConfiguration.register("robot.hardware", mHardware);
-            mConfiguration.read(Environment.getExternalStorageDirectory().getPath()
-                    + "/FIRST/" + mConfigurationName + ".json");
+            mConfiguration.read();
             mConfiguration.log();
 
             mServosHw = mHardware.mappingServos(this);

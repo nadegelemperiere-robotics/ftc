@@ -214,11 +214,11 @@
         },
         "commands": [
             {  "action": "drive",
-                "1": { "scale": 1.1, "input": "left_stick_x", "controller" : "drive" },
-                "2": { "scale": -1.0, "input": "left_stick_y", "controller" : "drive" },
-                "3": { "scale": 1.0, "input": "right_stick_x", "controller" : "drive" }
+                "1": { "scale": 1.0, "input": "left_stick_y", "controller" : "drive" },
+                "2": { "scale": -1.0, "input": "left_stick_x", "controller" : "drive" },
+                "3": { "scale": -1.0, "input": "right_stick_x", "controller" : "drive" }
             },
-            { "action": "tuneDriveSpeed", "1": 0.45, "condition": { "button": "left_bumper", "state": "pressed", "controller" : "drive" } },
+            { "action": "tuneDriveSpeed", "1": 0.15, "condition": { "button": "left_bumper", "state": "pressed", "controller" : "drive" } },
             { "action": "tuneDriveSpeed", "1": 1.0, "condition": { "button": "left_bumper", "state": "notPressed", "controller" : "drive" } },
 
             { "action": "powerOuttakeSlides", "1": 0.9,  "condition": { "button": "left_bumper", "state": "pressed", "controller" : "mechanisms"} },

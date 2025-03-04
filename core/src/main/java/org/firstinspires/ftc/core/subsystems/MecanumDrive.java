@@ -16,12 +16,14 @@ import org.json.JSONObject;
 
 
 /* Pedro Pathing includes */
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.localization.Pose;
-import com.pedropathing.util.CustomFilteredPIDFCoefficients;
-import com.pedropathing.util.CustomPIDFCoefficients;
-import com.pedropathing.util.KalmanFilterParameters;
+import com.pedropathing.pathgen.MathFunctions;
+import com.pedropathing.pathgen.Point;
+import com.pedropathing.pathgen.Vector;
+import com.pedropathing.util.Drawing;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -157,7 +159,29 @@ public class MecanumDrive extends Follower implements DriveTrain {
      * Current task status
      * @return true if the train is available, false if busy
      */
-    public boolean                      hasFinished() { return !this.isBusy(); }
+    public boolean                      hasFinished() {
+        boolean result = !this.isBusy();
+        return result;
+    }
+
+    /**
+     * Overload update to add drawing
+     */
+    public void                         update() {
+        super.update();
+        Drawing.drawDebug(this);
+//        if(this.getCurrentPath() != null)
+//        {
+//
+//        }
+//        if(this.getDashboardPoseTracker()!= null)   {
+//            Drawing.drawPoseHistory(this.getDashboardPoseTracker(), "#4CAF50");
+//        }
+//        if(this.poseUpdater != null)   {
+//            Drawing.drawRobot(this.poseUpdater.getPose(), "#4CAF50");
+//        }
+//        Drawing.sendPacket();
+    }
 
     /**
      * Change the power multiplier when driving
@@ -218,16 +242,16 @@ public class MecanumDrive extends Follower implements DriveTrain {
     /**
      * Current state logging function
      */
-    public void                         log() {
+    public void                         log(String header) {
         if(mConfigurationValid) {
 
             mLocalizer.log();
 
-            mLogger.info(mShortName + " POS : " +
+            mLogger.info(header + "> " + mShortName + " POS : " +
                     " x : " + (double)((int)(mLocalizer.getPose().getX() * 100)) / 100 +
                     " - y : " + (double)((int)(mLocalizer.getPose().getY() * 100)) / 100 +
                     " - heading : " + (int)(mLocalizer.getPose().getHeading() / Math.PI * 180) + " deg");
-            mLogger.info(mShortName + " SPD : " +
+            mLogger.info(header + "> " + mShortName + " SPD : " +
                     " x : " + (double)((int)(mLocalizer.getVelocity().getX()) *1000) / 1000 +
                     " - y : " + (double)((int)(mLocalizer.getVelocity().getY())*1000) / 1000 +
                     " - heading : " + (double)((int)(mLocalizer.getVelocity().getHeading() / Math.PI * 1800))/1000 + " deg/s");
@@ -351,80 +375,87 @@ public class MecanumDrive extends Follower implements DriveTrain {
                     FollowerConstants.yMovement = follower.getDouble(sYMovementKey);
                 }
 
+                double[] polar = Point.cartesianToPolar(FollowerConstants.xMovement, -FollowerConstants.yMovement);
+                Vector flv = MathFunctions.normalizeVector(new Vector(polar[0],polar[1]));
+                FollowerConstants.frontLeftVector.setComponents(flv.getMagnitude(), flv.getTheta());
+
                 FollowerConstants.maxPower = 1.0;
                 if (follower.has(sMaxPowerKey)) {
                     FollowerConstants.maxPower = follower.getDouble(sMaxPowerKey);
                 }
 
-                double p = 0.1;
-                double i = 0,f = 0,d = 0;
+                FollowerConstants.translationalPIDFCoefficients.P = 0.1;
+                FollowerConstants.translationalPIDFCoefficients.I = 0;
+                FollowerConstants.translationalPIDFCoefficients.D = 0;
+                FollowerConstants.translationalPIDFCoefficients.F = 0;
                 if(follower.has(sTranslationPidfKey)) {
                     JSONObject pid = follower.getJSONObject(sTranslationPidfKey);
-                    if(pid.has(sPidfPKey)) { p = pid.getDouble(sPidfPKey); }
-                    if(pid.has(sPidfIKey)) { i = pid.getDouble(sPidfIKey); }
-                    if(pid.has(sPidfDKey)) { d = pid.getDouble(sPidfDKey); }
-                    if(pid.has(sPidfFKey)) { f = pid.getDouble(sPidfFKey); }
+                    if(pid.has(sPidfPKey)) { FollowerConstants.translationalPIDFCoefficients.P = pid.getDouble(sPidfPKey); }
+                    if(pid.has(sPidfIKey)) { FollowerConstants.translationalPIDFCoefficients.I = pid.getDouble(sPidfIKey); }
+                    if(pid.has(sPidfDKey)) { FollowerConstants.translationalPIDFCoefficients.D = pid.getDouble(sPidfDKey); }
+                    if(pid.has(sPidfFKey)) { FollowerConstants.translationalPIDFCoefficients.F = pid.getDouble(sPidfFKey); }
                 }
-                FollowerConstants.translationalPIDFCoefficients = new CustomPIDFCoefficients(p,i,d,f);
 
-                p = i = d = f = 0;
+                FollowerConstants.translationalIntegral.P = 0;
+                FollowerConstants.translationalIntegral.I = 0;
+                FollowerConstants.translationalIntegral.D = 0;
+                FollowerConstants.translationalIntegral.F = 0;
                 if(follower.has(sTranslationIntegralKey)) {
                     JSONObject pid = follower.getJSONObject(sTranslationIntegralKey);
-                    if(pid.has(sPidfPKey)) { p = pid.getDouble(sPidfPKey); }
-                    if(pid.has(sPidfIKey)) { i = pid.getDouble(sPidfIKey); }
-                    if(pid.has(sPidfDKey)) { d = pid.getDouble(sPidfDKey); }
-                    if(pid.has(sPidfFKey)) { f = pid.getDouble(sPidfFKey); }
+                    if(pid.has(sPidfPKey)) { FollowerConstants.translationalIntegral.P = pid.getDouble(sPidfPKey); }
+                    if(pid.has(sPidfIKey)) { FollowerConstants.translationalIntegral.I = pid.getDouble(sPidfIKey); }
+                    if(pid.has(sPidfDKey)) { FollowerConstants.translationalIntegral.D = pid.getDouble(sPidfDKey); }
+                    if(pid.has(sPidfFKey)) { FollowerConstants.translationalIntegral.F = pid.getDouble(sPidfFKey); }
                 }
-                FollowerConstants.translationalIntegral  = new CustomPIDFCoefficients(p,i,d,f);
 
                 FollowerConstants.translationalPIDFFeedForward = 0.015;
                 if(follower.has(sTranslationPidfFFKey)) {
                     FollowerConstants.translationalPIDFFeedForward = follower.getDouble(sTranslationPidfFFKey);
                 }
 
-                p = 1.0;
-                i = d = f = 0;
+                FollowerConstants.headingPIDFCoefficients.P = 1;
+                FollowerConstants.headingPIDFCoefficients.I = 0;
+                FollowerConstants.headingPIDFCoefficients.D = 0;
+                FollowerConstants.headingPIDFCoefficients.F = 0;
                 if(follower.has(sHeadingPidfKey)) {
                     JSONObject pid = follower.getJSONObject(sHeadingPidfKey);
-                    if(pid.has(sPidfPKey)) { p = pid.getDouble(sPidfPKey); }
-                    if(pid.has(sPidfIKey)) { i = pid.getDouble(sPidfIKey); }
-                    if(pid.has(sPidfDKey)) { d = pid.getDouble(sPidfDKey); }
-                    if(pid.has(sPidfFKey)) { f = pid.getDouble(sPidfFKey); }
+                    if(pid.has(sPidfPKey)) { FollowerConstants.headingPIDFCoefficients.P = pid.getDouble(sPidfPKey); }
+                    if(pid.has(sPidfIKey)) { FollowerConstants.headingPIDFCoefficients.I = pid.getDouble(sPidfIKey); }
+                    if(pid.has(sPidfDKey)) { FollowerConstants.headingPIDFCoefficients.D  = pid.getDouble(sPidfDKey); }
+                    if(pid.has(sPidfFKey)) { FollowerConstants.headingPIDFCoefficients.F = pid.getDouble(sPidfFKey); }
                 }
-                FollowerConstants.headingPIDFCoefficients   = new CustomPIDFCoefficients(p,i,d,f);
 
                 FollowerConstants.headingPIDFFeedForward  = 0.01;
                 if(follower.has(sHeadingPidfFFKey)) {
                     FollowerConstants.headingPIDFFeedForward  = follower.getDouble(sHeadingPidfFFKey);
                 }
 
-                double t = 0.6;
-                p = 0.025;
-                d = 0.00001;
-                f = i = 0;
+                FollowerConstants.drivePIDFCoefficients.T = 0.6;
+                FollowerConstants.drivePIDFCoefficients.P = 0.025;
+                FollowerConstants.drivePIDFCoefficients.I = 0;
+                FollowerConstants.drivePIDFCoefficients.D = 0.00001;
+                FollowerConstants.drivePIDFCoefficients.F = 0;
                 if(follower.has(sDrivePidfKey)) {
                     JSONObject pid = follower.getJSONObject(sDrivePidfKey);
-                    if(pid.has(sPidfPKey)) { p = pid.getDouble(sPidfPKey); }
-                    if(pid.has(sPidfIKey)) { i = pid.getDouble(sPidfIKey); }
-                    if(pid.has(sPidfDKey)) { d = pid.getDouble(sPidfDKey); }
-                    if(pid.has(sPidfFKey)) { f = pid.getDouble(sPidfFKey); }
-                    if(pid.has(sPidfTKey)) { t = pid.getDouble(sPidfTKey); }
+                    if(pid.has(sPidfPKey)) { FollowerConstants.drivePIDFCoefficients.P = pid.getDouble(sPidfPKey); }
+                    if(pid.has(sPidfIKey)) { FollowerConstants.drivePIDFCoefficients.I = pid.getDouble(sPidfIKey); }
+                    if(pid.has(sPidfDKey)) { FollowerConstants.drivePIDFCoefficients.D = pid.getDouble(sPidfDKey); }
+                    if(pid.has(sPidfFKey)) { FollowerConstants.drivePIDFCoefficients.F = pid.getDouble(sPidfFKey); }
+                    if(pid.has(sPidfTKey)) { FollowerConstants.drivePIDFCoefficients.T = pid.getDouble(sPidfTKey); }
                 }
-                FollowerConstants.drivePIDFCoefficients = new CustomFilteredPIDFCoefficients(p,i,d,t,f);
 
                 FollowerConstants.drivePIDFFeedForward  = 0.01;
                 if(follower.has(sDrivePidfFFKey)) {
                     FollowerConstants.drivePIDFFeedForward  = follower.getDouble(sDrivePidfFFKey);
                 }
 
-                double model = 6;
-                double data = 1;
+                FollowerConstants.driveKalmanFilterParameters.modelCovariance = 6;
+                FollowerConstants.driveKalmanFilterParameters.dataCovariance = 1;
                 if(follower.has(sDriveKalmanFilterKey)) {
                     JSONObject kalman = follower.getJSONObject(sDriveKalmanFilterKey);
-                    if(kalman.has(sKalmanModelKey)) { model = kalman.getDouble(sKalmanModelKey); }
-                    if(kalman.has(sKalmanDataKey)) { data = kalman.getDouble(sKalmanDataKey); }
+                    if(kalman.has(sKalmanModelKey)) { FollowerConstants.driveKalmanFilterParameters.modelCovariance = kalman.getDouble(sKalmanModelKey); }
+                    if(kalman.has(sKalmanDataKey)) { FollowerConstants.driveKalmanFilterParameters.dataCovariance = kalman.getDouble(sKalmanDataKey); }
                 }
-                FollowerConstants.driveKalmanFilterParameters = new KalmanFilterParameters(model, data);
 
                 FollowerConstants.mass = 10.65942;
                 if(follower.has(sMassKey)) {
@@ -503,27 +534,29 @@ public class MecanumDrive extends Follower implements DriveTrain {
                 FollowerConstants.useSecondaryHeadingPID = follower.has(sSecondHeadingPidfKey) || follower.has(sHeadingPidfSwitch) || follower.has(sSecondHeadingPidfFFKey);
                 FollowerConstants.useSecondaryDrivePID = follower.has(sSecondDrivePidfKey) || follower.has(sDrivePidfSwitch) || follower.has(sSecondDrivePidfFFKey);
 
-                p = 0.3;
-                i = f = 0;
-                d = 0.01;
+                FollowerConstants.secondaryTranslationalPIDFCoefficients.P = 0.3;
+                FollowerConstants.secondaryTranslationalPIDFCoefficients.I = 0;
+                FollowerConstants.secondaryTranslationalPIDFCoefficients.D = 0.01;
+                FollowerConstants.secondaryTranslationalPIDFCoefficients.F = 0;
                 if(follower.has(sSecondTranslationPidfKey)) {
                     JSONObject pid = follower.getJSONObject(sSecondTranslationPidfKey);
-                    if(pid.has(sPidfPKey)) { p = pid.getDouble(sPidfPKey); }
-                    if(pid.has(sPidfIKey)) { i = pid.getDouble(sPidfIKey); }
-                    if(pid.has(sPidfDKey)) { d = pid.getDouble(sPidfDKey); }
-                    if(pid.has(sPidfFKey)) { f = pid.getDouble(sPidfFKey); }
+                    if(pid.has(sPidfPKey)) { FollowerConstants.secondaryTranslationalPIDFCoefficients.P = pid.getDouble(sPidfPKey); }
+                    if(pid.has(sPidfIKey)) { FollowerConstants.secondaryTranslationalPIDFCoefficients.I = pid.getDouble(sPidfIKey); }
+                    if(pid.has(sPidfDKey)) { FollowerConstants.secondaryTranslationalPIDFCoefficients.D = pid.getDouble(sPidfDKey); }
+                    if(pid.has(sPidfFKey)) { FollowerConstants.secondaryTranslationalPIDFCoefficients.F = pid.getDouble(sPidfFKey); }
                 }
-                FollowerConstants.secondaryTranslationalPIDFCoefficients = new CustomPIDFCoefficients(p,i,d,f);
 
-                p = i = d = f = 0;
+                FollowerConstants.secondaryTranslationalIntegral.P = 0;
+                FollowerConstants.secondaryTranslationalIntegral.I = 0;
+                FollowerConstants.secondaryTranslationalIntegral.D = 0;
+                FollowerConstants.secondaryTranslationalIntegral.F = 0;
                 if(follower.has(sSecondTranslationIntegralKey)) {
                     JSONObject pid = follower.getJSONObject(sSecondTranslationIntegralKey);
-                    if(pid.has(sPidfPKey)) { p = pid.getDouble(sPidfPKey); }
-                    if(pid.has(sPidfIKey)) { i = pid.getDouble(sPidfIKey); }
-                    if(pid.has(sPidfDKey)) { d = pid.getDouble(sPidfDKey); }
-                    if(pid.has(sPidfFKey)) { f = pid.getDouble(sPidfFKey); }
+                    if(pid.has(sPidfPKey)) { FollowerConstants.secondaryTranslationalIntegral.P = pid.getDouble(sPidfPKey); }
+                    if(pid.has(sPidfIKey)) { FollowerConstants.secondaryTranslationalIntegral.I = pid.getDouble(sPidfIKey); }
+                    if(pid.has(sPidfDKey)) { FollowerConstants.secondaryTranslationalIntegral.D = pid.getDouble(sPidfDKey); }
+                    if(pid.has(sPidfFKey)) { FollowerConstants.secondaryTranslationalIntegral.F = pid.getDouble(sPidfFKey); }
                 }
-                FollowerConstants.secondaryTranslationalIntegral = new CustomPIDFCoefficients(p,i,d,f);
 
                 FollowerConstants.secondaryTranslationalPIDFFeedForward = 0.015;
                 if(follower.has(sSecondTranslationPidfFFKey)) {
@@ -535,17 +568,17 @@ public class MecanumDrive extends Follower implements DriveTrain {
                     FollowerConstants.translationalPIDFSwitch = follower.getDouble(sTranslationPidfSwitch);
                 }
 
-                p = 5.0;
-                i = f = 0;
-                d = 0.08;
+                FollowerConstants.secondaryHeadingPIDFCoefficients.P = 5.0;
+                FollowerConstants.secondaryHeadingPIDFCoefficients.I = 0;
+                FollowerConstants.secondaryHeadingPIDFCoefficients.D = 0.08;
+                FollowerConstants.secondaryHeadingPIDFCoefficients.F = 0;
                 if(follower.has(sSecondHeadingPidfKey)) {
                     JSONObject pid = follower.getJSONObject(sSecondHeadingPidfKey);
-                    if(pid.has(sPidfPKey)) { p = pid.getDouble(sPidfPKey); }
-                    if(pid.has(sPidfIKey)) { i = pid.getDouble(sPidfIKey); }
-                    if(pid.has(sPidfDKey)) { d = pid.getDouble(sPidfDKey); }
-                    if(pid.has(sPidfFKey)) { f = pid.getDouble(sPidfFKey); }
+                    if(pid.has(sPidfPKey)) { FollowerConstants.secondaryHeadingPIDFCoefficients.P = pid.getDouble(sPidfPKey); }
+                    if(pid.has(sPidfIKey)) { FollowerConstants.secondaryHeadingPIDFCoefficients.I = pid.getDouble(sPidfIKey); }
+                    if(pid.has(sPidfDKey)) { FollowerConstants.secondaryHeadingPIDFCoefficients.D = pid.getDouble(sPidfDKey); }
+                    if(pid.has(sPidfFKey)) { FollowerConstants.secondaryHeadingPIDFCoefficients.F = pid.getDouble(sPidfFKey); }
                 }
-                FollowerConstants.secondaryHeadingPIDFCoefficients   = new CustomPIDFCoefficients(p,i,d,f);
 
                 FollowerConstants.secondaryHeadingPIDFFeedForward  = 0.01;
                 if(follower.has(sSecondHeadingPidfFFKey)) {
@@ -557,19 +590,19 @@ public class MecanumDrive extends Follower implements DriveTrain {
                     FollowerConstants.headingPIDFSwitch = follower.getDouble(sHeadingPidfSwitch);
                 }
 
-                t = 0.6;
-                p = 0.02;
-                d = 0.000005;
-                f = i = 0;
+                FollowerConstants.secondaryDrivePIDFCoefficients.P = 0.02;
+                FollowerConstants.secondaryDrivePIDFCoefficients.I = 0;
+                FollowerConstants.secondaryDrivePIDFCoefficients.D = 0.000005;
+                FollowerConstants.secondaryDrivePIDFCoefficients.F = 0;
+                FollowerConstants.secondaryDrivePIDFCoefficients.T = 0.6;
                 if(follower.has(sSecondDrivePidfKey)) {
                     JSONObject pid = follower.getJSONObject(sSecondDrivePidfKey);
-                    if(pid.has(sPidfPKey)) { p = pid.getDouble(sPidfPKey); }
-                    if(pid.has(sPidfIKey)) { i = pid.getDouble(sPidfIKey); }
-                    if(pid.has(sPidfDKey)) { d = pid.getDouble(sPidfDKey); }
-                    if(pid.has(sPidfFKey)) { f = pid.getDouble(sPidfFKey); }
-                    if(pid.has(sPidfTKey)) { t = pid.getDouble(sPidfTKey); }
+                    if(pid.has(sPidfPKey)) { FollowerConstants.secondaryDrivePIDFCoefficients.P = pid.getDouble(sPidfPKey); }
+                    if(pid.has(sPidfIKey)) { FollowerConstants.secondaryDrivePIDFCoefficients.I = pid.getDouble(sPidfIKey); }
+                    if(pid.has(sPidfDKey)) { FollowerConstants.secondaryDrivePIDFCoefficients.D = pid.getDouble(sPidfDKey); }
+                    if(pid.has(sPidfFKey)) { FollowerConstants.secondaryDrivePIDFCoefficients.F = pid.getDouble(sPidfFKey); }
+                    if(pid.has(sPidfTKey)) { FollowerConstants.secondaryDrivePIDFCoefficients.T = pid.getDouble(sPidfTKey); }
                 }
-                FollowerConstants.secondaryDrivePIDFCoefficients = new CustomFilteredPIDFCoefficients(p,i,d,t,f);
 
                 FollowerConstants.secondaryDrivePIDFFeedForward  = 0.01;
                 if(follower.has(sSecondDrivePidfFFKey)) {
@@ -616,7 +649,10 @@ public class MecanumDrive extends Follower implements DriveTrain {
             mConfigurationValid = false;
         }
 
-        if(mConfigurationValid) { initialize(mLocalizer); }
+        if(mConfigurationValid) {
+            FtcDashboard.getInstance().updateConfig();
+            initialize(mLocalizer);
+        }
 
     }
 

@@ -50,14 +50,12 @@ import org.firstinspires.ftc.core.tuning.Tuning;
 public class ForwardTuning extends LinearOpMode implements Tuning {
 
     /* -------- Configuration variables -------- */
-    public static String                        CONFIGURATION   = "test";
     public static double                        DISTANCE        = 48;
 
     /* ---------------- Members ---------------- */
     private LogManager                          mLogger;
 
     private Configuration                       mConfiguration;
-    private String                              mConfigurationName;
     private Hardware                            mHardware;
 
     private SaveProvider                        mShallSave;
@@ -87,11 +85,9 @@ public class ForwardTuning extends LinearOpMode implements Tuning {
 
             mHardware = new Hardware(hardwareMap, mLogger);
 
-            mConfigurationName = CONFIGURATION;
             mConfiguration = new Configuration(mLogger);
             mConfiguration.register("robot.hardware", mHardware);
-            mConfiguration.read(Environment.getExternalStorageDirectory().getPath()
-                    + "/FIRST/" + mConfigurationName + ".json");
+            mConfiguration.read();
             mConfiguration.log();
 
             mLocalizers = mHardware.localizers();

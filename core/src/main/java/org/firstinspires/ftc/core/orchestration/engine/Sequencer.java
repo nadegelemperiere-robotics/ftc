@@ -87,6 +87,7 @@ public class Sequencer {
         if(!mTasks.isEmpty()) {
 
             Task current = mTasks.getFirst();
+
             if (current.hasFinished()) {
 
                 mTasks.remove(current);
@@ -100,6 +101,9 @@ public class Sequencer {
                     if(!mName.isEmpty()) { mLogger.info(mName + " : Stop"); }
                 }
 
+            }
+            else {
+                if(!mName.isEmpty()) { mLogger.info( mName + " : " + current.name()); }
             }
         }
 

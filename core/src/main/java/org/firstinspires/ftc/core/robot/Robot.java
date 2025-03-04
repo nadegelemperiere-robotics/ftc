@@ -83,7 +83,7 @@ public class Robot extends Context implements Configurable {
     public void                         log()
     {
         for (Map.Entry<String, Subsystem> subsystem : mSubsystems.entrySet()) {
-            subsystem.getValue().log();
+            subsystem.getValue().log("--");
         }
     }
 

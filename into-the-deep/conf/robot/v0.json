@@ -12,12 +12,12 @@
                 "outtake-slides": [ ]
             },
             "servos" : {
-                "intake-elbow-pitch":  [ ],
+                "intake-elbow-pitch":  [ { "hwmap": "0" }],
                 "intake-wrist-roll":   [ ],
-                "intake-claw":         [ ],
+                "intake-claw":         [ { "hwmap": "1" } ],
                 "intake-arm-pitch":    [ ],
                 "outtake-wrist-roll":  [ ],
-                "outtake-claw":        [ ],
+                "outtake-claw":        [ { "hwmap": "2" } ],
                 "outtake-elbow-pitch": [ ]
             },
             "localizers": {
@@ -173,9 +173,9 @@
                 "follower"   : {
                     "mass"       : 8,
                     "max-power"  : 1.0,
-                    "x-movement" : 53.8394958015502,
-                    "y-movement" : 51.65520615465059,
-                    "forward-0-power-acceleration" : -20.654845691222988,
+                    "x-movement" : 78.78821665846456,
+                    "y-movement" : 40.71633646807333,
+                    "forward-0-power-acceleration" : -22.35292605896326,
                     "strafe-0-power-acceleration" : -21.114626907838524,
                     "translation-pidf" : { "p" : 0.3 , "i" : 0 , "d" : 0.01,  "f" : 0 },
                     "translation-pidf-feed-forward" : 0.01,
@@ -197,11 +197,11 @@
         },
         "commands": [
             {  "action": "drive",
-                "1": { "scale": 1.1, "input": "left_stick_x", "controller" : "drive" },
-                "2": { "scale": -1.0, "input": "left_stick_y", "controller" : "drive" },
-                "3": { "scale": 1.0, "input": "right_stick_x", "controller" : "drive" }
+                "1": { "scale": 1.0, "input": "left_stick_y", "controller" : "drive" },
+                "2": { "scale": -1.0, "input": "left_stick_x", "controller" : "drive" },
+                "3": { "scale": -1.0, "input": "right_stick_x", "controller" : "drive" }
             },
-            { "action": "tuneDriveSpeed", "1": 0.45, "condition": { "button": "left_bumper", "state": "pressed", "controller" : "drive" } },
+            { "action": "tuneDriveSpeed", "1": 0.15, "condition": { "button": "left_bumper", "state": "pressed", "controller" : "drive" } },
             { "action": "tuneDriveSpeed", "1": 1.0, "condition": { "button": "left_bumper", "state": "notPressed", "controller" : "drive" } },
 
             { "action": "powerOuttakeSlides", "1": 0.9,  "condition": { "button": "left_bumper", "state": "pressed", "controller" : "mechanisms"} },

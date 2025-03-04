@@ -53,19 +53,13 @@ import org.firstinspires.ftc.core.tuning.Robot;
 public class CurvedBackAndForthTuning extends LinearOpMode implements Tuning {
 
     /* -------- Configuration variables -------- */
-    public static String    CONFIGURATION       = "test";
     public static double    DISTANCE            = 20;
     public static String    DRIVE_TRAIN         = "drive-train";
-    public static boolean   USE_TRANSLATIONAL   = true;
-    public static boolean   USE_CENTRIPETAL     = true;
-    public static boolean   USE_HEADING         = true;
-    public static boolean   USE_DRIVE           = true;
 
     /* ---------------- Members ---------------- */
     private LogManager      mLogger;
 
     private Configuration   mConfiguration;
-    private String          mConfigurationName;
 
     private Robot           mRobot;
     private MecanumDrive    mDrive;
@@ -89,11 +83,9 @@ public class CurvedBackAndForthTuning extends LinearOpMode implements Tuning {
 
             mRobot = new Robot(this, hardwareMap, mLogger);
 
-            mConfigurationName = CONFIGURATION;
             mConfiguration = new Configuration(mLogger);
             mConfiguration.register("robot", mRobot);
-            mConfiguration.read(Environment.getExternalStorageDirectory().getPath()
-                    + "/FIRST/" + mConfigurationName + ".json");
+            mConfiguration.read();
             mConfiguration.log();
 
             mDrive = (MecanumDrive)mRobot.subsystem(this, DRIVE_TRAIN);

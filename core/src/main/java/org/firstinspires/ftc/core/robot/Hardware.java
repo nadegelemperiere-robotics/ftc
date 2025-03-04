@@ -317,7 +317,7 @@ public class Hardware extends HardwareMap implements Configurable {
         result.append("<ul>\n");
 
         // Log voltage sensor
-        result.append("<p style=\"font-size: 12px; font-weight: 500\"> VOLTAGE")
+        result.append("<p style=\"margin-left:10px; font-size: 12px; font-weight: 500\"> VOLTAGE : ")
                 .append(mVoltageSensorName)
                 .append("</p>");
 

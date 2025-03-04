@@ -30,14 +30,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
+/* ACME robotics */
+import com.acmerobotics.dashboard.config.Config;
+
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
-
+@Config
 public class Configuration {
 
     // Default working configuration
-    static protected String         sDefaultConfiguration = "";
+    static public String            CONFIGURATION = "";
     static protected Configuration  sInstance = null;
 
     // Status
@@ -122,7 +125,7 @@ public class Configuration {
 
         String filename = Environment.getExternalStorageDirectory().getPath()
                 + "/FIRST/"
-                + Configuration.sDefaultConfiguration
+                + Configuration.CONFIGURATION
                 + ".json";
         this.read(filename);
     }

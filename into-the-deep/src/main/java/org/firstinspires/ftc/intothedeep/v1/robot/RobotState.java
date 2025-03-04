@@ -16,11 +16,15 @@ import org.firstinspires.ftc.core.subsystems.MecanumDrive;
 import org.firstinspires.ftc.intothedeep.v1.subsystems.IntakeArm;
 import org.firstinspires.ftc.intothedeep.v1.subsystems.OuttakeArm;
 
+/* Robot includes */
+import org.firstinspires.ftc.intothedeep.v1.robot.Robot.Alliance;
+
 
 public abstract class RobotState extends org.firstinspires.ftc.core.robot.RobotState {
 
     public static class SharedData extends org.firstinspires.ftc.core.robot.RobotState.SharedData {
 
+        public Alliance        alliance;
         public IntakeArm       intakeArm;
         public DefaultSlides   intakeSlides;
         public OuttakeArm      outtakeArm;

@@ -495,12 +495,12 @@ public class OuttakeArm implements Subsystem {
      * Current state logging function
      */
     @Override
-    public void                         log() {
-        if(this.hasFinished()) { mLogger.info(mName + " : pos = " + mPosition); }
-        else { mLogger.info(mName + " : pos > " + mPosition); }
-        mElbow.log();
-        mWrist.log();
-        mClaw.log();
+    public void                         log(String header) {
+        if(this.hasFinished()) { mLogger.info(header + "> " + mName.toUpperCase() + " : pos = " + mPosition); }
+        else { mLogger.info(header + "> " + mName.toUpperCase() + " : pos > " + mPosition); }
+        mElbow.log(header + "--");
+        mWrist.log(header + "--");
+        mClaw.log(header + "--");
     }
 
 

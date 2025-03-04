@@ -49,22 +49,18 @@ import org.firstinspires.ftc.core.tuning.Robot;
 public class StraightBackAndForthTuning extends LinearOpMode implements Tuning {
 
     /* -------- Configuration variables -------- */
-    public static String    CONFIGURATION       = "test";
+    public static double    MAX_POWER           = 1;
     public static double    DISTANCE            = 20;
     public static String    DRIVE_TRAIN         = "drive-train";
-    public static boolean   USE_TRANSLATIONAL   = true;
-    public static boolean   USE_CENTRIPETAL     = true;
-    public static boolean   USE_HEADING         = true;
-    public static boolean   USE_DRIVE           = true;
 
     /* ---------------- Members ---------------- */
     private LogManager      mLogger;
 
     private Configuration   mConfiguration;
-    private String          mConfigurationName;
     private Robot           mRobot;
 
     private MecanumDrive    mDrive;
+    private double          mMaxPower;
 
     private boolean         mForward = true;
 
@@ -85,17 +81,17 @@ public class StraightBackAndForthTuning extends LinearOpMode implements Tuning {
 
             mRobot = new Robot(this, hardwareMap, mLogger);
 
-            mConfigurationName = CONFIGURATION;
             mConfiguration = new Configuration(mLogger);
             mConfiguration.register("robot", mRobot);
-            mConfiguration.read(Environment.getExternalStorageDirectory().getPath()
-                    + "/FIRST/" + mConfigurationName + ".json");
+            mConfiguration.read();
             mConfiguration.log();
 
             mDrive = (MecanumDrive)mRobot.subsystem(this, DRIVE_TRAIN);
             if(mDrive != null) {
                 mDrive.setStartingPose(new Pose(0,0,0));
                 mDrive.setPose(new Pose(0,0,0));
+                mMaxPower = MAX_POWER;
+                mDrive.setMaxPower(mMaxPower);
             }
 
             mForwards = new Path(new BezierLine(new Point(0,0, Point.CARTESIAN), new Point(DISTANCE,0, Point.CARTESIAN)));
@@ -112,6 +108,11 @@ public class StraightBackAndForthTuning extends LinearOpMode implements Tuning {
             mLogger.info(LogManager.Target.DASHBOARD,description);
 
             FtcDashboard.getInstance().updateConfig();
+
+            Drawing.drawPoseHistory(mDrive.getDashboardPoseTracker(), "#4CAF50");
+            Drawing.drawRobot(mDrive.getPose(), "#4CAF50");
+            Drawing.sendPacket();
+
             mLogger.update();
 
             waitForStart();
@@ -131,7 +132,13 @@ public class StraightBackAndForthTuning extends LinearOpMode implements Tuning {
                     }
                 }
 
+                if(MAX_POWER != mMaxPower) {
+                    mMaxPower = MAX_POWER;
+                    mDrive.setMaxPower(mMaxPower);
+                }
+
                 mLogger.metric("Going forward","" + mForward);
+                mRobot.log();
 
                 Drawing.drawPoseHistory(mDrive.getDashboardPoseTracker(), "#4CAF50");
                 Drawing.drawRobot(mDrive.getPose(), "#4CAF50");

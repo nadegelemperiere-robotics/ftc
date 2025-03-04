@@ -95,7 +95,7 @@ public class LocalizerOTOS extends LocalizerComponent {
      * @return returns the current pose estimate as a Pose
      */
     @Override
-    public Pose getPose() {
+    public Pose                         getPose() {
         Pose pose = new Pose(mOtosPose.x, mOtosPose.y, mOtosPose.h);
 
         Vector vec = pose.getVector();
@@ -345,6 +345,7 @@ public class LocalizerOTOS extends LocalizerComponent {
                 Pose origin = new Pose(0,0,0);
 
                 this.setStartPose(origin);
+                this.setPose(origin);
                 mPreviousHeading = mStartPose.getHeading();
             }
         }

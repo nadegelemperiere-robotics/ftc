@@ -6,8 +6,9 @@
             <goBILDA5202SeriesMotor name="frontRight" port="1" />
             <goBILDA5202SeriesMotor name="backLeft" port="2" />
             <goBILDA5202SeriesMotor name="frontLeft" port="3" />
-            <Servo name="left_hand" port="0" />
-            <Servo name="servo" port="1" />
+            <Servo name="0" port="0" />
+            <Servo name="1" port="1" />
+            <Servo name="2" port="2" />
             <LynxEmbeddedIMU name="imu" port="0" bus="0" />
             <SparkFunOTOS2 name="otos" port="0" bus="2" />
         </LynxModule>

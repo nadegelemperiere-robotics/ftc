@@ -49,15 +49,35 @@ import org.firstinspires.ftc.core.tuning.Tuning;
 @TeleOp(name = "TurnTuning", group = "Tuning")
 public class TurnTuning extends LinearOpMode implements Tuning {
 
+    static {
+        FtcDashboard.getInstance().removeConfigVariable("DriveEncoderLocalizer","FORWARD_TICKS_TO_INCHES");
+        FtcDashboard.getInstance().removeConfigVariable("DriveEncoderLocalizer","ROBOT_LENGTH");
+        FtcDashboard.getInstance().removeConfigVariable("DriveEncoderLocalizer","ROBOT_WIDTH");
+        FtcDashboard.getInstance().removeConfigVariable("DriveEncoderLocalizer","STRAFE_TICKS_TO_INCHES");
+        FtcDashboard.getInstance().removeConfigVariable("DriveEncoderLocalizer","TURN_TICKS_TO_RADIANS");
+
+        FtcDashboard.getInstance().removeConfigVariable("ThreeWheelIMULocalizer","FORWARD_TICKS_TO_INCHES");
+        FtcDashboard.getInstance().removeConfigVariable("ThreeWheelIMULocalizer","STRAFE_TICKS_TO_INCHES");
+        FtcDashboard.getInstance().removeConfigVariable("ThreeWheelIMULocalizer","TURN_TICKS_TO_RADIANS");
+        FtcDashboard.getInstance().removeConfigVariable("ThreeWheelIMULocalizer","useIMU");
+
+        FtcDashboard.getInstance().removeConfigVariable("ThreeWheelLocalizer","FORWARD_TICKS_TO_INCHES");
+        FtcDashboard.getInstance().removeConfigVariable("ThreeWheelLocalizer","STRAFE_TICKS_TO_INCHES");
+        FtcDashboard.getInstance().removeConfigVariable("ThreeWheelLocalizer","TURN_TICKS_TO_RADIANS");
+
+        FtcDashboard.getInstance().removeConfigVariable("TwoWheelLocalizer","FORWARD_TICKS_TO_INCHES");
+        FtcDashboard.getInstance().removeConfigVariable("TwoWheelLocalizer","STRAFE_TICKS_TO_INCHES");
+
+        FtcDashboard.getInstance().updateConfig();
+    }
+
     /* -------- Configuration variables -------- */
-    public static String                        CONFIGURATION   = "test";
     public static double                        ANGLE           = 20 * Math.PI;
 
     /* ---------------- Members ---------------- */
     private LogManager                          mLogger;
 
     private Configuration                       mConfiguration;
-    private String                              mConfigurationName;
     private Hardware                            mHardware;
 
     private SaveProvider                        mShallSave;
@@ -87,11 +107,9 @@ public class TurnTuning extends LinearOpMode implements Tuning {
 
             mHardware = new Hardware(hardwareMap, mLogger);
 
-            mConfigurationName = CONFIGURATION;
             mConfiguration = new Configuration(mLogger);
             mConfiguration.register("robot.hardware", mHardware);
-            mConfiguration.read(Environment.getExternalStorageDirectory().getPath()
-                    + "/FIRST/" + mConfigurationName + ".json");
+            mConfiguration.read();
             mConfiguration.log();
 
             mLocalizers = mHardware.localizers();

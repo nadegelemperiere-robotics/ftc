@@ -10,6 +10,7 @@ package org.firstinspires.ftc.intothedeep.v1;
 /* System includes */
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /* Qualcomm includes */
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -17,6 +18,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 /* ACME robotics includes */
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
@@ -34,8 +36,12 @@ import org.firstinspires.ftc.intothedeep.v1.robot.Robot;
 import org.firstinspires.ftc.intothedeep.v1.orchestration.Dispatcher;
 import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 
+@Config
 @TeleOp(name = "Robot V1 Teleop", group = "V1")
 public class TeleOpMode extends LinearOpMode {
+
+    static public Robot.Alliance    ALLIANCE    = Robot.Alliance.BLUE;;
+    static public boolean           START       = false;
 
     LogManager              mLogger;
 
@@ -49,8 +55,6 @@ public class TeleOpMode extends LinearOpMode {
     public void runOpMode() {
 
         try {
-
-
 
             // Log initialization
             mLogger = new LogManager(telemetry, FtcDashboard.getInstance(),"teleop-v1");
@@ -79,6 +83,14 @@ public class TeleOpMode extends LinearOpMode {
             mConfiguration.read();
             mConfiguration.log();
 
+            // Select Alliance
+            while (!Objects.requireNonNull(mControllers.get("mechanisms")).buttons.b.pressed() && !START) {
+                if(Objects.requireNonNull(mControllers.get("mechanisms")).buttons.a.pressedOnce() && ALLIANCE == Robot.Alliance.BLUE) { ALLIANCE = Robot.Alliance.RED; }
+                if(Objects.requireNonNull(mControllers.get("mechanisms")).buttons.a.pressedOnce() && ALLIANCE == Robot.Alliance.RED) { ALLIANCE = Robot.Alliance.BLUE; }
+                mLogger.info("Toggle alliance using A. Press B when over");
+                mLogger.info("Alliance : " + ALLIANCE);
+            }
+
         }
         catch(Exception e){
             mLogger.error(e.getMessage());
@@ -92,7 +104,7 @@ public class TeleOpMode extends LinearOpMode {
         mLogger.reset();
         // Starting position is not specified, then it will become
         // (0,0,0) if no data from previous OpMode, or the last OpMode pose if data from previous OpMode
-        mRobot.start(Robot.Mode.TELEOP,null);
+        mRobot.start(Robot.Mode.TELEOP,ALLIANCE);
 
         while(opModeIsActive()) {
 

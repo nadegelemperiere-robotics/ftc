@@ -56,7 +56,6 @@ import org.firstinspires.ftc.core.tuning.Robot;
 public class LateralZeroPowerAccelerationTuning extends LinearOpMode implements Tuning {
 
     /* -------- Configuration variables -------- */
-    public static String                        CONFIGURATION   = "test";
     public static String                        LEFT_BACK       = "back-left-wheel";
     public static String                        LEFT_FRONT      = "front-left-wheel";
     public static String                        RIGHT_BACK      = "back-right-wheel";
@@ -68,7 +67,6 @@ public class LateralZeroPowerAccelerationTuning extends LinearOpMode implements 
     private LogManager                          mLogger;
 
     private Configuration                       mConfiguration;
-    private String                              mConfigurationName;
     private Hardware                            mHardware;
     private Robot                               mRobot;
 
@@ -104,11 +102,9 @@ public class LateralZeroPowerAccelerationTuning extends LinearOpMode implements 
 
             mRobot = new Robot(this,hardwareMap, mLogger);
 
-            mConfigurationName = CONFIGURATION;
             mConfiguration = new Configuration(mLogger);
             mConfiguration.register("robot", mRobot);
-            mConfiguration.read(Environment.getExternalStorageDirectory().getPath()
-                    + "/FIRST/" + mConfigurationName + ".json");
+            mConfiguration.read();
             mConfiguration.log();
 
             mHardware   = mRobot.hardware(this);

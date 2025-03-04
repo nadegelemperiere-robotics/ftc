@@ -148,21 +148,21 @@ public class Actuator implements Subsystem {
     /**
      * Log actuator current status
      */
-    public void                         log() {
+    public void                         log(String header) {
 
         if(mMotor != null && this.hasFinished()) {
             //mMotor.log();
-            mLogger.info(mShortName + " : pos = " + mPosition + " - enc : " + mMotor.getCurrentPosition() + " - spd : " + mMotor.getVelocity() + " - pwr : " + mMotor.getPower() + " - mode : " + mMotor.getMode());
+            mLogger.info(header + "> " + mShortName + " : pos = " + mPosition + " - enc : " + mMotor.getCurrentPosition() + " - spd : " + mMotor.getVelocity() + " - pwr : " + mMotor.getPower() + " - mode : " + mMotor.getMode());
         }
         else if(mMotor != null && !this.hasFinished()) {
             //mMotor.log();
-            mLogger.info(mShortName + " : pos > " + mPosition + " - enc : " + mMotor.getCurrentPosition() + " - spd : " + mMotor.getVelocity() + " - pwr : " + mMotor.getPower() + " - mode : " + mMotor.getMode());
+            mLogger.info(header + "> " + mShortName + " : pos > " + mPosition + " - enc : " + mMotor.getCurrentPosition() + " - spd : " + mMotor.getVelocity() + " - pwr : " + mMotor.getPower() + " - mode : " + mMotor.getMode());
         }
         else if(mServo != null && this.hasFinished()) {
-            mLogger.info(mShortName + " : pos = " + mPosition + " - srv : " + mServo.getPosition());
+            mLogger.info(header + "> " + mShortName + " : pos = " + mPosition + " - srv : " + mServo.getPosition());
         }
         else if(mServo != null && !this.hasFinished()) {
-            mLogger.info(mShortName + " : pos > " + mPosition + " - srv : " + mServo.getPosition());
+            mLogger.info(header + "> " + mShortName + " : pos > " + mPosition + " - srv : " + mServo.getPosition());
         }
     }
 

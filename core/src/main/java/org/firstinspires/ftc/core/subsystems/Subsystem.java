@@ -55,7 +55,7 @@ public interface Subsystem extends Configurable {
 
     /* ----------------------- Task management --------------------- */
     void    update();
-    void    log();
+    void    log(String header);
     boolean hasFinished();
 
     /* ------------ Inter OpModes persistence management ----------- */

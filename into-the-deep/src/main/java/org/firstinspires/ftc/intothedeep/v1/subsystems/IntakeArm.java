@@ -550,14 +550,14 @@ public class IntakeArm implements Subsystem {
      * Current state logging function
      */
     @Override
-    public void                         log() {
+    public void                         log(String header) {
 
-        if(this.hasFinished()) { mLogger.info(mName + " : pos = " + mPosition); }
-        else { mLogger.info(mName + " : pos > " + mPosition); }
-        mArm.log();
-        mElbow.log();
-        mWrist.log();
-        mClaw.log();
+        if(this.hasFinished()) { mLogger.info(header + "> " + mName.toUpperCase() + " : pos = " + mPosition); }
+        else { mLogger.info(header + "> " + mName.toUpperCase() + " : pos > " + mPosition); }
+        mArm.log(header + "--");
+        mElbow.log(header + "--");
+        mWrist.log(header + "--");
+        mClaw.log(header + "--");
     }
 
 

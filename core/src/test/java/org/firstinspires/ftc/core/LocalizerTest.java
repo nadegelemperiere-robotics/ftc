@@ -52,7 +52,6 @@ import org.firstinspires.ftc.core.tuning.Tuning;
 public class LocalizerTest extends LinearOpMode implements Tuning {
 
     /* -------- Configuration variables -------- */
-    public static String                        CONFIGURATION   = "test";
     public static String                        LEFT_BACK       = "back-left-wheel";
     public static String                        LEFT_FRONT      = "front-left-wheel";
     public static String                        RIGHT_BACK      = "back-right-wheel";
@@ -62,7 +61,6 @@ public class LocalizerTest extends LinearOpMode implements Tuning {
     private LogManager                          mLogger;
 
     private Configuration                       mConfiguration;
-    private String                              mConfigurationName;
     private Hardware                            mHardware;
 
     private Controller                          mController;
@@ -84,8 +82,6 @@ public class LocalizerTest extends LinearOpMode implements Tuning {
     // Link between name and the corresponding localizer
     private Map<String, LocalizerComponent>     mLocalizers;
 
-
-
     @Override
     public void runOpMode() {
 
@@ -98,11 +94,9 @@ public class LocalizerTest extends LinearOpMode implements Tuning {
 
             mHardware = new Hardware(hardwareMap, mLogger);
 
-            mConfigurationName = CONFIGURATION;
             mConfiguration = new Configuration(mLogger);
             mConfiguration.register("robot.hardware", mHardware);
-            mConfiguration.read(Environment.getExternalStorageDirectory().getPath()
-                    + "/FIRST/" + mConfigurationName + ".json");
+            mConfiguration.read();
             mConfiguration.log();
 
             mLocalizers = mHardware.localizers();
@@ -205,7 +199,7 @@ public class LocalizerTest extends LinearOpMode implements Tuning {
                 mLogger.metric("Current Localizer",currentLocalizer);
 
                 if(mDashboardPoseTracker != null)   {Drawing.drawPoseHistory(mDashboardPoseTracker, "#4CAF50"); }
-                if(mDashboardPoseTracker != null)   {Drawing.drawRobot(mSelectedUpdater.getPose(), "#4CAF50"); }
+                if(mSelectedUpdater != null)   {Drawing.drawRobot(mSelectedUpdater.getPose(), "#4CAF50"); }
                 Drawing.sendPacket();
 
                 mLogger.update();

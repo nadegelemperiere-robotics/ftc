@@ -18,9 +18,6 @@ import org.json.JSONObject;
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-/* PderoPathing includes */
-import com.pedropathing.localization.Pose;
-
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
@@ -38,6 +35,10 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
         TELEOP,
         AUTO_SAMPLE,
         AUTO_SPECIMEN
+    }
+    public enum Alliance {
+        BLUE,
+        RED
     }
 
     static final String sIntakeArmKey       = "intake-arm";
@@ -88,10 +89,10 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
     /**
      * Starts the robot in initial position
      */
-    public void                         start(Mode mode, Pose pose) {
+    public void                         start(Mode mode, Alliance alliance) {
         if(mConfigurationValid) {
             super.start();
-            if(pose != null) { mData.chassis.initialize(pose); }
+            mData.alliance = alliance;
             switch (mode) {
                 case TELEOP: mState = new InitState(mData, mLogger); break;
                 case AUTO_SAMPLE: mState = new AutonomousSampleState(mData, mLogger); break;
