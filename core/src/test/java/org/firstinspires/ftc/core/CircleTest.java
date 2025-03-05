@@ -1,4 +1,11 @@
-package subsystems;
+/* -------------------------------------------------------
+   Copyright (c) [2025] Nadege LEMPERIERE
+   All rights reserved
+   -------------------------------------------------------
+   Follower final test following a circle
+   ------------------------------------------------------- */
+
+package org.firstinspires.ftc.core;
 
 /* Android includes */
 import android.os.Environment;
@@ -13,8 +20,8 @@ import com.acmerobotics.dashboard.config.Config;
 
 /* PedroPathing includes */
 import com.pedropathing.follower.FollowerConstants;
-import com.pedropathing.pathgen.BezierLine;
-import com.pedropathing.pathgen.Path;
+import com.pedropathing.pathgen.BezierCurve;
+import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
 import com.pedropathing.localization.Pose;
 
@@ -45,27 +52,24 @@ import org.firstinspires.ftc.core.tuning.Robot;
  * @version 1.0, 3/13/2024
  */
 @Config
-@Autonomous (name = "StraightBackAndForthTuning", group = "Tuning")
-public class StraightBackAndForthTuning extends LinearOpMode implements Tuning {
+@Autonomous (name = "CircleTest", group = "Test")
+public class CircleTest extends LinearOpMode implements Tuning {
 
     /* -------- Configuration variables -------- */
     public static double    MAX_POWER           = 1;
-    public static double    DISTANCE            = 20;
+    public static double    RADIUS              = 10;
     public static String    DRIVE_TRAIN         = "drive-train";
 
     /* ---------------- Members ---------------- */
     private LogManager      mLogger;
 
     private Configuration   mConfiguration;
-
     private Robot           mRobot;
+
     private MecanumDrive    mDrive;
     private double          mMaxPower;
 
-    private boolean         mForward = true;
-
-    private Path            mForwards;
-    private Path            mBackwards;
+    private PathChain       mCircle;
 
     /**
      * This initializes the Follower and creates the forward and backward Paths. Additionally, this
@@ -95,17 +99,21 @@ public class StraightBackAndForthTuning extends LinearOpMode implements Tuning {
                 FollowerConstants.maxPower = mMaxPower;
             }
 
-            mForwards = new Path(new BezierLine(new Point(0,0, Point.CARTESIAN), new Point(DISTANCE,0, Point.CARTESIAN)));
-            mForwards.setConstantHeadingInterpolation(0);
-            mBackwards = new Path(new BezierLine(new Point(DISTANCE,0, Point.CARTESIAN), new Point(0,0, Point.CARTESIAN)));
-            mBackwards.setConstantHeadingInterpolation(0);
+            if(mDrive != null) {
+                mCircle = mDrive.pathBuilder()
+                        .addPath(new BezierCurve(new Point(0, 0, Point.CARTESIAN), new Point(RADIUS, 0, Point.CARTESIAN), new Point(RADIUS, RADIUS, Point.CARTESIAN)))
+                        .addPath(new BezierCurve(new Point(RADIUS, RADIUS, Point.CARTESIAN), new Point(RADIUS, 2 * RADIUS, Point.CARTESIAN), new Point(0, 2 * RADIUS, Point.CARTESIAN)))
+                        .addPath(new BezierCurve(new Point(0, 2 * RADIUS, Point.CARTESIAN), new Point(-RADIUS, 2 * RADIUS, Point.CARTESIAN), new Point(-RADIUS, RADIUS, Point.CARTESIAN)))
+                        .addPath(new BezierCurve(new Point(-RADIUS, RADIUS, Point.CARTESIAN), new Point(-RADIUS, 0, Point.CARTESIAN), new Point(0, 0, Point.CARTESIAN)))
+                        .build();
 
-            mDrive.followPath(mForwards);
+                mDrive.followPath(mCircle);
+            }
 
             String description = "<p style=\"font-weight: bold; font-size: 14px\"> ------------------------- </p>" +
-                    "<p style=\"font-weight: bold; font-size: 14px\"> This will run the robot in a straight line going " + DISTANCE + " inches" +
-                    " forward. The robot will go forward and backward continuously along " +
-                    " the path. Make sure you have enough room. </p>";
+                    "<p style=\"font-weight: bold; font-size: 14px\"> This will run in a roughly circular shape of radius " + RADIUS + "inches" +
+                    " , starting on the right-most edge. So, make sure you have enough " +
+                    " space to the left, front, and back. </p>";
             mLogger.info(LogManager.Target.DASHBOARD,description);
 
             FtcDashboard.getInstance().updateConfig();
@@ -118,25 +126,20 @@ public class StraightBackAndForthTuning extends LinearOpMode implements Tuning {
 
             while(opModeIsActive()) {
 
-                mDrive.update();
-                if (!mDrive.isBusy()) {
-                    if (mForward) {
-                        mForward = false;
-                        mDrive.followPath(mBackwards);
-                    } else {
-                        mForward = true;
-                        mDrive.followPath(mForwards);
+                if(mDrive != null) {
+                    mDrive.update();
+                    if (mDrive.atParametricEnd()) {
+                        mDrive.followPath(mCircle);
+                    }
+
+                    if (MAX_POWER != mMaxPower) {
+                        mMaxPower = MAX_POWER;
+                        mDrive.setMaxPower(mMaxPower);
+                        FollowerConstants.maxPower = mMaxPower;
+                        FtcDashboard.getInstance().updateConfig();
                     }
                 }
 
-                if(MAX_POWER != mMaxPower) {
-                    mMaxPower = MAX_POWER;
-                    mDrive.setMaxPower(mMaxPower);
-                    FollowerConstants.maxPower = mMaxPower;
-                    FtcDashboard.getInstance().updateConfig();
-                }
-
-                mLogger.metric("Going forward","" + mForward);
                 mRobot.log();
 
                 mLogger.update();

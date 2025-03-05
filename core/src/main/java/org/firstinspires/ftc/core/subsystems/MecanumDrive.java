@@ -112,6 +112,10 @@ public class MecanumDrive extends Follower implements DriveTrain {
     String                          mLocalizerHwName;
 
     final Hardware                  mHardware;
+    MotorComponent                  mLeftBack;
+    MotorComponent                  mLeftFront;
+    MotorComponent                  mRightBack;
+    MotorComponent                  mRightFront;
     LocalizerComponent              mLocalizer;
 
     double                          mDrivingSpeedMultiplier;
@@ -137,7 +141,12 @@ public class MecanumDrive extends Follower implements DriveTrain {
         mLocalizerHwName    = "";
 
         mHardware           = hardware;
+        mLeftBack           = null;
+        mLeftFront          = null;
+        mRightBack          = null;
+        mRightFront         = null;
         mLocalizer          = null;
+        drawOnDashboard     = false;
         
     }
 
@@ -168,19 +177,11 @@ public class MecanumDrive extends Follower implements DriveTrain {
      * Overload update to add drawing
      */
     public void                         update() {
+        mLogger.info(LogManager.Target.FILE,"start");
         super.update();
+        mLogger.info(LogManager.Target.FILE, "draw");
         Drawing.drawDebug(this);
-//        if(this.getCurrentPath() != null)
-//        {
-//
-//        }
-//        if(this.getDashboardPoseTracker()!= null)   {
-//            Drawing.drawPoseHistory(this.getDashboardPoseTracker(), "#4CAF50");
-//        }
-//        if(this.poseUpdater != null)   {
-//            Drawing.drawRobot(this.poseUpdater.getPose(), "#4CAF50");
-//        }
-//        Drawing.sendPacket();
+        mLogger.info(LogManager.Target.FILE, "stop");
     }
 
     /**
@@ -247,14 +248,132 @@ public class MecanumDrive extends Follower implements DriveTrain {
 
             mLocalizer.log();
 
+            mLogger.debug("Follower busy : " + isBusy() +
+                    "\nReachedEnd : " + this.atParametricEnd() +
+                    "\nheadingError : " + headingError +
+                    "\nheading vector magnitude : " + headingVector.getMagnitude() +
+                    "\nheading vector heading : " + headingVector.getTheta() +
+                    "\ncorrective vector magnitude : " +  correctiveVector.getMagnitude() +
+                    "\ncorrective vector heading : " + correctiveVector.getTheta() +
+                    "\ntranslational error magnitude : " + getTranslationalError().getMagnitude() +
+                    "\ntranslational error direction : " +  getTranslationalError().getTheta() +
+                    "\ntranslational vector magnitude : " + translationalVector.getMagnitude() +
+                    "\ntranslational vector heading : " + translationalVector.getTheta() +
+                    "\ncentripetal vector magnitude : " + centripetalVector.getMagnitude() +
+                    "\ncentripetal vector heading : " + centripetalVector.getTheta() +
+                    "\ndrive error " + driveError +
+                    "\ndrive vector magnitude " +  driveVector.getMagnitude() +
+                    "\ndrive vector heading : " + driveVector.getTheta() +
+                    "\nx : " + getPose().getX() +
+                    "\ny : " + getPose().getY() +
+                    "\nheading : " +  getPose().getHeading() +
+                    "\nclosest x : " + getClosestPose().getX() +
+                    "\nclosest y : " + getClosestPose().getY() +
+                    "\nclosest heading : " +  getClosestPose().getHeading() +
+                    "\ntotal heading : " +  poseUpdater.getTotalHeading() +
+                    "\nvelocity magnitude : " + getVelocity().getMagnitude() +
+                    "\nvelocity heading : " + getVelocity().getTheta());
+
+            double[] wheelPowers = new double[4];
+            Vector[] mecanumVectorsCopy;
+            Vector[] truePathingVectors = new Vector[2];
+
+            if(correctiveVector.getMagnitude() == FollowerConstants.maxPower ) {
+                // checks for corrective power equal to max power scaling in magnitude. if equal, then set pathing power to that
+                truePathingVectors[0] = MathFunctions.copyVector(correctiveVector);
+                truePathingVectors[1] = MathFunctions.copyVector(correctiveVector);
+            } else {
+                // corrective power did not take up all the power, so add on heading power
+                Vector leftSideVector = MathFunctions.subtractVectors(correctiveVector, headingVector);
+                Vector rightSideVector = MathFunctions.addVectors(correctiveVector, headingVector);
+                mLogger.trace("Correction left with heading x : " + leftSideVector.getXComponent() + " y : " + leftSideVector.getYComponent() +
+                        "\nCorrection right with heading x : " +  rightSideVector.getXComponent() + " y : " + rightSideVector.getYComponent());
+
+                if (leftSideVector.getMagnitude() >  FollowerConstants.maxPower || rightSideVector.getMagnitude() >  FollowerConstants.maxPower) {
+                    //if the combined corrective and heading power is greater than 1, then scale down heading power
+                    double headingScalingFactor = Math.min(findNormalizingScaling(correctiveVector, headingVector), findNormalizingScaling(correctiveVector, MathFunctions.scalarMultiplyVector(headingVector, -1)));
+                    truePathingVectors[0] = MathFunctions.subtractVectors(correctiveVector, MathFunctions.scalarMultiplyVector(headingVector, headingScalingFactor));
+                    truePathingVectors[1] = MathFunctions.addVectors(correctiveVector, MathFunctions.scalarMultiplyVector(headingVector, headingScalingFactor));
+                } else {
+                    // if we're here then we can add on some drive power but scaled down to 1
+                    Vector leftSideVectorWithPathing = MathFunctions.addVectors(leftSideVector, driveVector);
+                    Vector rightSideVectorWithPathing = MathFunctions.addVectors(rightSideVector, driveVector);
+
+                    mLogger.trace("Correction left with drive x : " + leftSideVectorWithPathing.getXComponent() + " y : " + leftSideVectorWithPathing.getYComponent() +
+                            "\nCorrection right with drive x : " +  rightSideVectorWithPathing.getXComponent() + " y : " + rightSideVectorWithPathing.getYComponent());
+
+
+                    if (leftSideVectorWithPathing.getMagnitude() > FollowerConstants.maxPower || rightSideVectorWithPathing.getMagnitude() > FollowerConstants.maxPower) {
+                        // too much power now, so we scale down the pathing vector
+                        double pathingScalingFactor = Math.min(findNormalizingScaling(leftSideVector, driveVector), findNormalizingScaling(rightSideVector, driveVector));
+                        truePathingVectors[0] = MathFunctions.addVectors(leftSideVector, MathFunctions.scalarMultiplyVector(driveVector, pathingScalingFactor));
+                        truePathingVectors[1] = MathFunctions.addVectors(rightSideVector, MathFunctions.scalarMultiplyVector(driveVector, pathingScalingFactor));
+                    } else {
+                        // just add the vectors together and you get the final vector
+                        truePathingVectors[0] = MathFunctions.copyVector(leftSideVectorWithPathing);
+                        truePathingVectors[1] = MathFunctions.copyVector(rightSideVectorWithPathing);
+                    }
+                }
+            }
+
+            truePathingVectors[0] = MathFunctions.scalarMultiplyVector(truePathingVectors[0], 2.0);
+            truePathingVectors[1] = MathFunctions.scalarMultiplyVector(truePathingVectors[1], 2.0);
+
+            Vector copiedFrontLeftVector = MathFunctions.normalizeVector(FollowerConstants.frontLeftVector);
+            mecanumVectorsCopy = new Vector[]{
+                        new Vector(copiedFrontLeftVector.getMagnitude(), copiedFrontLeftVector.getTheta()),
+                        new Vector(copiedFrontLeftVector.getMagnitude(), 2*Math.PI-copiedFrontLeftVector.getTheta()),
+                        new Vector(copiedFrontLeftVector.getMagnitude(), 2*Math.PI-copiedFrontLeftVector.getTheta()),
+                        new Vector(copiedFrontLeftVector.getMagnitude(), copiedFrontLeftVector.getTheta())};
+
+            for (int i = 0; i < mecanumVectorsCopy.length; i++) {
+                // this copies the vectors from mecanumVectors but creates new references for them
+                mecanumVectorsCopy[i].rotateVector(getPose().getHeading());
+            }
+
+            wheelPowers[0] = (mecanumVectorsCopy[1].getXComponent()*truePathingVectors[0].getYComponent() - truePathingVectors[0].getXComponent()*mecanumVectorsCopy[1].getYComponent()) / (mecanumVectorsCopy[1].getXComponent()*mecanumVectorsCopy[0].getYComponent() - mecanumVectorsCopy[0].getXComponent()*mecanumVectorsCopy[1].getYComponent());
+            wheelPowers[1] = (mecanumVectorsCopy[0].getXComponent()*truePathingVectors[0].getYComponent() - truePathingVectors[0].getXComponent()*mecanumVectorsCopy[0].getYComponent()) / (mecanumVectorsCopy[0].getXComponent()*mecanumVectorsCopy[1].getYComponent() - mecanumVectorsCopy[1].getXComponent()*mecanumVectorsCopy[0].getYComponent());
+            wheelPowers[2] = (mecanumVectorsCopy[3].getXComponent()*truePathingVectors[1].getYComponent() - truePathingVectors[1].getXComponent()*mecanumVectorsCopy[3].getYComponent()) / (mecanumVectorsCopy[3].getXComponent()*mecanumVectorsCopy[2].getYComponent() - mecanumVectorsCopy[2].getXComponent()*mecanumVectorsCopy[3].getYComponent());
+            wheelPowers[3] = (mecanumVectorsCopy[2].getXComponent()*truePathingVectors[1].getYComponent() - truePathingVectors[1].getXComponent()*mecanumVectorsCopy[2].getYComponent()) / (mecanumVectorsCopy[2].getXComponent()*mecanumVectorsCopy[3].getYComponent() - mecanumVectorsCopy[3].getXComponent()*mecanumVectorsCopy[2].getYComponent());
+
+            double wheelPowerMax = Math.max(Math.max(Math.abs(wheelPowers[0]), Math.abs(wheelPowers[1])), Math.max(Math.abs(wheelPowers[2]), Math.abs(wheelPowers[3])));
+            if (wheelPowerMax > FollowerConstants.maxPower ) {
+                wheelPowers[0] = (wheelPowers[0] / wheelPowerMax) * FollowerConstants.maxPower ;
+                wheelPowers[1] = (wheelPowers[1] / wheelPowerMax) * FollowerConstants.maxPower ;
+                wheelPowers[2] = (wheelPowers[2] / wheelPowerMax) * FollowerConstants.maxPower ;
+                wheelPowers[3] = (wheelPowers[3] / wheelPowerMax) * FollowerConstants.maxPower ;
+            }
+
+            mLogger.trace("Correction final left x : " + truePathingVectors[0].getXComponent() + " y : " + truePathingVectors[0].getYComponent() +
+                        "\nCorrection final right x : " +  truePathingVectors[1].getXComponent() + " y : " + truePathingVectors[1].getYComponent());
+
+            mLogger.trace("left front mecanum vector x : " + mecanumVectorsCopy[0].getXComponent() + " y : " + mecanumVectorsCopy[0].getYComponent() +
+                    "\nleft back mecanum vector x : " + mecanumVectorsCopy[1].getXComponent() + " y : " + mecanumVectorsCopy[1].getYComponent() +
+                    "\nright front mecanum vector x : " + mecanumVectorsCopy[2].getXComponent() + " y : " + mecanumVectorsCopy[2].getYComponent() +
+                    "\nright back mecanum vector x : " + mecanumVectorsCopy[3].getXComponent() + " y : " + mecanumVectorsCopy[3].getYComponent());
+
+            mLogger.trace("left front motor command : " + wheelPowers[0] +
+                    "\nleft back motor command : " + wheelPowers[1] +
+                    "\nright front motor command : " + wheelPowers[2] +
+                    "\nright back motor command : " + wheelPowers[3]);
+
+            mLogger.debug("left back motor power : " + mLeftBack.getPower() +
+                    "\nleft front motor power : " + mLeftFront.getPower() +
+                    "\nright back motor power : " + mRightBack.getPower() +
+                    "\nright front motor power : " + mRightFront.getPower());
+
             mLogger.info(header + "> " + mShortName + " POS : " +
-                    " x : " + (double)((int)(mLocalizer.getPose().getX() * 100)) / 100 +
-                    " - y : " + (double)((int)(mLocalizer.getPose().getY() * 100)) / 100 +
-                    " - heading : " + (int)(mLocalizer.getPose().getHeading() / Math.PI * 180) + " deg");
+                    " x : " + (double)((int)(getPose().getX() * 100)) / 100 +
+                    " - y : " + (double)((int)(getPose().getY() * 100)) / 100 +
+                    " - heading : " + (int)(getPose().getHeading() / Math.PI * 180) + " deg");
             mLogger.info(header + "> " + mShortName + " SPD : " +
                     " x : " + (double)((int)(mLocalizer.getVelocity().getX()) *1000) / 1000 +
                     " - y : " + (double)((int)(mLocalizer.getVelocity().getY())*1000) / 1000 +
                     " - heading : " + (double)((int)(mLocalizer.getVelocity().getHeading() / Math.PI * 1800))/1000 + " deg/s");
+            mLogger.info(header + "> " + mShortName + " SPD : " +
+                    " x : " + (double)((int)(poseUpdater.getVelocity().getXComponent()) *1000) / 1000 +
+                    " - y : " + (double)((int)(poseUpdater.getVelocity().getYComponent())*1000) / 1000 +
+                    " - heading : " + (double)((int)(poseUpdater.getAngularVelocity() / Math.PI * 1800))/1000 + " deg/s");
         }
     }
 
@@ -276,6 +395,10 @@ public class MecanumDrive extends Follower implements DriveTrain {
         mConfigurationValid     = true;
 
         mLocalizer              = null;
+        mLeftBack               = null;
+        mLeftFront              = null;
+        mRightBack              = null;
+        mRightFront             = null;
 
         try {
 
@@ -297,9 +420,9 @@ public class MecanumDrive extends Follower implements DriveTrain {
                 if(wheels.has(sFrontLeftKey)) {
                     FollowerConstants.leftFrontMotorName = wheels.getString(sFrontLeftKey);
                     if (motors.containsKey(FollowerConstants.leftFrontMotorName)) {
-                        MotorComponent temp = motors.get(FollowerConstants.leftFrontMotorName);
-                        if(temp != null) {
-                            FollowerConstants.leftFrontMotorDirection = temp.getDirection();
+                        mLeftFront = motors.get(FollowerConstants.leftFrontMotorName);
+                        if(mLeftFront != null) {
+                            FollowerConstants.leftFrontMotorDirection = mLeftFront.getDirection();
                         }
                         else {
                             mLogger.error("Missing left front wheel motor in drive train configuration");
@@ -310,9 +433,9 @@ public class MecanumDrive extends Follower implements DriveTrain {
                 if(wheels.has(sBackLeftKey)) {
                     FollowerConstants.leftRearMotorName = wheels.getString(sBackLeftKey);
                     if (motors.containsKey(FollowerConstants.leftRearMotorName)) {
-                        MotorComponent temp = motors.get(FollowerConstants.leftRearMotorName);
-                        if(temp != null) {
-                            FollowerConstants.leftRearMotorDirection = temp.getDirection();
+                        mLeftBack = motors.get(FollowerConstants.leftRearMotorName);
+                        if(mLeftBack != null) {
+                            FollowerConstants.leftRearMotorDirection = mLeftBack.getDirection();
                         }
                         else {
                             mLogger.error("Missing left back wheel motor in drive train configuration");
@@ -323,9 +446,9 @@ public class MecanumDrive extends Follower implements DriveTrain {
                 if(wheels.has(sFrontRightKey)) {
                     FollowerConstants.rightFrontMotorName = wheels.getString(sFrontRightKey);
                     if (motors.containsKey(FollowerConstants.rightFrontMotorName)) {
-                        MotorComponent temp = motors.get(FollowerConstants.rightFrontMotorName);
-                        if(temp != null) {
-                            FollowerConstants.rightFrontMotorDirection = temp.getDirection();
+                        mRightFront = motors.get(FollowerConstants.rightFrontMotorName);
+                        if(mRightFront != null) {
+                            FollowerConstants.rightFrontMotorDirection = mRightFront.getDirection();
                         }
                         else {
                             mLogger.error("Missing right front wheel motor in drive train configuration");
@@ -336,9 +459,9 @@ public class MecanumDrive extends Follower implements DriveTrain {
                 if(wheels.has(sBackRightKey)) {
                     FollowerConstants.rightRearMotorName = wheels.getString(sBackRightKey);
                     if (motors.containsKey(FollowerConstants.rightRearMotorName)) {
-                        MotorComponent temp = motors.get(FollowerConstants.rightRearMotorName);
-                        if(temp != null) {
-                            FollowerConstants.rightRearMotorDirection = temp.getDirection();
+                        mRightBack = motors.get(FollowerConstants.rightRearMotorName);
+                        if(mRightBack != null) {
+                            FollowerConstants.rightRearMotorDirection = mRightBack.getDirection();
                         }
                         else {
                             mLogger.error("Missing right back wheel motor in drive train configuration");
@@ -1376,6 +1499,15 @@ public class MecanumDrive extends Follower implements DriveTrain {
      */
     @Override
     public void                         initialize() { }
+
+
+    private double findNormalizingScaling(Vector staticVector, Vector variableVector) {
+        double a = Math.pow(variableVector.getXComponent(), 2) + Math.pow(variableVector.getYComponent(), 2);
+        double b = staticVector.getXComponent() * variableVector.getXComponent() + staticVector.getYComponent() * variableVector.getYComponent();
+        double c = Math.pow(staticVector.getXComponent(), 2) + Math.pow(staticVector.getYComponent(), 2) - Math.pow(FollowerConstants.maxPower, 2);
+        return (-b + Math.sqrt(Math.pow(b, 2) - a*c))/(a);
+
+    }
 
 }
 

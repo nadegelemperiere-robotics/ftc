@@ -177,10 +177,12 @@
                     "y-movement" : 40.71633646807333,
                     "forward-0-power-acceleration" : -22.35292605896326,
                     "strafe-0-power-acceleration" : -21.114626907838524,
-                    "translation-pidf" : { "p" : 0.3 , "i" : 0 , "d" : 0.01,  "f" : 0 },
-                    "translation-pidf-feed-forward" : 0.01,
-                    "heading-pidf" : { "p" : 1.0, "i" : 0.0 , "d" : 0.01,  "f" : 0 },
-                    "heading-pidf-feed-forward" : 0.01
+                    "translation-pidf" : { "p" : 0.1 , "i" : 0 , "d" : 0.005,  "f" : 0 },
+                    "translation-pidf-feed-forward" : 0.005,
+                    "heading-pidf" : { "p" : 0.5, "i" : 0.0 , "d" : 0.05,  "f" : 0 },
+                    "heading-pidf-feed-forward" : 0.01,
+                    "drive-pidf" : { "p" : 0.025, "i" : 0.0 , "d" : 0.00001,  "f" : 0, "t" : 0.6 },
+                    "drive-pidf-feed-forward" : 0.0
                 }
             }
         }

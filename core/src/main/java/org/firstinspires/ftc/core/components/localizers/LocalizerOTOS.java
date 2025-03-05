@@ -112,7 +112,7 @@ public class LocalizerOTOS extends LocalizerComponent {
      * @return returns the current velocity estimate as a Pose
      */
     @Override
-    public Pose getVelocity() {
+    public Pose                         getVelocity() {
         return new Pose(mOtosVelocity.x, mOtosVelocity.y, mOtosVelocity.h);
     }
 
@@ -122,7 +122,7 @@ public class LocalizerOTOS extends LocalizerComponent {
      * @return returns the current velocity estimate as a Vector
      */
     @Override
-    public Vector getVelocityVector() {
+    public Vector                       getVelocityVector() {
         return getVelocity().getVector();
     }
 
@@ -133,7 +133,7 @@ public class LocalizerOTOS extends LocalizerComponent {
      * @param pose the new start pose
      */
     @Override
-    public void setStartPose(Pose pose) {
+    public void                         setStartPose(Pose pose) {
         if(mConfigurationValid) {
             mStartPose = pose;
         }

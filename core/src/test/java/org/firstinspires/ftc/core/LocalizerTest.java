@@ -2,7 +2,7 @@
    Copyright (c) [2025] Nadege LEMPERIERE
    All rights reserved
    -------------------------------------------------------
-   Localizers lateral tuning tool
+   Localizers final test tool
    ------------------------------------------------------- */
 
 package org.firstinspires.ftc.core;
@@ -11,9 +11,6 @@ package org.firstinspires.ftc.core;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-
-/* Android includes */
-import android.os.Environment;
 
 /* Qualcomm includes */
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -48,7 +45,7 @@ import org.firstinspires.ftc.core.robot.Hardware;
 import org.firstinspires.ftc.core.tuning.Tuning;
 
 @Config
-@TeleOp(name = "LocalizerTest", group = "Tuning")
+@TeleOp(name = "LocalizerTest", group = "Test")
 public class LocalizerTest extends LinearOpMode implements Tuning {
 
     /* -------- Configuration variables -------- */
@@ -228,11 +225,13 @@ public class LocalizerTest extends LinearOpMode implements Tuning {
 
         if (mLocalizers.containsKey(mCurrentLocalizer)) {
             mSelectedLocalizer = mLocalizers.get(mCurrentLocalizer);
-            mSelectedUpdater = new PoseUpdater(null, mSelectedLocalizer);
-            mDashboardPoseTracker = new DashboardPoseTracker(mSelectedUpdater);
+            if(mSelectedLocalizer != null) {
+                mSelectedUpdater = new PoseUpdater(null, mSelectedLocalizer);
+                mDashboardPoseTracker = new DashboardPoseTracker(mSelectedUpdater);
 
-            mSelectedLocalizer.setStartPose(new Pose(0,0,0));
-            mSelectedLocalizer.setPose(new Pose(0,0,0));
+                mSelectedLocalizer.setStartPose(new Pose(0, 0, 0));
+                mSelectedLocalizer.setPose(new Pose(0, 0, 0));
+            }
 
         }
     }

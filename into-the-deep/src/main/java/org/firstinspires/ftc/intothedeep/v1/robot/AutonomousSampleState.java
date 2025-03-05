@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 /* PedroPathing includes */
 import com.pedropathing.localization.Pose;
 import com.pedropathing.pathgen.BezierLine;
+import com.pedropathing.pathgen.BezierCurve;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
 
@@ -35,31 +36,35 @@ import org.firstinspires.ftc.core.orchestration.engine.Sequencer;
 
 public class AutonomousSampleState extends RobotState {
 
-    static final Map<Alliance,Pose>   sInitial;
-    static final Map<Alliance,Pose>   sUnderBasket;
-    static final Map<Alliance,Pose>   sSample1;
-    static final Map<Alliance,Pose>   sPreAscend;
-    static final Map<Alliance,Pose>   sAscend;
+    static final Map<Alliance,Pose> sInitial;
+    static final Map<Alliance,Pose> sUnderBasket;
+    static final Map<Alliance,Pose> sSample1;
+    static final Map<Alliance,Pose> sAlongTheWay;
+    static final Map<Alliance,Pose> sPreAscend;
+    static final Map<Alliance,Pose> sAscend;
 
     static {
         sInitial        = new LinkedHashMap<>();
         sUnderBasket    = new LinkedHashMap<>();
         sSample1        = new LinkedHashMap<>();
+        sAlongTheWay    = new LinkedHashMap<>();
         sPreAscend      = new LinkedHashMap<>();
         sAscend         = new LinkedHashMap<>();
 
 
-        sInitial.put(Alliance.BLUE,new Pose(-36,-60,0));
-        sUnderBasket.put(Alliance.BLUE,new Pose(-46.25,-49.37,Math.PI/4));
-        sSample1.put(Alliance.BLUE,new Pose(-46.25 + 0.75 * Math.sqrt(2.0),-46.37 + 0.75 * Math.sqrt(2.0),Math.PI/2));
-        sPreAscend.put(Alliance.BLUE,new Pose(-46,-12,Math.PI));
-        sAscend.put(Alliance.BLUE,new Pose(-31.5,-12,Math.PI));
+        sInitial.put(Alliance.BLUE,new Pose(-39,-60,0));
+        sUnderBasket.put(Alliance.BLUE,new Pose(-49.25,-49.37,Math.PI/4));
+        sSample1.put(Alliance.BLUE,new Pose(-49.25 + 0.75 * Math.sqrt(2.0),-46.37 + 0.75 * Math.sqrt(2.0),Math.PI/2));
+        sAlongTheWay.put(Alliance.BLUE,new Pose(-36,-24,Math.PI/2));
+        sPreAscend.put(Alliance.BLUE,new Pose(-49,-12,Math.PI));
+        sAscend.put(Alliance.BLUE,new Pose(-34.5,-12,Math.PI));
 
-        sInitial.put(Alliance.RED,new Pose(36,60,Math.PI));
-        sUnderBasket.put(Alliance.RED,new Pose(46.25,49.37, -3*Math.PI/4));
-        sSample1.put(Alliance.RED,new Pose(46.25 - 0.75 * Math.sqrt(2.0),46.37 - 0.75 * Math.sqrt(2.0),- Math.PI/2));
-        sPreAscend.put(Alliance.RED,new Pose(46,12,0));
-        sAscend.put(Alliance.RED, new Pose(31.5,12,0));
+        sInitial.put(Alliance.RED,new Pose(39,60,Math.PI));
+        sUnderBasket.put(Alliance.RED,new Pose(49.25,49.37, -3*Math.PI/4));
+        sSample1.put(Alliance.RED,new Pose(49.25 - 0.75 * Math.sqrt(2.0),46.37 - 0.75 * Math.sqrt(2.0),- Math.PI/2));
+        sAlongTheWay.put(Alliance.RED,new Pose(36,24,-Math.PI/2));
+        sPreAscend.put(Alliance.RED,new Pose(49,12,0));
+        sAscend.put(Alliance.RED, new Pose(34.5,12,0));
     }
 
     final   Sequencer   mSequencer;
@@ -108,8 +113,9 @@ public class AutonomousSampleState extends RobotState {
                         sUnderBasket.get(alliance).getHeading()).build();
 
         PathChain trajectory4 = ((SharedData)mData).chassis.pathBuilder()
-                .addPath(new BezierLine(
+                .addPath(new BezierCurve(
                         new Point(sUnderBasket.get(alliance)),
+                        new Point(sAlongTheWay.get(alliance)),
                         new Point(sPreAscend.get(alliance))))
                 .setLinearHeadingInterpolation(
                         sUnderBasket.get(alliance).getHeading(),

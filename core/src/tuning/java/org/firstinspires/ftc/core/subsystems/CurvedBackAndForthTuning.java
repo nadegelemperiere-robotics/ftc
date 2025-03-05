@@ -4,17 +4,17 @@ package subsystems;
 import android.os.Environment;
 
 /* Qualcomm includes */
-import com.pedropathing.localization.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 /* ACME includes */
-import com.pedropathing.util.Drawing;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 
 /* PedroPathing includes */
+import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.pathgen.BezierCurve;
+import com.pedropathing.localization.Pose;
 import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.Point;
 
@@ -26,9 +26,6 @@ import org.firstinspires.ftc.core.configuration.Configuration;
 
 /* Subsystems includes */
 import org.firstinspires.ftc.core.subsystems.MecanumDrive;
-
-/* Robot includes */
-import org.firstinspires.ftc.core.robot.Hardware;
 
 /* Tuning includes */
 import org.firstinspires.ftc.core.tuning.Tuning;
@@ -53,6 +50,7 @@ import org.firstinspires.ftc.core.tuning.Robot;
 public class CurvedBackAndForthTuning extends LinearOpMode implements Tuning {
 
     /* -------- Configuration variables -------- */
+    public static double    MAX_POWER           = 1;
     public static double    DISTANCE            = 20;
     public static String    DRIVE_TRAIN         = "drive-train";
 
@@ -63,6 +61,7 @@ public class CurvedBackAndForthTuning extends LinearOpMode implements Tuning {
 
     private Robot           mRobot;
     private MecanumDrive    mDrive;
+    private double          mMaxPower;
 
     private boolean         mForward = true;
 
@@ -92,6 +91,9 @@ public class CurvedBackAndForthTuning extends LinearOpMode implements Tuning {
             if(mDrive != null) {
                 mDrive.setStartingPose(new Pose(0,0,0));
                 mDrive.setPose(new Pose(0,0,0));
+                mMaxPower = MAX_POWER;
+                mDrive.setMaxPower(mMaxPower);
+                FollowerConstants.maxPower = mMaxPower;
             }
 
             mForwards = new Path(new BezierCurve(new Point(0,0, Point.CARTESIAN), new Point(Math.abs(DISTANCE),0, Point.CARTESIAN), new Point(Math.abs(DISTANCE),DISTANCE, Point.CARTESIAN)));
@@ -127,13 +129,16 @@ public class CurvedBackAndForthTuning extends LinearOpMode implements Tuning {
                     }
                 }
 
+                if(MAX_POWER != mMaxPower) {
+                    mMaxPower = MAX_POWER;
+                    mDrive.setMaxPower(mMaxPower);
+                    FollowerConstants.maxPower = mMaxPower;
+                    FtcDashboard.getInstance().updateConfig();
+                }
+
                 mConfiguration.log();
 
-                mLogger.metric("Goind forward","" + mForward);
-
-                Drawing.drawPoseHistory(mDrive.getDashboardPoseTracker(), "#4CAF50");
-                Drawing.drawRobot(mDrive.getPose(), "#4CAF50");
-                Drawing.sendPacket();
+                mLogger.metric("Going forward","" + mForward);
 
                 mLogger.update();
             }
