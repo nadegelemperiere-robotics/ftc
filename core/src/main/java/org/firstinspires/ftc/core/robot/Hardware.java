@@ -42,6 +42,7 @@ import org.firstinspires.ftc.core.components.servos.ServoCoupled;
 import org.firstinspires.ftc.core.components.imus.ImuComponent;
 import org.firstinspires.ftc.core.components.voltage.VoltageSensorComponent;
 import org.firstinspires.ftc.core.components.localizers.LocalizerComponent;
+import org.firstinspires.ftc.core.components.cameras.CameraComponent;
 
 public class Hardware extends HardwareMap implements Configurable {
 
@@ -50,6 +51,7 @@ public class Hardware extends HardwareMap implements Configurable {
     static final protected String   sImusKey        = "imus";
     static final protected String   sServosKey      = "servos";
     static final protected String   sLocalizersKey  = "localizers";
+    static final protected String   sCamerasKey     = "cameras";
 
     final protected LogManager                      mLogger;
 
@@ -61,6 +63,7 @@ public class Hardware extends HardwareMap implements Configurable {
     final protected Map<String, ServoComponent>     mServos;
     final protected Map<String, ImuComponent>       mImus;
     final protected Map<String, LocalizerComponent> mLocalizers;
+    final protected Map<String, CameraComponent>    mCameras;
     VoltageSensorComponent                          mVoltageSensor;
     String                                          mVoltageSensorName;
 
@@ -90,15 +93,17 @@ public class Hardware extends HardwareMap implements Configurable {
         mServos         = new LinkedHashMap<>();
         mImus           = new LinkedHashMap<>();
         mLocalizers     = new LinkedHashMap<>();
+        mCameras        = new LinkedHashMap<>();
         mVoltageSensor  = null;
         mVoltageSensorName = "";
 
     }
 
-    public Map<String,MotorComponent>       motors() { return mMotors; }
-    public Map<String,ServoComponent>       servos() { return mServos; }
-    public Map<String,ImuComponent>         imus() { return mImus; }
-    public Map<String,LocalizerComponent>   localizers() { return mLocalizers; }
+    public Map<String,MotorComponent>       motors()        { return mMotors; }
+    public Map<String,ServoComponent>       servos()        { return mServos; }
+    public Map<String,ImuComponent>         imus()          { return mImus; }
+    public Map<String,LocalizerComponent>   localizers()    { return mLocalizers; }
+    public Map<String,CameraComponent>      cameras()       { return mCameras; }
     public VoltageSensorComponent           voltageSensor() { return mVoltageSensor; }
 
 
@@ -110,6 +115,9 @@ public class Hardware extends HardwareMap implements Configurable {
         mLogger.info(LogManager.Target.FILE, "start");
         for (Map.Entry<String, ImuComponent> imu : mImus.entrySet()) {
             imu.getValue().update();
+        }
+        for (Map.Entry<String, CameraComponent> camera : mCameras.entrySet()) {
+            camera.getValue().update();
         }
         // Call other components at least once to trigger bulk caching
         for (Map.Entry<String, MotorComponent> motor : mMotors.entrySet()) {
@@ -130,6 +138,7 @@ public class Hardware extends HardwareMap implements Configurable {
         mImus.clear();
         mServos.clear();
         mLocalizers.clear();
+        mCameras.clear();
 
         try {
 
@@ -237,6 +246,29 @@ public class Hardware extends HardwareMap implements Configurable {
 
                 }
             }
+
+            // Read cameras
+            if (reader.has(sCamerasKey)) {
+
+                JSONObject cameras = reader.getJSONObject(sCamerasKey);
+                Iterator<String> keys = cameras.keys();
+                while (keys.hasNext()) {
+
+                    String key = keys.next();
+
+                    CameraComponent camera = CameraComponent.factory(key, cameras.getJSONObject(key), mMap, mLogger);
+                    if(camera == null) {
+                        mLogger.warning("Camera " + key + " not recognized by factory");
+                        mConfigurationValid = false;
+                    }
+                    else if (!camera.isConfigured()) {
+                        mLogger.warning("Camera " + key + " configuration is invalid");
+                        mConfigurationValid = false;
+                    } else { mCameras.put(key, camera); }
+
+                }
+            }
+
         } catch (JSONException e) {
             mLogger.error(e.getMessage());
         }
@@ -305,6 +337,15 @@ public class Hardware extends HardwareMap implements Configurable {
             }
             writer.put(sLocalizersKey, localizers);
 
+            // Write cameras
+            JSONObject cameras = new JSONObject();
+            for (Map.Entry<String, CameraComponent> camera : mCameras.entrySet()) {
+                JSONObject temp = new JSONObject();
+                camera.getValue().write(temp);
+                localizers.put(camera.getKey(), temp);
+            }
+            writer.put(sCamerasKey, cameras);
+
         } catch (JSONException e) { mLogger.error(e.getMessage()); }
     }
 
@@ -351,7 +392,6 @@ public class Hardware extends HardwareMap implements Configurable {
         result.append("</ul>\n");
         result.append("</details>\n");
 
-
         // Log imus
         result.append("<details style=\"margin-left:10px\">\n");
         result.append("<summary style=\"font-size: 12px; font-weight: 500\"> IMUS </summary>\n");
@@ -367,7 +407,6 @@ public class Hardware extends HardwareMap implements Configurable {
         result.append("</ul>\n");
         result.append("</details>\n");
 
-
         // Log odometers
         result.append("<details style=\"margin-left:10px\">\n");
         result.append("<summary style=\"font-size: 12px; font-weight: 500\"> LOCALIZERS </summary>\n");
@@ -380,6 +419,21 @@ public class Hardware extends HardwareMap implements Configurable {
                     .append(value.logConfigurationHTML())
                     .append("</ul>\n")
                     .append("</details>\n"));
+        result.append("</ul>\n");
+        result.append("</details>\n");
+
+        // Log cameras
+        result.append("<details style=\"margin-left:10px\">\n");
+        result.append("<summary style=\"font-size: 12px; font-weight: 500\"> CAMERAS </summary>\n");
+        result.append("<ul>\n");
+        mCameras.forEach((key, value) -> result.append("<details style=\"margin-left:10px\">\n")
+                .append("<summary style=\"font-size: 11px; font-weight: 500\"> ")
+                .append(key.toUpperCase())
+                .append(" </summary>\n")
+                .append("<ul>\n")
+                .append(value.logConfigurationHTML())
+                .append("</ul>\n")
+                .append("</details>\n"));
         result.append("</ul>\n");
         result.append("</details>\n");
 
@@ -439,6 +493,16 @@ public class Hardware extends HardwareMap implements Configurable {
                     .append(key)
                     .append("\n")
                     .append(value.logConfigurationText(header + "----")));
+
+        // Log cameras
+        result.append(header)
+                .append("> CAMERAS\n");
+
+        mCameras.forEach((key, value) -> result.append(header)
+                .append("--> ")
+                .append(key)
+                .append("\n")
+                .append(value.logConfigurationText(header + "----")));
 
         return result.toString();
 

@@ -162,15 +162,18 @@ public class LocalizerPinPoint extends LocalizerComponent {
      */
     @Override
     public void                         update() {
-        mDeltaTimeNano = mTimer.getElapsedTime();
-        mTimer.resetTimer();
-        mPinPoint.update();
-        Pose currentPinpointPose = getPoseEstimate(mPinPoint.getPosition(), mPinpointPose, mDeltaTimeNano);
-        mTotalHeading += MathFunctions.getSmallestAngleDifference(currentPinpointPose.getHeading(), mPreviousHeading);
-        mPreviousHeading = currentPinpointPose.getHeading();
-        Pose deltaPose = MathFunctions.subtractPoses(currentPinpointPose, mPinpointPose);
-        mCurrentVelocity = new Pose(deltaPose.getX() / (mDeltaTimeNano / Math.pow(10.0, 9)), deltaPose.getY() / (mDeltaTimeNano / Math.pow(10.0, 9)), deltaPose.getHeading() / (mDeltaTimeNano / Math.pow(10.0, 9)));
-        mPinpointPose = currentPinpointPose;
+
+        if(mConfigurationValid) {
+            mDeltaTimeNano = mTimer.getElapsedTime();
+            mTimer.resetTimer();
+            mPinPoint.update();
+            Pose currentPinpointPose = getPoseEstimate(mPinPoint.getPosition(), mPinpointPose, mDeltaTimeNano);
+            mTotalHeading += MathFunctions.getSmallestAngleDifference(currentPinpointPose.getHeading(), mPreviousHeading);
+            mPreviousHeading = currentPinpointPose.getHeading();
+            Pose deltaPose = MathFunctions.subtractPoses(currentPinpointPose, mPinpointPose);
+            mCurrentVelocity = new Pose(deltaPose.getX() / (mDeltaTimeNano / Math.pow(10.0, 9)), deltaPose.getY() / (mDeltaTimeNano / Math.pow(10.0, 9)), deltaPose.getHeading() / (mDeltaTimeNano / Math.pow(10.0, 9)));
+            mPinpointPose = currentPinpointPose;
+        }
     }
 
     /**

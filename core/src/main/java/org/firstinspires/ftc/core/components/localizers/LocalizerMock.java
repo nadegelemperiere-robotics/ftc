@@ -117,8 +117,10 @@ public class LocalizerMock extends LocalizerComponent {
      */
     @Override
     public void                         update() {
-        mTotalHeading += MathFunctions.getSmallestAngleDifference(mCurrentPose.getHeading(), mPreviousHeading);
-        mPreviousHeading = mCurrentPose.getHeading();
+        if(mConfigurationValid) {
+            mTotalHeading += MathFunctions.getSmallestAngleDifference(mCurrentPose.getHeading(), mPreviousHeading);
+            mPreviousHeading = mCurrentPose.getHeading();
+        }
     }
     /**
      * This returns how far the robot has turned in radians, in a number not clamped between 0 and

@@ -44,6 +44,20 @@
                     "logo-direction"    : "up",
                     "usb-direction"     : "left"
                 }
+            },
+            "cameras": {
+                "limelight": {
+                    "type"   : "limelight",
+                    "hwmap"  : "limelight",
+                    "port"   : 5802
+                },
+                "logitech": {
+                    "type"   : "default",
+                    "hwmap"  : "webcam"
+                },
+                "mock": {
+                    "type"   : "mock"
+                }
             }
         },
         "subsystems" : {

@@ -288,10 +288,9 @@ public class MotorCoupled implements MotorComponent {
 
         if(mConfigurationValid) {
             mController = new MotorControllerCoupled(mFirst.getController(), mSecond.getController(), mName, mLogger);
-            if(!mFirst.getMotorType().equals(mSecond.getMotorType())) {
-                mLogger.warning("Coupled motor does not have the same type");
-            }if(!mFirst.getManufacturer().equals(mSecond.getManufacturer())) {
-                mLogger.warning("Coupled motor does not have the same manufacturer");
+
+            if(!mFirst.getManufacturer().equals(mSecond.getManufacturer())) {
+                mLogger.warning("Coupled motor does not have the same manufacturers : "+  mFirst.getManufacturer() + " and " + mSecond.getManufacturer());
             }
         }
 

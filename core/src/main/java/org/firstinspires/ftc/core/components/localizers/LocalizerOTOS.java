@@ -158,9 +158,13 @@ public class LocalizerOTOS extends LocalizerComponent {
      */
     @Override
     public void                         update() {
-        mOtos.getPosVelAcc(mOtosPose,mOtosVelocity,mOtosAcceleration);
-        mTotalHeading += MathFunctions.getSmallestAngleDifference(mOtosPose.h, mPreviousHeading);
-        mPreviousHeading = mOtosPose.h;
+
+        if(mConfigurationValid) {
+            mOtos.getPosVelAcc(mOtosPose, mOtosVelocity, mOtosAcceleration);
+            mTotalHeading += MathFunctions.getSmallestAngleDifference(mOtosPose.h, mPreviousHeading);
+            mPreviousHeading = mOtosPose.h;
+        }
+        
     }
 
     /**

@@ -187,35 +187,38 @@ public class LocalizerThreeDeadWheels extends LocalizerComponent {
      */
     @Override
     public void update() {
-        mDeltaTimeNano = mTimer.getElapsedTime();
-        mTimer.resetTimer();
 
-        updateEncoders();
-        Matrix robotDeltas = getRobotDeltas();
-        Matrix globalDeltas;
-        setPrevRotationMatrix(getPose().getHeading());
+        if(mConfigurationValid) {
+            mDeltaTimeNano = mTimer.getElapsedTime();
+            mTimer.resetTimer();
 
-        Matrix transformation = new Matrix(3,3);
-        if (Math.abs(robotDeltas.get(2, 0)) < 0.001) {
-            transformation.set(0, 0, 1.0 - (Math.pow(robotDeltas.get(2, 0), 2) / 6.0));
-            transformation.set(0, 1, -robotDeltas.get(2, 0) / 2.0);
-            transformation.set(1, 0, robotDeltas.get(2, 0) / 2.0);
-            transformation.set(1, 1, 1.0 - (Math.pow(robotDeltas.get(2, 0), 2) / 6.0));
-            transformation.set(2, 2, 1.0);
-        } else {
-            transformation.set(0, 0, Math.sin(robotDeltas.get(2, 0)) / robotDeltas.get(2, 0));
-            transformation.set(0, 1, (Math.cos(robotDeltas.get(2, 0)) - 1.0) / robotDeltas.get(2, 0));
-            transformation.set(1, 0, (1.0 - Math.cos(robotDeltas.get(2, 0))) / robotDeltas.get(2, 0));
-            transformation.set(1, 1, Math.sin(robotDeltas.get(2, 0)) / robotDeltas.get(2, 0));
-            transformation.set(2, 2, 1.0);
+            updateEncoders();
+            Matrix robotDeltas = getRobotDeltas();
+            Matrix globalDeltas;
+            setPrevRotationMatrix(getPose().getHeading());
+
+            Matrix transformation = new Matrix(3, 3);
+            if (Math.abs(robotDeltas.get(2, 0)) < 0.001) {
+                transformation.set(0, 0, 1.0 - (Math.pow(robotDeltas.get(2, 0), 2) / 6.0));
+                transformation.set(0, 1, -robotDeltas.get(2, 0) / 2.0);
+                transformation.set(1, 0, robotDeltas.get(2, 0) / 2.0);
+                transformation.set(1, 1, 1.0 - (Math.pow(robotDeltas.get(2, 0), 2) / 6.0));
+                transformation.set(2, 2, 1.0);
+            } else {
+                transformation.set(0, 0, Math.sin(robotDeltas.get(2, 0)) / robotDeltas.get(2, 0));
+                transformation.set(0, 1, (Math.cos(robotDeltas.get(2, 0)) - 1.0) / robotDeltas.get(2, 0));
+                transformation.set(1, 0, (1.0 - Math.cos(robotDeltas.get(2, 0))) / robotDeltas.get(2, 0));
+                transformation.set(1, 1, Math.sin(robotDeltas.get(2, 0)) / robotDeltas.get(2, 0));
+                transformation.set(2, 2, 1.0);
+            }
+
+            globalDeltas = Matrix.multiply(Matrix.multiply(mPrevRotationMatrix, transformation), robotDeltas);
+
+            mDisplacementPose.add(new Pose(globalDeltas.get(0, 0), globalDeltas.get(1, 0), globalDeltas.get(2, 0)));
+            mCurrentVelocity = new Pose(globalDeltas.get(0, 0) / (mDeltaTimeNano / Math.pow(10.0, 9)), globalDeltas.get(1, 0) / (mDeltaTimeNano / Math.pow(10.0, 9)), globalDeltas.get(2, 0) / (mDeltaTimeNano / Math.pow(10.0, 9)));
+
+            mTotalHeading += globalDeltas.get(2, 0);
         }
-
-        globalDeltas = Matrix.multiply(Matrix.multiply(mPrevRotationMatrix, transformation), robotDeltas);
-
-        mDisplacementPose.add(new Pose(globalDeltas.get(0, 0), globalDeltas.get(1, 0), globalDeltas.get(2, 0)));
-        mCurrentVelocity = new Pose(globalDeltas.get(0, 0) / (mDeltaTimeNano / Math.pow(10.0, 9)), globalDeltas.get(1, 0) / (mDeltaTimeNano / Math.pow(10.0, 9)), globalDeltas.get(2, 0) / (mDeltaTimeNano / Math.pow(10.0, 9)));
-
-        mTotalHeading += globalDeltas.get(2, 0);
     }
 
     /**
