@@ -108,8 +108,8 @@ public class SampleFactory implements LimelightObjectFactory<Sample, Sample> {
             result[i_data] = input.index(); i_data++;
             result[i_data] = input.x(); i_data++;
             result[i_data] = input.y(); i_data++;
-            result[i_data] = input.xMax() - input.xMin(); ; i_data++;
-            result[i_data] = input.yMax() - input.yMin(); ; i_data++;
+            result[i_data] = input.xMax() - input.xMin(); i_data++;
+            result[i_data] = input.yMax() - input.yMin(); i_data++;
             result[i_data] = col; i_data++;
             result[i_data] = input.area();
         }

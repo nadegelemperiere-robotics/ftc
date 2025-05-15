@@ -6,9 +6,6 @@
    ------------------------------------------------------- */
 package org.firstinspires.ftc.core.processing.limelight;
 
-/* System includes */
-import java.util.List;
-
 /* Qualcomm includes */
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 

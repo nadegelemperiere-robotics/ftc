@@ -40,7 +40,7 @@ import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 @TeleOp(name = "Robot V1 Teleop", group = "V1")
 public class TeleOpMode extends LinearOpMode {
 
-    static public Robot.Alliance    ALLIANCE    = Robot.Alliance.BLUE;;
+    static public Robot.Alliance    ALLIANCE    = Robot.Alliance.BLUE;
     static public boolean           START       = false;
 
     LogManager              mLogger;

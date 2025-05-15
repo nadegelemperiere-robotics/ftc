@@ -156,16 +156,12 @@ public class AutonomousSampleState extends RobotState {
                 ),
                 new Task(
                         "Elevate outtake slides",
-                        () -> {
-                            ((SharedData)mData).outtakeSlides.position("max",25,5000);
-                        },
+                        () -> ((SharedData)mData).outtakeSlides.position("max",25,5000),
                         new Condition(() -> ((SharedData)mData).outtakeSlides.hasFinished())
                 ),
                 new Task(
                         "Position outtake arm",
-                        () -> {
-                            ((SharedData)mData).outtakeArm.position(OuttakeArm.Position.DROP);
-                        },
+                        () -> ((SharedData)mData).outtakeArm.position(OuttakeArm.Position.DROP),
                         new Condition(() -> ((SharedData)mData).outtakeArm.hasFinished())
                 ),
                 new Task(
@@ -177,34 +173,24 @@ public class AutonomousSampleState extends RobotState {
                 ),
                 new Task(
                         "Move outtake slides back",
-                        () -> {
-                            ((SharedData)mData).outtakeSlides.position("min",25,5000);
-                        },
+                        () -> ((SharedData)mData).outtakeSlides.position("min",25,5000),
                         new Condition(() -> ((SharedData)mData).outtakeSlides.hasFinished())
                 ),
                 new Task(
                         "Move to first sample",
-                        () -> {
-                            ((SharedData)mData).chassis.followPath(trajectory2);
-                        },
+                        () -> ((SharedData)mData).chassis.followPath(trajectory2),
                         new Condition(() -> ((SharedData)mData).chassis.hasFinished())
                 ),
                 new Task("Extend slides",
-                        () -> {
-                            ((SharedData)mData).intakeSlides.position("autonomous-sample",10,5000);
-                        },
+                        () -> ((SharedData)mData).intakeSlides.position("autonomous-sample",10,5000),
                         new Condition(() -> ((SharedData)mData).intakeSlides.hasFinished())
                 ),
                 new Task("Position intake arm for grabbing",
-                        () -> {
-                            ((SharedData)mData).intakeArm.position(IntakeArm.Position.GRAB);
-                        },
+                        () -> ((SharedData)mData).intakeArm.position(IntakeArm.Position.GRAB),
                         new Condition(() -> ((SharedData)mData).intakeArm.hasFinished())
                 ),
                 new Task("Grab specimen",
-                        () -> {
-                            ((SharedData)mData).intakeArm.toogleClaw();
-                        },
+                        () -> ((SharedData)mData).intakeArm.toogleClaw(),
                         new Condition(() -> ((SharedData)mData).intakeArm.hasFinished())
                 ),
                 new Task(
@@ -231,37 +217,27 @@ public class AutonomousSampleState extends RobotState {
                 ),
                 new Task(
                         "Micro release inttake claw",
-                        () -> {
-                            ((SharedData)mData).intakeArm.microrelease();
-                        },
+                        () -> ((SharedData)mData).intakeArm.microrelease(),
                         new Condition(() -> ((SharedData)mData).intakeArm.hasFinished())
                 ),
                 new Task(
                         "Close inttake claw",
-                        () -> {
-                            ((SharedData)mData).intakeArm.close();
-                        },
+                        () -> ((SharedData)mData).intakeArm.close(),
                         new Condition(() -> ((SharedData)mData).intakeArm.hasFinished())
                 ),
                 new Task(
                         "Move intake slides to exchange position",
-                        () -> {
-                            ((SharedData)mData).intakeSlides.position("transfer-exchange", 40,2000);
-                        },
+                        () -> ((SharedData)mData).intakeSlides.position("transfer-exchange", 40,2000),
                         new Condition(() -> ((SharedData)mData).intakeSlides.hasFinished())
                 ),
                 new Task(
                         "Close outtake claw",
-                        () -> {
-                            ((SharedData)mData).outtakeArm.toogleClaw();
-                        },
+                        () -> ((SharedData)mData).outtakeArm.toogleClaw(),
                         new Condition(() -> ((SharedData)mData).outtakeArm.hasFinished())
                 ),
                 new Task(
                         "Open inttake claw",
-                        () -> {
-                            ((SharedData)mData).intakeArm.toogleClaw();
-                        },
+                        () -> ((SharedData)mData).intakeArm.toogleClaw(),
                         new Condition(() -> ((SharedData)mData).intakeArm.hasFinished())
                 ),
                 new Task(
@@ -277,37 +253,27 @@ public class AutonomousSampleState extends RobotState {
                 ),
                 new Task(
                         "Elevate outtake slides",
-                        () -> {
-                            ((SharedData)mData).outtakeSlides.position("max",25,5000);
-                        },
+                        () -> ((SharedData)mData).outtakeSlides.position("max",25,5000),
                         new Condition(() -> ((SharedData)mData).outtakeSlides.hasFinished())
                 ),
                 new Task(
                         "Position outtake arm",
-                        () -> {
-                            ((SharedData)mData).outtakeArm.position(OuttakeArm.Position.DROP);
-                        },
+                        () -> ((SharedData)mData).outtakeArm.position(OuttakeArm.Position.DROP),
                         new Condition(() -> ((SharedData)mData).outtakeArm.hasFinished())
                 ),
                 new Task(
                         "Open outtake claw",
-                        () -> {
-                            ((SharedData)mData).outtakeArm.toogleClaw();
-                        },
+                        () -> ((SharedData)mData).outtakeArm.toogleClaw(),
                         new Condition(() -> ((SharedData)mData).outtakeArm.hasFinished())
                 ),
                 new Task(
                         "Move outtake slides to ascend position",
-                        () -> {
-                            ((SharedData)mData).outtakeSlides.position("autonomous-sample-ascend",25,5000);
-                        },
+                        () -> ((SharedData)mData).outtakeSlides.position("autonomous-sample-ascend",25,5000),
                         new Condition(() -> ((SharedData)mData).outtakeSlides.hasFinished())
                 ),
                 new Task(
                         "Move to ascend area",
-                        () -> {
-                            ((SharedData)mData).chassis.followPath(trajectory4);
-                        },
+                        () -> ((SharedData)mData).chassis.followPath(trajectory4),
                         new Condition(() -> ((SharedData)mData).chassis.hasFinished())
                 )
         );

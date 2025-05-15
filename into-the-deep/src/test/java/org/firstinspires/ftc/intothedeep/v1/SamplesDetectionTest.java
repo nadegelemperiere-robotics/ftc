@@ -7,9 +7,6 @@
 
 package org.firstinspires.ftc.intothedeep.v1;
 
-/* System includes */
-import java.util.List;
-
 /* Android includes */
 import android.graphics.Bitmap;
 
@@ -37,9 +34,6 @@ import org.firstinspires.ftc.core.components.cameras.CameraComponent;
 /* Processing includes */
 import org.firstinspires.ftc.intothedeep.v1.processing.SamplesDetection;
 import org.firstinspires.ftc.intothedeep.v1.processing.Sample;
-
-/* Robot includes */
-import org.firstinspires.ftc.core.robot.Hardware;
 
 /* Tuning includes */
 import org.firstinspires.ftc.core.tuning.Tuning;
@@ -94,7 +88,8 @@ public class SamplesDetectionTest extends LinearOpMode  implements Tuning {
 
             while(opModeIsActive()) {
 
-                mDetection.update();
+                mDetection.color(COLOR);
+                mRobot.update();
                 mDetection.log("");
 
                 Mat frame = mCamera.current();
@@ -109,7 +104,6 @@ public class SamplesDetectionTest extends LinearOpMode  implements Tuning {
                 }
 
                 // Log cameras state and updated configuration
-                mRobot.update();
                 mLogger.update();
 
             }

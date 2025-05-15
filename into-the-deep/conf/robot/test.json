@@ -71,6 +71,7 @@
                 "orientation" : {
                     "type" : "limelight-snapscript",
                     "camera" : "limelight",
+                    "port" : 5807,
                     "pipeline" : 6
                 }
             }

@@ -143,7 +143,7 @@ public class CameraLimelight implements CameraComponent {
                 byte[] jpegBytes = buffer.toByteArray();
                 MatOfByte mob = new MatOfByte(jpegBytes);
                 Mat decoded = Imgcodecs.imdecode(mob, Imgcodecs.IMREAD_COLOR);
-                if (decoded != null && decoded.channels() == 3) {
+                if (decoded.channels() == 3) {
                     Imgproc.cvtColor(decoded, decoded, Imgproc.COLOR_BGR2RGB);
                     mCurrentFrame = decoded;
                 }

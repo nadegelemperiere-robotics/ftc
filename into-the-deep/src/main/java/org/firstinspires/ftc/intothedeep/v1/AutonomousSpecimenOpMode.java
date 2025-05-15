@@ -37,7 +37,7 @@ import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 @Autonomous(name = "Robot V1 Specimen Autonomous", group = "V1", preselectTeleOp = "Robot V1 Teleop")
 public class AutonomousSpecimenOpMode extends LinearOpMode {
 
-    static public Robot.Alliance    ALLIANCE    = Robot.Alliance.BLUE;;
+    static public Robot.Alliance    ALLIANCE    = Robot.Alliance.BLUE;
     static public boolean           START       = false;
 
     LogManager      mLogger;

@@ -167,7 +167,7 @@ public class Hardware extends HardwareMap implements Configurable {
                     mConfigurationValid = false;
                 }
                 else {
-                    voltageSensor = new DeviceMapping(VoltageSensor.class);
+                    voltageSensor = new DeviceMapping<>(VoltageSensor.class);
                     voltageSensor.put(mVoltageSensorName, mVoltageSensor);
                 }
             }

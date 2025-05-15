@@ -10,8 +10,6 @@ package org.firstinspires.ftc.intothedeep.v1.processing;
 
 import org.firstinspires.ftc.core.robot.Hardware;
 import org.firstinspires.ftc.core.tools.LogManager;
-import org.firstinspires.ftc.intothedeep.v1.subsystems.IntakeArm;
-import org.firstinspires.ftc.intothedeep.v1.subsystems.OuttakeArm;
 import org.json.JSONException;
 import org.json.JSONObject;
 

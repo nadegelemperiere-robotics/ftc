@@ -119,7 +119,7 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
         mData.outtakeArm    = null;
         mData.intakeSlides  = null;
         mData.outtakeSlides = null;
-        mData.locator       = null;
+        mData.detector      = null;
 
         try {
             if(reader.has(sHardwareKey)) {
@@ -219,7 +219,7 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
             if (processor.getKey().equals(sDetectionKey)) {
                 org.firstinspires.ftc.core.processing.Processor detection = processor.getValue();
                 if (detection instanceof SamplesDetection) {
-                    mData.locator = (SamplesDetection) detection;
+                    mData.detector = (SamplesDetection) detection;
                 }
             }
         }
@@ -244,8 +244,8 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
             mLogger.error("Outtake slides not found in subsystems");
             mConfigurationValid = false;
         }
-        if(mData.locator == null) {
-            mLogger.error("Locator not found in processors");
+        if(mData.detector == null) {
+            mLogger.error("Detector not found in processors");
             mConfigurationValid = false;
         }
     }

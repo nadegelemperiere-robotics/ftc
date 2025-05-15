@@ -7,13 +7,22 @@
 package org.firstinspires.ftc.core.processing.limelight;
 
 /* System includes */
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /* JSON includes */
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 /* Qualcomm includes */
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -36,21 +45,24 @@ public class LimelightPythonSnapscript<T extends LimelightObject, U extends Lime
     static  final public    String sTypeKey           = "limelight-snapscript";
     static  final           String sPipelineKey       = "pipeline";
     static  final public    String sCameraKey         = "camera";
+    static  final public    String sPortKey           = "port";
 
-    final LogManager                mLogger;
+    final LogManager                    mLogger;
 
-    protected boolean               mConfigurationValid;
+    protected boolean                   mConfigurationValid;
 
-    final String                    mName;
-    String                          mHwName;
+    final String                        mName;
+    String                              mHwName;
 
-    final Hardware                  mHardware;
+    final Hardware                      mHardware;
 
-    Limelight3A                     mWebcam;
-    int                             mPipeline;
-    LimelightObjectFactory<T,U>     mFactory;
-    int                             mLastProcessed;
-    String                          mCode;
+    Limelight3A                         mWebcam;
+    int                                 mPipeline;
+    final LimelightObjectFactory<T,U>   mFactory;
+    int                                 mLastProcessed;
+    final String                        mCode;
+    String                              mRestApiUrl;
+    int                                 mPort;
 
     /**
      * Constructor
@@ -73,6 +85,8 @@ public class LimelightPythonSnapscript<T extends LimelightObject, U extends Lime
         mCode               = code;
         mPipeline           = -1;
         mLastProcessed      = 1;
+        mRestApiUrl         = "";
+        mPort               = -1;
 
     }
 
@@ -98,7 +112,8 @@ public class LimelightPythonSnapscript<T extends LimelightObject, U extends Lime
 
             mWebcam.pipelineSwitch(mPipeline);
             mWebcam.start();
-            mWebcam.updatePythonInputs(data);
+            //mWebcam.updatePythonInputs(data);
+            this.sendData(data);
         }
     }
 
@@ -113,21 +128,92 @@ public class LimelightPythonSnapscript<T extends LimelightObject, U extends Lime
 
         if (mConfigurationValid) {
 
-            LLResult results = mWebcam.getLatestResult();
-            if(results != null) {
-                double[] data = results.getPythonOutput();
+            double[] data = this.getData();
+            if(data != null) {
                 int increment = mFactory.increment(mName);
 
                 if (data[0] == mLastProcessed) {
                     for (int i_sample = 0; i_sample < ((data.length - 1) / increment); i_sample++) {
 
                         U object = mFactory.build(mName, data, i_sample * increment + 1);
-                        mLogger.debug(""+object);
                         if(object != null)  { result.add(object); }
                     }
                     mLastProcessed ++;
                 }
 
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Bypass updatePythonInputs, which is limited to 32 data by attacking
+     * directly the limelight rest API which does not suffer such a limitation
+     * @param data the input data for python pipeline
+     */
+    void                                sendData(double[] data) {
+        if(mConfigurationValid) {
+            try {
+                URL url = new URL(mRestApiUrl + "/update-pythoninputs");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/json");
+
+                JSONArray jsonArray = new JSONArray(data);
+
+                OutputStream out = conn.getOutputStream();
+                out.write(jsonArray.toString().getBytes(StandardCharsets.UTF_8));
+
+                if (conn.getResponseCode() != 200) {
+                    throw new IOException("Failed to send Python input: " + conn.getResponseCode());
+                }
+            }
+            catch (IOException | JSONException e) {
+                mLogger.warning("Could not send python pipeline data : " + e);
+            }
+        }
+
+
+    }
+
+    /**
+     * Bypass getPythonOutput, which is limited to 32 data by attacking
+     * directly the limelight rest API which does not suffer such a limitation
+     * @return The output data of the pipeline
+     */
+    double[]                            getData() {
+
+        double[] result = null;
+
+        if(mConfigurationValid) {
+
+            try {
+                URL url = new URL(mRestApiUrl + "/results");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+
+                InputStream in = conn.getInputStream();
+                InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
+                BufferedReader br = new BufferedReader(reader);
+
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    response.append(line);
+                }
+
+                JSONObject json = new JSONObject(response.toString());
+                JSONArray pythonOut = json.getJSONArray("PythonOut");
+
+                result = new double[pythonOut.length()];
+                for (int i = 0; i < pythonOut.length(); i++) {
+                    result[i] = pythonOut.getDouble(i);
+                }
+            }
+            catch (IOException | JSONException e) {
+                mLogger.warning("Could not send python pipeline data : " + e);
             }
         }
 
@@ -155,6 +241,7 @@ public class LimelightPythonSnapscript<T extends LimelightObject, U extends Lime
         mConfigurationValid = true;
         mWebcam             = null;
         mPipeline           = -1;
+        mRestApiUrl         = "";
 
         try {
 
@@ -169,6 +256,10 @@ public class LimelightPythonSnapscript<T extends LimelightObject, U extends Lime
             if (reader.has(sPipelineKey)) {
                 mPipeline = reader.getInt(sPipelineKey);
             }
+
+            if(reader.has(sPortKey)) {
+                mPort = reader.getInt(sPortKey);
+            }
         }
         catch(JSONException e) { mLogger.error(e.getMessage()); }
 
@@ -180,6 +271,10 @@ public class LimelightPythonSnapscript<T extends LimelightObject, U extends Lime
             mLogger.error("Invalid pipeline identifier : " + mPipeline);
             mConfigurationValid = false;
         }
+        if( mPort == -1) {
+            mLogger.error("Invalid port : " + mPort);
+            mConfigurationValid = false;
+        }
 
         if(mConfigurationValid) {
             boolean check = mWebcam.uploadPython(mCode, mPipeline);
@@ -187,6 +282,12 @@ public class LimelightPythonSnapscript<T extends LimelightObject, U extends Lime
                 mLogger.error("Could not update code for pipeline : " + mName);
                 mConfigurationValid = false;
             }
+        }
+
+        if(mConfigurationValid) {
+            String temp = mWebcam.getConnectionInfo();
+            mRestApiUrl = "http://" + temp.substring(temp.indexOf(':') + 1, temp.length()-1) + ":" + mPort;
+
         }
     }
 
@@ -204,6 +305,7 @@ public class LimelightPythonSnapscript<T extends LimelightObject, U extends Lime
 
                 writer.put(sCameraKey,mHwName);
                 writer.put(sPipelineKey,mPipeline);
+                writer.put(sPortKey,mPort);
 
             } catch (JSONException e) { mLogger.error(e.getMessage()); }
         }
@@ -227,6 +329,8 @@ public class LimelightPythonSnapscript<T extends LimelightObject, U extends Lime
                     .append(mHwName)
                     .append(" PPL : ")
                     .append(mPipeline)
+                    .append(" - STREAM : ")
+                    .append(mRestApiUrl)
                     .append("</li>\n");
 
         }
@@ -253,6 +357,8 @@ public class LimelightPythonSnapscript<T extends LimelightObject, U extends Lime
                     .append(mHwName)
                     .append(" PPL : ")
                     .append(mPipeline)
+                    .append(" - STREAM : ")
+                    .append(mRestApiUrl)
                     .append("\n");
         }
 

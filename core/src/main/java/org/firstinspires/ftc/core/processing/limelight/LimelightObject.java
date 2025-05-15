@@ -8,8 +8,8 @@ package org.firstinspires.ftc.core.processing.limelight;
 
 public interface LimelightObject {
 
-    public  String  logText(String header);
-    public  String  logHTML();
+    String  logText(String header);
+    String  logHTML();
 
 
 }

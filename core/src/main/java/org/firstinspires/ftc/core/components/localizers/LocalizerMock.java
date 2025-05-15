@@ -31,7 +31,7 @@ public class LocalizerMock extends LocalizerComponent {
 
     Pose                        mStartPose;
     Pose                        mCurrentPose;
-    Pose                        mCurrentVelocity;
+    final Pose                  mCurrentVelocity;
     double                      mTotalHeading;
     double                      mPreviousHeading;
 

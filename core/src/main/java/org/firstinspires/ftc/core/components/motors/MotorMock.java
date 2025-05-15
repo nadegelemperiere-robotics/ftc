@@ -39,21 +39,21 @@ import org.firstinspires.ftc.core.orchestration.engine.InterOpMode;
 
 public class MotorMock implements MotorComponent {
 
-    final LogManager            mLogger;
+    final LogManager                mLogger;
 
-    final boolean               mConfigurationValid;
+    final boolean                   mConfigurationValid;
 
-    final String                mName;
+    final String                    mName;
 
-    DcMotor.Direction           mDirection;
+    DcMotor.Direction               mDirection;
 
-    DcMotor.RunMode             mMode;
-    int                         mPosition;
-    DcMotor.ZeroPowerBehavior   mBehavior;
-    double                      mPower;
-    int                         mTolerance;
+    DcMotor.RunMode                 mMode;
+    int                             mPosition;
+    DcMotor.ZeroPowerBehavior       mBehavior;
+    double                          mPower;
+    int                             mTolerance;
 
-    MotorControllerComponent    mController;
+    final MotorControllerComponent  mController;
     
     /* ----------------------- Constructors ------------------------ */
 

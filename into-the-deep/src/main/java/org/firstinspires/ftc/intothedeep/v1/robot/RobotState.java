@@ -33,7 +33,7 @@ public abstract class RobotState extends org.firstinspires.ftc.core.robot.RobotS
         public OuttakeArm       outtakeArm;
         public DefaultSlides    outtakeSlides;
         public MecanumDrive     chassis;
-        public SamplesDetection locator;
+        public SamplesDetection detector;
 
     }
 

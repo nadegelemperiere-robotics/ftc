@@ -15,12 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 /* Mockito includes */
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/* Qualcomm includes */
-import com.qualcomm.robotcore.hardware.Gamepad;
-
-/* Component includes */
-import org.firstinspires.ftc.core.components.controllers.Controller;
-
 /* Component Under Test includes */
 import org.firstinspires.ftc.core.tools.Calibration;
 

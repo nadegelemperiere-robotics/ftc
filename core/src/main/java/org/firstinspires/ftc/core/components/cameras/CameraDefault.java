@@ -61,7 +61,7 @@ public class CameraDefault implements CameraComponent {
     final HardwareMap           mMap;
 
     VisionPortal                mPortal;
-    DisplayProcessor            mProcessor;
+    final DisplayProcessor      mProcessor;
     Mat                         mCurrentFrame;
 
     /* ----------------------- Constructors ------------------------ */
@@ -224,8 +224,8 @@ public class CameraDefault implements CameraComponent {
 
 class DisplayProcessor implements VisionProcessor {
 
-    Mat         mCurrentFrame;
-    LogManager  mLogger;
+    Mat                 mCurrentFrame;
+    final LogManager    mLogger;
 
     /**
      * Creates a DisplayProcessor instance with a specified name and logger.

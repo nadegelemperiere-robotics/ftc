@@ -21,7 +21,7 @@ import org.opencv.core.Mat;
 
 public interface Processor {
 
-    static final String sTypeKey = "type";
+    final String sTypeKey = "type";
 
     /**
      * Factory method to create and configure an CameraComponent from a JSON object.

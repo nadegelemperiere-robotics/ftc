@@ -50,23 +50,23 @@ public class SamplesDetection implements Processor {
         ORIENT
     }
 
-    final LogManager                            mLogger;
+    final LogManager                                mLogger;
 
-    boolean                                     mConfigurationValid;
-    final String                                mName;
+    boolean                                         mConfigurationValid;
+    final String                                    mName;
 
-    SampleFactory                               mFactory;
-    LimelightNeuralNetworkDetection<Sample>     mDetection;
-    LimelightPythonSnapscript<Sample,Sample>    mOrientation;
-    Calibration                                 mCalibration;
+    final SampleFactory                             mFactory;
+    final LimelightNeuralNetworkDetection<Sample>   mDetection;
+    final LimelightPythonSnapscript<Sample,Sample>  mOrientation;
+    final Calibration                               mCalibration;
 
-    Mode                                        mMode;
-    Sample.Color                                mColor;
-    int                                         mImageIndex;
+    Mode                                            mMode;
+    Sample.Color                                    mColor;
+    int                                             mImageIndex;
 
-    List<Sample>                                mOngoing;
-    List<Sample>                                mConsolidated;
-    Sample                                      mSelected;
+    List<Sample>                                    mOngoing;
+    List<Sample>                                    mConsolidated;
+    Sample                                          mSelected;
 
     /**
      * Constructor
@@ -97,6 +97,8 @@ public class SamplesDetection implements Processor {
         mSelected           = null;
 
     }
+
+    public void                             color(Sample.Color color) { mColor = color; }
 
     public String                           name() { return mName; }
 

@@ -20,20 +20,20 @@ public class Sample implements LimelightObject {
 
     static final double sInvalidOrientation = -10000000000.0;
 
-    int mIndex;
-    double mX;
-    double mY;
-    double mArea;
-    Color mColor;
-    double mOrientation;
-    double mXMin;
-    double mXMax;
-    double mYMin;
-    double mYMax;
-    double mConfidence;
+    final int   mIndex;
+    double      mX;
+    double      mY;
+    double      mArea;
+    Color       mColor;
+    double      mOrientation;
+    double      mXMin;
+    double      mXMax;
+    double      mYMin;
+    double      mYMax;
+    double      mConfidence;
 
-    double mDistanceX;
-    double mDistanceY;
+    double      mDistanceX;
+    double      mDistanceY;
 
 
     /**

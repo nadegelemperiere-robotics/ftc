@@ -36,6 +36,9 @@ public class CalibrationTuning extends LinearOpMode {
 
         try {
 
+            mLogger = new LogManager(null,FtcDashboard.getInstance(),"calibration-tuning");
+            mLogger.level(LogManager.Severity.TRACE);
+
             mCalibration = new Calibration();
             mCalibration.initialize();
 

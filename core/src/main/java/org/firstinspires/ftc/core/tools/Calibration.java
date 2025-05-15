@@ -20,9 +20,9 @@ import org.opencv.core.Core;
 import org.opencv.calib3d.Calib3d;
 
 public class Calibration {
-    List<Point> sGroundCoordinates = Arrays.asList(
+    static final List<Point> sGroundCoordinates = Arrays.asList(
             new Point(0,4), new Point(0,7), new Point(0,10), new Point(0,13), new Point(0,16), new Point(-3,4), new Point(-3,7), new Point(-3,10), new Point(-3,13), new Point(-3,16), new Point(-6,7), new Point(-6,10), new Point(-6,13), new Point(-6,16), new Point(-9,16), new Point(3,4), new Point(3,7), new Point(3,10), new Point(3,13), new Point(3,16), new Point(3,19), new Point(6,7), new Point(6,10), new Point(6,13), new Point(6,16), new Point(6,19), new Point(9,16));
-    List<Point> sPixelPoints  = Arrays.asList(
+    static final List<Point> sPixelPoints  = Arrays.asList(
             new Point(160,57), new Point(160,118), new Point(160,161), new Point(160,192), new Point(160,218), new Point(72,55), new Point(87,117), new Point(98,160), new Point(106,193), new Point(112,218), new Point(14,117), new Point(35,159), new Point(52,193), new Point(64,219), new Point(17,220), new Point(250,56), new Point(233,119), new Point(222,162), new Point(214,195), new Point(208,219), new Point(205,238), new Point(308,120), new Point(286,163), new Point(270,195), new Point(257,218), new Point(248,237), new Point(306,219)   );
 
     Mat mHomography;

@@ -64,7 +64,7 @@ public class LocalizerTwoDeadWheels extends LocalizerComponent {
     Pose                                mDisplacementPose;
     Pose                                mCurrentVelocity;
     Matrix                              mPrevRotationMatrix;
-    NanoTimer                           mTimer;
+    final NanoTimer                     mTimer;
     long                                mDeltaTimeNano;
 
     Pose                                mForwardEncoderPose;

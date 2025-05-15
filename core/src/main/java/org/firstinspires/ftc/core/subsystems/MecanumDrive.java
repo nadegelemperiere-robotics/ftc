@@ -326,9 +326,9 @@ public class MecanumDrive extends Follower implements DriveTrain {
                         new Vector(copiedFrontLeftVector.getMagnitude(), 2*Math.PI-copiedFrontLeftVector.getTheta()),
                         new Vector(copiedFrontLeftVector.getMagnitude(), copiedFrontLeftVector.getTheta())};
 
-            for (int i = 0; i < mecanumVectorsCopy.length; i++) {
+            for (Vector vector : mecanumVectorsCopy) {
                 // this copies the vectors from mecanumVectors but creates new references for them
-                mecanumVectorsCopy[i].rotateVector(getPose().getHeading());
+                vector.rotateVector(getPose().getHeading());
             }
 
             wheelPowers[0] = (mecanumVectorsCopy[1].getXComponent()*truePathingVectors[0].getYComponent() - truePathingVectors[0].getXComponent()*mecanumVectorsCopy[1].getYComponent()) / (mecanumVectorsCopy[1].getXComponent()*mecanumVectorsCopy[0].getYComponent() - mecanumVectorsCopy[0].getXComponent()*mecanumVectorsCopy[1].getYComponent());
