@@ -3,16 +3,26 @@
  * Copyright (c) 2025 Nadege LEMPERIERE
  * All rights reserved
  * -------------------------------------------------------
- * CameraMock provides empty camera functions enabling
- * to test the robot logic without a real component
- * in FTC robots.
+ * CameraMock Class
+ * -------------------------------------------------------
+ * The CameraMock class provides empty camera functionality
+ * to enable testing of robot logic without requiring a
+ * physical camera component in FTC robots.
+ * -------------------------------------------------------
+ * Features:
+ * - Simulates camera behavior for testing purposes.
+ * - Provides methods for generating mock camera frames.
+ * - Manages configuration states and logs configuration
+ *   details in HTML or text format.
  * -------------------------------------------------------
  */
 
 package org.firstinspires.ftc.core.components.cameras;
 
 /* JSON includes */
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /* OpenCV includes */
@@ -25,9 +35,11 @@ import org.opencv.imgproc.Imgproc;
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
+import java.net.UnknownHostException;
+
 public class CameraMock implements CameraComponent {
 
-    public static final String  sTypeKey    = "mock";
+    public static final String  sTypeValue  = "mock";
 
     static final        int     sWidth      = 320;
     static final        int     sHeight     = 240;
@@ -64,10 +76,30 @@ public class CameraMock implements CameraComponent {
      */
     public String                       name() { return mName; }
 
+    /**
+     * Retrieves the last frame acquired by the camera
+     *
+     * @return The name of the component.
+     */
     public Mat                          current() { return mCurrentFrame; }
 
     /**
-     * Cache current camera value to enable multiple calls in a loop without
+     * Retrieves limelight camera for embedded vision processor access
+     *
+     * @return A mock limelight
+     *
+     */
+    public Limelight3A                  limelight() {
+
+        Limelight3A result = null;
+        try {
+            result = new LimelightMock(mLogger);
+        }
+        catch (UnknownHostException ignored) { }
+        return result;
+    }
+    /**
+     * Retrieve the last camera frame
      */
     public void                         update() {
 
@@ -100,7 +132,17 @@ public class CameraMock implements CameraComponent {
      * @param writer The JSON object to store the configuration settings.
      */
     @Override
-    public void                         write(JSONObject writer) { }
+    public void                         write(JSONObject writer) {
+
+        if(mConfigurationValid) {
+            try {
+                writer.put(sTypeKey, sTypeValue);
+            } catch (JSONException e) {
+                mLogger.error(e.getMessage());
+            }
+        }
+
+    }
 
     /**
      * Generates an HTML representation of the camera configuration for logging purposes.

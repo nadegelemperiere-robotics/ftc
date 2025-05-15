@@ -1,5 +1,5 @@
 /* -------------------------------------------------------
-   Copyright (c) [2025] FASNY
+   Copyright (c) [2025] Nadege LEMPERIERE
    All rights reserved
    -------------------------------------------------------
    Controller managing mock servos

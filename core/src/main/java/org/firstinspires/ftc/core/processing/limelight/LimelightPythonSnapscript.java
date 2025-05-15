@@ -4,11 +4,12 @@
    -------------------------------------------------------
    Limelight sample orientation pipeline management
    ------------------------------------------------------- */
-package org.firstinspires.ftc.intothedeep.v1.algorithms.vision;
+package org.firstinspires.ftc.core.processing.limelight;
 
 /* System includes */
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /* JSON includes */
 import org.json.JSONException;
@@ -17,22 +18,24 @@ import org.json.JSONObject;
 /* Qualcomm includes */
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
 /* Configuration includes */
 import org.firstinspires.ftc.core.configuration.Configurable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class LimelightObjectOrientation implements Configurable {
-    static  final public    String sTypeKey           = "orientation";
+/* Components includes */
+import org.firstinspires.ftc.core.components.cameras.CameraComponent;
+
+/* Robot includes */
+import org.firstinspires.ftc.core.robot.Hardware;
+
+public class LimelightPythonSnapscript<T extends LimelightObject, U extends LimelightObject> implements Configurable {
+
+    static  final public    String sTypeKey           = "limelight-snapscript";
     static  final           String sPipelineKey       = "pipeline";
-    static  final private   String sUpdateColorKey    = "update-color";
-    static  final public    String sHwMapKey          = "hwmap";
-    private static final Logger log = LoggerFactory.getLogger(LimelightObjectOrientation.class);
+    static  final public    String sCameraKey         = "camera";
 
     final LogManager                mLogger;
 
@@ -41,82 +44,61 @@ public class LimelightObjectOrientation implements Configurable {
     final String                    mName;
     String                          mHwName;
 
-    final HardwareMap               mMap;
+    final Hardware                  mHardware;
 
-    protected Limelight3A           mWebcam;
+    Limelight3A                     mWebcam;
     int                             mPipeline;
+    LimelightObjectFactory<T,U>     mFactory;
     int                             mLastProcessed;
-
-    boolean                         mShallUpdateColor;
-
-    List<Sample>                    mWaitingList;
+    String                          mCode;
 
     /**
      * Constructor
      *
      * @param name The camera name
-     * @param map The hardware map to get sensors from
+     * @param code The pipeline python code
+     * @param hardware The hardware to get camera from
      * @param logger The logger to use for traces
      */
-    public  LimelightObjectOrientation(String name, HardwareMap map, LogManager logger) {
+    public LimelightPythonSnapscript(String name, LimelightObjectFactory<T,U> factory, String code, Hardware hardware, LogManager logger) {
 
         mLogger             = logger;
         mConfigurationValid = false;
         mName               = name;
 
-        mMap                = map;
+        mHardware           = hardware;
 
         mWebcam             = null;
+        mFactory            = factory;
+        mCode               = code;
         mPipeline           = -1;
-        mLastProcessed      = 0;
-
-        mShallUpdateColor   = true;
+        mLastProcessed      = 1;
 
     }
 
     /**
      * Start camera streaming
      */
-    public void                         start(List<Sample> samples) {
+    public void                         start(List<T> inputs) {
 
         if (mConfigurationValid) {
 
-            mLogger.info("starting object orientation pipeline");
+            mLogger.info("starting python snapscript pipeline with " + inputs.size() + " inputs");
 
             // Format samples into pipeline inputs
-            double[] data = new double[samples.size() * 7 + 1];
-
-            mLogger.info(""+samples.size());
+            double[] data = new double[1];
             data[0] = mLastProcessed;
-            int i_data = 1;
-            for (int i_sample = 0; i_sample < samples.size(); i_sample++) {
-
-                Sample sample = samples.get(i_sample);
-                double size = Math.sqrt(sample.area() * 2.33);
-
-                Sample.Color color = sample.color();
-                int col = -1;
-                if (color == Sample.Color.RED)         { col = 0; }
-                else if (color == Sample.Color.BLUE)   { col = 1;}
-                else if (color == Sample.Color.YELLOW) { col = 2; }
-
-                mLogger.info("" + sample.index());
-
-                data[i_data] = sample.index(); i_data++;
-                data[i_data] = sample.x(); i_data++;
-                data[i_data] = sample.y(); i_data++;
-                data[i_data] = size; i_data++;
-                data[i_data] = size; i_data++;
-                data[i_data] = col; i_data++;
-                data[i_data] = sample.area(); i_data ++;
+            for (T object : inputs) {
+                double[] temp = mFactory.format(mName, object);
+                double[] temp2 = new double[data.length + temp.length];
+                System.arraycopy(data,0,temp2,0,data.length);
+                System.arraycopy(temp,0,temp2,data.length,temp.length);
+                data = temp2;
             }
-
-            mLogger.info(""+data.length);
 
             mWebcam.pipelineSwitch(mPipeline);
             mWebcam.start();
             mWebcam.updatePythonInputs(data);
-            mWaitingList = samples;
         }
     }
 
@@ -125,53 +107,26 @@ public class LimelightObjectOrientation implements Configurable {
      *
      * @return List of updated samples
      */
-    public List<Sample>                     process() {
+    public List<U>                      process() {
 
-        List<Sample> result = new ArrayList<>();
+        List<U> result = new ArrayList<>();
 
         if (mConfigurationValid) {
 
             LLResult results = mWebcam.getLatestResult();
             if(results != null) {
-                double[] orientations = results.getPythonOutput();
+                double[] data = results.getPythonOutput();
+                int increment = mFactory.increment(mName);
 
-                if (orientations[0] == mLastProcessed) {
-                    for (int i_sample = 0; i_sample < (int) ((orientations.length - 1) / 10); i_sample++) {
+                if (data[0] == mLastProcessed) {
+                    for (int i_sample = 0; i_sample < ((data.length - 1) / increment); i_sample++) {
 
-                        int index = (int) (orientations[i_sample * 10 + 1]);
-                        if(index != 0) {
-                            mLogger.info("" + index);
-
-                            double orientation = orientations[i_sample * 10 + 5];
-                            int col = (int) orientations[i_sample * 10 + 4];
-
-                            Sample.Color color = Sample.Color.UNKNOWN;
-                            if (col == 0) {
-                                color = Sample.Color.RED;
-                            } else if (col == 1) {
-                                color = Sample.Color.BLUE;
-                            } else if (col == 2) {
-                                color = Sample.Color.YELLOW;
-                            }
-
-                            for (int j_sample = 0; j_sample < mWaitingList.size(); j_sample++) {
-                                mLogger.info("" + mWaitingList.get(j_sample).index());
-                                if (index == mWaitingList.get(j_sample).index()) {
-                                    if (mShallUpdateColor) {
-                                        mWaitingList.get(j_sample).color(color);
-                                    }
-                                    mWaitingList.get(j_sample).orientation(orientation);
-                                }
-                            }
-                        }
-
+                        U object = mFactory.build(mName, data, i_sample * increment + 1);
+                        mLogger.debug(""+object);
+                        if(object != null)  { result.add(object); }
                     }
-
                     mLastProcessed ++;
-                    result = mWaitingList;
-
                 }
-
 
             }
         }
@@ -200,28 +155,39 @@ public class LimelightObjectOrientation implements Configurable {
         mConfigurationValid = true;
         mWebcam             = null;
         mPipeline           = -1;
-        mShallUpdateColor   = true;
 
         try {
 
-            if (mMap != null && reader.has(sHwMapKey)) {
-                mHwName = reader.getString(sHwMapKey);
-                mWebcam = mMap.get(Limelight3A.class, mHwName);
+            if(mHardware != null && reader.has(sCameraKey)) {
+                mHwName = reader.getString(sCameraKey);
+                CameraComponent component = null;
+                Map<String, CameraComponent> cameras = mHardware.cameras();
+                if(cameras.containsKey(mHwName)) { component = cameras.get(mHwName); }
+                if(component != null) { mWebcam = component.limelight();}
             }
 
-            if (mWebcam != null) {
-                if (reader.has(sPipelineKey)) {
-                    mPipeline = reader.getInt(sPipelineKey);
-                }
-                if(reader.has(sUpdateColorKey)) {
-                    mShallUpdateColor = reader.getBoolean(sUpdateColorKey);
-                }
+            if (reader.has(sPipelineKey)) {
+                mPipeline = reader.getInt(sPipelineKey);
             }
         }
         catch(JSONException e) { mLogger.error(e.getMessage()); }
 
-        if (mWebcam == null) { mConfigurationValid = false; }
+        if (mWebcam == null) {
+            mLogger.error("No camera found or wrong parameter");
+            mConfigurationValid = false;
+        }
+        if ( mPipeline < 0 || mPipeline > 7) {
+            mLogger.error("Invalid pipeline identifier : " + mPipeline);
+            mConfigurationValid = false;
+        }
 
+        if(mConfigurationValid) {
+            boolean check = mWebcam.uploadPython(mCode, mPipeline);
+            if(!check) {
+                mLogger.error("Could not update code for pipeline : " + mName);
+                mConfigurationValid = false;
+            }
+        }
     }
 
     /**
@@ -236,7 +202,7 @@ public class LimelightObjectOrientation implements Configurable {
 
             try {
 
-                writer.put(sHwMapKey,mHwName);
+                writer.put(sCameraKey,mHwName);
                 writer.put(sPipelineKey,mPipeline);
 
             } catch (JSONException e) { mLogger.error(e.getMessage()); }

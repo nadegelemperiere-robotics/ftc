@@ -1,9 +1,22 @@
-/* -------------------------------------------------------
-   Copyright (c) [2025] Nadege LEMPERIERE
-   All rights reserved
-   -------------------------------------------------------
-   Hardware manager
-   ------------------------------------------------------- */
+/**
+ * -------------------------------------------------------
+ * Copyright (c) 2025 Nadege LEMPERIERE
+ * All rights reserved
+ * -------------------------------------------------------
+ * Hardware Class
+ * -------------------------------------------------------
+ * The Hardware class manages the robot's hardware
+ * components, providing centralized access and
+ * configuration management for motors, sensors, and
+ * other devices.
+ * -------------------------------------------------------
+ * Features:
+ * - Supports dynamic registration of hardware components.
+ * - Provides methods for reading and writing hardware
+ *   configurations in JSON format.
+ * - Logs hardware states and configurations for debugging.
+ * -------------------------------------------------------
+ */
 
 package org.firstinspires.ftc.core.robot;
 

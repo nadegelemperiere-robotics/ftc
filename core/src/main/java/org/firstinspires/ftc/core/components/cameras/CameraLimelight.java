@@ -3,8 +3,20 @@
  * Copyright (c) 2025 Nadege LEMPERIERE
  * All rights reserved
  * -------------------------------------------------------
- * CameraLimelight provides camera functions from a
- * Limelight
+ * CameraLimelight Class
+ * -------------------------------------------------------
+ * The CameraLimelight class provides camera functionality
+ * using a Limelight camera. It supports configuration
+ * through JSON input and integrates with the FTC Control
+ * Hub for video streaming and frame processing.
+ * -------------------------------------------------------
+ * Features:
+ * - Factory method to create and configure Limelight
+ *   camera components.
+ * - Provides methods for retrieving the current camera
+ *   frame as an OpenCV Mat object.
+ * - Manages configuration states and logs configuration
+ *   details in HTML or text format.
  * -------------------------------------------------------
  */
 
@@ -27,16 +39,17 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /* OpenCV includes */
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
-import org.opencv.core.MatOfByte;
-import org.opencv.imgcodecs.Imgcodecs;
 
 
 public class CameraLimelight implements CameraComponent {
 
-    public static final String  sTypeKey    = "limelight";
+    public static final String  sTypeValue  = "limelight";
     static final String sHwMapKey           = "hwmap";
     static final String sPortKey            = "port";
 
@@ -78,7 +91,21 @@ public class CameraLimelight implements CameraComponent {
     public String                       name() { return mName; }
 
     /**
-     * Cache current camera value to enable multiple calls in a loop without
+     * Retrieves the last frame acquired by the camera
+     *
+     * @return The name of the component.
+     */
+    public Mat                          current() { return mCurrentFrame; }
+
+    /**
+     * Retrieves limelight camera for embedded vision processor access
+     *
+     * @return The limelight component
+     */
+    public Limelight3A                  limelight() { return mLimelight; }
+
+    /**
+     * Retrieve the last camera frame
      */
     public void                         update() {
 
@@ -115,15 +142,17 @@ public class CameraLimelight implements CameraComponent {
 
                 byte[] jpegBytes = buffer.toByteArray();
                 MatOfByte mob = new MatOfByte(jpegBytes);
-                mCurrentFrame = Imgcodecs.imdecode(mob, Imgcodecs.IMREAD_COLOR);
+                Mat decoded = Imgcodecs.imdecode(mob, Imgcodecs.IMREAD_COLOR);
+                if (decoded != null && decoded.channels() == 3) {
+                    Imgproc.cvtColor(decoded, decoded, Imgproc.COLOR_BGR2RGB);
+                    mCurrentFrame = decoded;
+                }
             }
         } catch (Exception e) {
             mLogger.warning("Failed to fetch or decode frame: " + e.getMessage());
             mCurrentFrame = null;
         }
     }
-
-    public Mat                          current() { return mCurrentFrame; }
 
     /* ------------------ Configurable functions ------------------- */
 
@@ -182,7 +211,7 @@ public class CameraLimelight implements CameraComponent {
 
         if(mConfigurationValid) {
             try {
-                writer.put(CameraComponent.sTypeKey, sTypeKey);
+                writer.put(sTypeKey, sTypeValue);
                 writer.put(sHwMapKey, mHwName);
                 writer.put(sPortKey, mPort);
             } catch (JSONException e) {

@@ -15,6 +15,26 @@
 apply from: '../build.common.gradle'
 apply from: '../build.dependencies.gradle'
 
+tasks.register('fetchPipelines') {
+    doLast {
+        println "🔄 Fetching limelight pipelines from github..."
+
+        def orientationUrl = 'https://raw.githubusercontent.com/nadegelemperiere-robotics/limelight-pipelines/refs/heads/feat-first-version/pipelines/sample-orientation-pipeline.py'
+        def outputFile = file('src/main/java/org/firstinspires/ftc/intothedeep/v1/configuration/LimelightPipelinesCode.java')
+
+        def orientation = new URL(orientationUrl).text
+        def orientation_escaped = groovy.json.StringEscapeUtils.escapeJava(orientation)
+        def classContent = """
+            package org.firstinspires.ftc.intothedeep.v1.configuration;
+
+            public class LimelightPipelinesCode {
+                public static final String sOrientationCode = "${orientation_escaped}";
+            }
+        """
+        outputFile.text = classContent
+    }
+}
+
 android {
     namespace = 'org.firstinspires.ftc.intothedeep'
 
@@ -25,6 +45,7 @@ android {
     sourceSets {
         main.java.srcDirs += file('../core/src/test/java/org/firstinspires/ftc/core/')
         main.java.srcDirs += file('../core/src/tuning/java/org/firstinspires/ftc/core/')
+        main.java.srcDirs += file('./src/test/java/org/firstinspires/ftc/intothedeep/v1/')
     }
 }
 

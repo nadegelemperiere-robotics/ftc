@@ -25,6 +25,9 @@ import org.firstinspires.ftc.core.tools.LogManager;
 /* Configuration includes */
 import org.firstinspires.ftc.core.configuration.Configurable;
 
+/* Processing includes */
+import org.firstinspires.ftc.core.processing.Processor;
+
 /* Subsystems includes */
 import org.firstinspires.ftc.core.subsystems.Subsystem;
 
@@ -36,10 +39,13 @@ public class Robot extends Context implements Configurable {
 
     protected static final String      sHardwareKey   = "hardware";
     protected static final String      sSubsystemsKey = "subsystems";
+    protected static final String      sProcessorsKey = "processors";
 
     protected final LogManager              mLogger;
 
     protected final Map<String, Subsystem>  mSubsystems;
+
+    protected final Map<String, Processor>  mProcessors;
 
     protected boolean                       mConfigurationValid;
 
@@ -58,6 +64,7 @@ public class Robot extends Context implements Configurable {
 
         mHardware           = new Hardware(map, logger);
         mSubsystems         = new LinkedHashMap<>();
+        mProcessors         = new LinkedHashMap<>();
     }
 
     /**
@@ -74,6 +81,9 @@ public class Robot extends Context implements Configurable {
         for (Map.Entry<String, Subsystem> subsystem : mSubsystems.entrySet()) {
             subsystem.getValue().update();
         }
+        for (Map.Entry<String, Processor> processor : mProcessors.entrySet()) {
+            processor.getValue().update();
+        }
         super.update();
     }
 
@@ -84,6 +94,9 @@ public class Robot extends Context implements Configurable {
     {
         for (Map.Entry<String, Subsystem> subsystem : mSubsystems.entrySet()) {
             subsystem.getValue().log("--");
+        }
+        for (Map.Entry<String, Processor> processor : mProcessors.entrySet()) {
+            processor.getValue().log("--");
         }
     }
 
@@ -115,6 +128,7 @@ public class Robot extends Context implements Configurable {
 
         mConfigurationValid = true;
         mSubsystems.clear();
+        mProcessors.clear();
 
         try {
             if(reader.has(sHardwareKey)) {
@@ -150,6 +164,30 @@ public class Robot extends Context implements Configurable {
                 }
             }
 
+            if(reader.has(sProcessorsKey)) {
+                JSONObject processors = reader.getJSONObject(sProcessorsKey);
+
+                Iterator<String> keys = processors.keys();
+                while (keys.hasNext()) {
+
+                    String key = keys.next();
+
+                    Processor processor = Processor.factory(key, processors.getJSONObject(key), mHardware, mLogger);
+                    if(processor == null) {
+                        mLogger.warning("Processor " + key + " not recognized by factory");
+                        mConfigurationValid = false;
+                    }
+                    else if(!processor.isConfigured()) {
+                        mLogger.warning("Processor " + key + " configuration is invalid");
+                        mConfigurationValid = false;
+                    }
+                    else {
+                        mProcessors.put(key, processor);
+                    }
+
+                }
+            }
+
         } catch (JSONException e) {
             mLogger.error(e.getMessage());
         }
@@ -178,6 +216,15 @@ public class Robot extends Context implements Configurable {
                     subsystems.put(subsystem.getKey(),temp);
                 }
                 writer.put(sSubsystemsKey, subsystems);
+
+                JSONObject processors = new JSONObject();
+                for (Map.Entry<String, Processor> processor : mProcessors.entrySet()) {
+                    JSONObject temp = new JSONObject();
+                    processor.getValue().write(temp);
+                    processors.put(processor.getKey(),temp);
+                }
+                writer.put(sProcessorsKey, processors);
+
             }
             catch (JSONException e) { mLogger.error(e.getMessage()); }
         }
@@ -210,6 +257,20 @@ public class Robot extends Context implements Configurable {
         result.append("</ul>\n");
         result.append("</details>\n");
 
+        // Log subsystem
+        result.append("<details style=\"margin-left:10px\">\n");
+        result.append("<summary style=\"font-size: 12px; font-weight: 500\"> PROCESSORS </summary>\n");
+        result.append("<ul>\n");
+        mProcessors.forEach((key, value) -> result.append("<details style=\"margin-left:10px\">\n")
+                .append("<summary style=\"font-size: 11px; font-weight: 500\"> ")
+                .append(key.toUpperCase())
+                .append(" </summary>\n")
+                .append("<ul>\n")
+                .append(value.logConfigurationHTML())
+                .append("</ul>\n")
+                .append("</details>\n"));
+        result.append("</ul>\n");
+        result.append("</details>\n");
 
         return result.toString();
 
@@ -239,6 +300,14 @@ public class Robot extends Context implements Configurable {
                 .append("\n")
                 .append(value.logConfigurationText(header + "----")));
 
+        // Log processors
+        result.append(header)
+                .append("> PROCESSORS\n");
+        mProcessors.forEach((key, value) -> result.append(header)
+                .append("--> ")
+                .append(key.toUpperCase())
+                .append("\n")
+                .append(value.logConfigurationText(header + "----")));
 
         return result.toString();
 

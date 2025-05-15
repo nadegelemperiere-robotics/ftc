@@ -431,7 +431,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     /**
-     * Returns a string suitable for display to the user as to the type of device.Note that this is a device-type-specific name; it has nothing to do with thename by which a user might have configured the device in a robot configuration.
+     * Returns a string suitable for display to the user as to the type of device.Note that this is a device-type-specific name; it has nothing to do with the name by which a user might have configured the device in a robot configuration.
      * @return the device name
      */
     @Override
@@ -600,7 +600,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     /**
-     * Returns the assigned type for this motor. If no particular motor type has beenconfigured, then getUnspecifiedMotorType will be returned.Note that the motor type for a given motor is initially assigned in the robotconfiguration user interface, though it may subsequently be modified using methods herein.
+     * Returns the assigned type for this motor. If no particular motor type has been configured, then getUnspecifiedMotorType will be returned.Note that the motor type for a given motor is initially assigned in the robot configuration user interface, though it may subsequently be modified using methods herein.
      * @return motor type
      */
     @Override
@@ -664,7 +664,7 @@ public class MotorCoupled implements MotorComponent {
     }
 
     /**
-     * Sets the desired encoder target position to which the motor should advance or retreat and then actively hold thereat. This behavior is similar to the operation of a servo. The maximum speed at which this advance or retreat occurs is governed by the power level currently set on the motor. While the motor is advancing or retreating to the desired taget position, isBusy() will return true.
+     * Sets the desired encoder target position to which the motor should advance or retreat and then actively hold thereat. This behavior is similar to the operation of a servo. The maximum speed at which this advance or retreat occurs is governed by the power level currently set on the motor. While the motor is advancing or retreating to the desired target position, isBusy() will return true.
      * Note that adjustment to a target position is only effective when the motor is in RUN_TO_POSITION RunMode. Note further that, clearly, the motor must be equipped with an encoder in order for this mode to function properly.
      * @param position the desired encoder target position
      */

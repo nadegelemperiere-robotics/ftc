@@ -94,7 +94,7 @@ public class ImuMock implements ImuComponent {
     public void                         update() {}
 
     /**
-     * Yaw reste function
+     * Yaw reset function
      */
     public void                         reset() {
         mCurrentHeading = 0;

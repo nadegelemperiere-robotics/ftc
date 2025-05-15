@@ -62,6 +62,21 @@
                 }
             }
         },
+        "processors" : {
+            "sample-detection" : {
+                "type" : "sample-detection",
+                "detection" : {
+                    "type" : "limelight-nn-detection",
+                    "camera" : "limelight",
+                    "pipeline" : 7
+                },
+                "orientation" : {
+                    "type" : "limelight-snapscript",
+                    "camera" : "limelight",
+                    "pipeline" : 6
+                }
+            }
+        },
         "subsystems" : {
             "intake-arm" : {
                 "type" : "intake-arm",

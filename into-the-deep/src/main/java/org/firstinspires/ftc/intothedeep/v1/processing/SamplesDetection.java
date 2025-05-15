@@ -5,40 +5,44 @@
    Into-The-Deep Sample detection processing
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.intothedeep.v1.algorithms.vision;
+package org.firstinspires.ftc.intothedeep.v1.processing;
 
 /* System includes */
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Comparator;
 
-/* Android includes */
-import android.graphics.Bitmap;
-
-/* Opencv includes */
-
+/* JSON includes */
 import org.json.JSONException;
 import org.json.JSONObject;
+
+/* Opencv includes */
 import org.opencv.core.Mat;
 import org.opencv.core.Core;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.core.CvType;
 import org.opencv.core.Size;
-import org.opencv.android.Utils;
 import org.opencv.imgproc.Imgproc;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.Calibration;
 import org.firstinspires.ftc.core.tools.LogManager;
 
-/* Vision includes */
-import org.firstinspires.ftc.core.algorithms.Algorithm;
+/* Configuration includes */
+import org.firstinspires.ftc.intothedeep.v1.configuration.LimelightPipelinesCode;
+
+/* Processing includes */
+import org.firstinspires.ftc.core.processing.limelight.LimelightNeuralNetworkDetection;
+import org.firstinspires.ftc.core.processing.limelight.LimelightPythonSnapscript;
+import org.firstinspires.ftc.core.processing.Processor;
 
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;
 
-public class SamplesDetection implements Algorithm {
+public class SamplesDetection implements Processor {
+
+    static final String         sTypeValue = "sample-detection";
+
 
     public enum Mode {
         NONE,
@@ -46,23 +50,23 @@ public class SamplesDetection implements Algorithm {
         ORIENT
     }
 
-    final LogManager                mLogger;
+    final LogManager                            mLogger;
 
-    boolean                         mConfigurationValid;
-    final String                    mName;
+    boolean                                     mConfigurationValid;
+    final String                                mName;
 
-    LimelightObjectDetection        mDetection;
-    LimelightObjectOrientation      mOrientation;
-    Calibration                     mCalibration;
+    SampleFactory                               mFactory;
+    LimelightNeuralNetworkDetection<Sample>     mDetection;
+    LimelightPythonSnapscript<Sample,Sample>    mOrientation;
+    Calibration                                 mCalibration;
 
-    Mode                            mMode;
-    Sample.Color                    mColor;
-    int                             mImageIndex;
+    Mode                                        mMode;
+    Sample.Color                                mColor;
+    int                                         mImageIndex;
 
-    List<Sample>                    mOngoing;
-    List<Sample>                    mConsolidated;
-    Sample                          mSelected;
-
+    List<Sample>                                mOngoing;
+    List<Sample>                                mConsolidated;
+    Sample                                      mSelected;
 
     /**
      * Constructor
@@ -79,8 +83,9 @@ public class SamplesDetection implements Algorithm {
 
         mConfigurationValid = false;
 
-        mDetection          = new LimelightObjectDetection(name, hardware, logger);
-        mOrientation        = new LimelightObjectOrientation(name, hardware, logger);
+        mFactory            = new SampleFactory(mLogger);
+        mDetection          = new LimelightNeuralNetworkDetection<>(SampleFactory.sDetectionKey, mFactory, hardware, logger);
+        mOrientation        = new LimelightPythonSnapscript<>(SampleFactory.sOrientationKey, mFactory,LimelightPipelinesCode.sOrientationCode, hardware, logger);
         mCalibration        = new Calibration();
 
         mImageIndex         = 0;
@@ -93,7 +98,11 @@ public class SamplesDetection implements Algorithm {
 
     }
 
+    public String                           name() { return mName; }
+
     public List<Sample>                     samples() { return mConsolidated; }
+
+    public boolean                          isConfigured() { return mConfigurationValid; }
 
     /**
      * Start sample detection
@@ -125,15 +134,11 @@ public class SamplesDetection implements Algorithm {
                     float[] ground = mCalibration.computeGroundPosition(sample.x(), sample.y());
                     sample.distanceX(ground[1]);
                     sample.distanceY(-ground[0]);
-                    mLogger.debug(sample.logHTML());
                     mOngoing.add(sample);
                 }
                 mOngoing.sort(Comparator.comparingDouble(s -> mergedRanking(s, mColor)));
-                for (Sample sample : mOngoing) {
-                    mLogger.debug(sample.logHTML());
-                }
 
-//                mLogger.addLine("Switching to orientation");
+                mLogger.debug("Switching to orientation");
                 mOrientation.start(mOngoing);
                 mMode = Mode.ORIENT;
             }
@@ -143,7 +148,18 @@ public class SamplesDetection implements Algorithm {
             mLogger.debug(LogManager.Target.FILE," Orientation processed for " + oriented.size() + " samples");
             if (!oriented.isEmpty()) {
 
-//              mLogger.addLine("Switching back to detection");
+                for (Sample sample : oriented ) {
+                    int index = sample.index();
+                    for(Sample ongoing : mOngoing) {
+                        if(ongoing.index() == index) {
+                            sample.distanceX(ongoing.distanceX());
+                            sample.distanceY(ongoing.distanceY());
+                        }
+                    }
+
+                }
+
+                mLogger.debug("Switching back to detection");
                 mConsolidated.clear();
                 mConsolidated.addAll(oriented);
                 mSelected = mConsolidated.get(0);
@@ -151,10 +167,6 @@ public class SamplesDetection implements Algorithm {
                 mMode = Mode.DETECT;
                 mOngoing.clear();
             }
-            for (Sample sample : mConsolidated) {
-                mLogger.debug(sample.logHTML());
-            }
-            mLogger.debug(mSelected.logHTML());
         }
 
         mImageIndex++;
@@ -187,52 +199,58 @@ public class SamplesDetection implements Algorithm {
     }
 
     /**
-     * Create an empty bitmap, black content, to add overlays to
+     * Add overlay to the raw image
      *
-     * @param width : width of the image to create
-     * @param height : height of the image to create
+     * @param raw : raw frame to draw overlays on
      *
-     * @return An android bitmap of a black imafge with samples overlays
+     * @return The camera image with samples overlays
      * **/
-    public Bitmap                           draw(int width, int height) {
-        // Create a blank image (black)
-        Mat frame = new Mat(height, width, CvType.CV_8UC3, new Scalar(0, 0, 0));
+    public Mat                           draw(Mat raw) {
 
-        for(Sample sample : mConsolidated) {
+        Mat result = null;
 
-            Point topLeft = new Point(sample.xMin(), sample.yMin());
-            Point bottomRight = new Point(sample.xMax(), sample.yMax());
+        if(raw != null) {
 
-            Scalar color = new Scalar(255,255,255);
-            if(sample.color() == Sample.Color.RED) { color = new Scalar(255,0,0); }
-            if(sample.color() == Sample.Color.BLUE) { color = new Scalar(0,0,255); }
-            if(sample.color() == Sample.Color.YELLOW) { color = new Scalar(255,255,0); }
+            result = raw.clone();
 
-            Point cross1 = new Point(Math.max(0,sample.x() - 10), sample.y());
-            Point cross2 = new Point(Math.min(width - 1,sample.x() + 10), sample.y());
-            Point cross3 = new Point(sample.x(), Math.max(0,sample.y() - 10));
-            Point cross4 = new Point(sample.x(),Math.min(height - 1,sample.y() + 10));
+            for (Sample sample : mConsolidated) {
 
-            String text = sample.index() + " - " +  String.format("%.2f",sample.confidence()) + " - " + (int)(sample.orientation());
-            Size size = Imgproc.getTextSize(text, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5,1,null);
-            Point text1 = new Point(sample.xMin(), Math.max(0,sample.yMin() - size.height));
-            Point text2 = new Point(Math.min(width - 1,sample.xMin() + size.width), sample.yMin());
+                Point topLeft = new Point(sample.xMin(), sample.yMin());
+                Point bottomRight = new Point(sample.xMax(), sample.yMax());
 
-            Imgproc.rectangle(frame, topLeft, bottomRight, color, 2);
-            Imgproc.line(frame, cross1, cross2, color, 2);
-            Imgproc.line(frame, cross3, cross4, color, 2);
-            Imgproc.rectangle(frame, text1, text2, color,Core.FILLED);
-            if(sample.index() == mSelected.index()) {
-                Imgproc.putText(frame, text, new Point(sample.xMin(), sample.yMin()), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(255, 255, 255), 1);
-            }
-            else {
-                Imgproc.putText(frame, text, new Point(sample.xMin(), sample.yMin()), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 0), 1);
+                Scalar color = new Scalar(255, 255, 255);
+                if (sample.color() == Sample.Color.RED) {
+                    color = new Scalar(255, 0, 0);
+                }
+                if (sample.color() == Sample.Color.BLUE) {
+                    color = new Scalar(0, 0, 255);
+                }
+                if (sample.color() == Sample.Color.YELLOW) {
+                    color = new Scalar(255, 255, 0);
+                }
+
+                Point cross1 = new Point(Math.max(0, sample.x() - 10), sample.y());
+                Point cross2 = new Point(Math.min(raw.cols() - 1, sample.x() + 10), sample.y());
+                Point cross3 = new Point(sample.x(), Math.max(0, sample.y() - 10));
+                Point cross4 = new Point(sample.x(), Math.min(raw.rows() - 1, sample.y() + 10));
+
+                String text = sample.index() + " - " + String.format("%.2f", sample.confidence()) + " - " + (int) (sample.orientation());
+                Size size = Imgproc.getTextSize(text, Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, 1, null);
+                Point text1 = new Point(sample.xMin(), Math.max(0, sample.yMin() - size.height));
+                Point text2 = new Point(Math.min(raw.cols() - 1, sample.xMin() + size.width), sample.yMin());
+
+                Imgproc.rectangle(result, topLeft, bottomRight, color, 2);
+                Imgproc.line(result, cross1, cross2, color, 2);
+                Imgproc.line(result, cross3, cross4, color, 2);
+                Imgproc.rectangle(result, text1, text2, color, Core.FILLED);
+                if (sample.index() == mSelected.index()) {
+                    Imgproc.putText(result, text, new Point(sample.xMin(), sample.yMin()), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(255, 255, 255), 1);
+                } else {
+                    Imgproc.putText(result, text, new Point(sample.xMin(), sample.yMin()), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 0), 1);
+                }
             }
         }
 
-        // Convert to Bitmap to show in Android
-        Bitmap result = Bitmap.createBitmap(frame.cols(), frame.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(frame, result);
         return result;
     }
 
@@ -243,14 +261,14 @@ public class SamplesDetection implements Algorithm {
 
         try {
 
-            if (reader.has(LimelightObjectDetection.sTypeKey)) {
-                JSONObject detection = reader.getJSONObject(LimelightObjectDetection.sTypeKey);
+            if (reader.has(SampleFactory.sDetectionKey)) {
+                JSONObject detection = reader.getJSONObject(SampleFactory.sDetectionKey);
                 mDetection.read(detection);
             }
 
-            if (reader.has(LimelightObjectOrientation.sTypeKey)) {
+            if (reader.has(SampleFactory.sOrientationKey)) {
 
-                JSONObject detection = reader.getJSONObject(LimelightObjectOrientation.sTypeKey);
+                JSONObject detection = reader.getJSONObject(SampleFactory.sOrientationKey);
                 mOrientation.read(detection);
             }
 
@@ -275,22 +293,24 @@ public class SamplesDetection implements Algorithm {
             // Write detection
             JSONObject detection = new JSONObject();
             mDetection.write(detection);
-            writer.put(LimelightObjectDetection.sTypeKey,detection);
+            writer.put(SampleFactory.sDetectionKey,detection);
 
             // Write orientation
             JSONObject orientation = new JSONObject();
             mOrientation.write(orientation);
-            writer.put(LimelightObjectOrientation.sTypeKey,orientation);
+            writer.put(SampleFactory.sOrientationKey,orientation);
 
         } catch (JSONException e) { mLogger.error(e.getMessage()); }
     }
 
 
-    /** Log consolidated samples to the dashboard **/
-    public void                             log()
+    /** Log sample detection results **/
+    public void                             log(String header)
     {
 
         StringBuilder result = new StringBuilder();
+
+        result.append("<p> Current mode is " + mMode + "</p>");
 
         result.append("<details open style=\"margin-left:10px\">\n");
         result.append("<summary style=\"font-size: 12px; font-weight: 500\"> ONGOING </summary>\n");
@@ -311,10 +331,33 @@ public class SamplesDetection implements Algorithm {
         result.append("</details>\n");
 
         if (mSelected != null){
-            result.append("<div>\n");
+            result.append("<p style=\"margin-left:10px; font-size: 12px; font-weight: 500\"> SELECTED : ");
             result.append(mSelected.logHTML());
-            result.append("</div>\n");
+            result.append("</p>\n");
         }
+
+        mLogger.raw(LogManager.Target.DASHBOARD, result.toString());
+
+        result = new StringBuilder();
+
+        result.append(header);
+        result.append("> ONGOING\n");
+        for (Sample sample : mOngoing) {
+            result.append(sample.logText(header+"--"));
+        }
+
+        result.append(header);
+        result.append("> CONSOLIDATED\n");
+        for (Sample sample : mConsolidated) {
+            result.append(sample.logText(header+"--"));
+        }
+
+        if (mSelected != null){result.append(header);
+            result.append("> SELECTED\n");
+            result.append(mSelected.logText(header+"--"));
+        }
+
+        mLogger.info(LogManager.Target.FILE,result.toString());
     }
 
     /** Log consolidated samples to the dashboard **/
@@ -326,6 +369,7 @@ public class SamplesDetection implements Algorithm {
                 header +
                 "--> DETECTION\n" +
                 mDetection.logConfigurationText((header + "----")) +
+                "\n" +
                 header +
                 "--> ORIENTATION\n" +
                 mOrientation.logConfigurationText((header + "----"));

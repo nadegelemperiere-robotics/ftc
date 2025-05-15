@@ -3,18 +3,24 @@
  * Copyright (c) 2025 Nadege LEMPERIERE
  * All rights reserved
  * -------------------------------------------------------
- * CamerComponent provides centralized initialization and
- * configuration management for the cameras in FTC robots.
+ * CameraComponent Interface
  * -------------------------------------------------------
- * This class facilitates the initialization and handling
- * of the camera component within the FTC Control Hub,
- * allowing for easy configuration using JSON input. It
- * provides methods for video stream display in dashboard,
- * managing configuration states, and logging system
- * parameters.
- * <p>
+ * The CameraComponent interface provides centralized
+ * initialization and configuration management for cameras
+ * in FTC robots. It facilitates the handling of camera
+ * components, allowing for easy configuration using JSON
+ * input and integration with the FTC Control Hub.
+ * -------------------------------------------------------
  * Features:
- * <p>
+ * - Factory method to create and configure camera
+ *   components (e.g., Limelight, Default, or Mock cameras).
+ * - Provides methods for video stream display in the
+ *   dashboard.
+ * - Manages configuration states and logs configuration
+ *   details in HTML or text format.
+ * - Supports retrieving the current camera frame as an
+ *   OpenCV Mat object.
+ * -------------------------------------------------------
  */
 
 package org.firstinspires.ftc.core.components.cameras;
@@ -24,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /* Qualcomm includes */
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /* OpenCV includes */
@@ -38,7 +45,7 @@ import org.firstinspires.ftc.core.configuration.Configurable;
 
 public interface CameraComponent extends Configurable {
 
-    static final String sTypeKey = "type";
+    String sTypeKey = "type";
 
     /**
      * Factory method to create and configure an CameraComponent from a JSON object.
@@ -61,15 +68,15 @@ public interface CameraComponent extends Configurable {
         }
 
         switch (type) {
-            case CameraLimelight.sTypeKey:
+            case CameraLimelight.sTypeValue:
                 result = new CameraLimelight(name, map, logger);
                 result.read(reader);
                 break;
-            case CameraDefault.sTypeKey:
+            case CameraDefault.sTypeValue:
                 result = new CameraDefault(name, map, logger);
                 result.read(reader);
                 break;
-            case CameraMock.sTypeKey:
+            case CameraMock.sTypeValue:
                 result = new CameraMock(name, logger);
                 result.read(reader);
                 break;
@@ -94,6 +101,7 @@ public interface CameraComponent extends Configurable {
     /* ---------------------- Cameras function --------------------- */
 
     Mat                         current();
+    Limelight3A                 limelight();
 
 
 }

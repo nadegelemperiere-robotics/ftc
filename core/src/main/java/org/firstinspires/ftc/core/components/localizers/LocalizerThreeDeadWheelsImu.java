@@ -9,6 +9,7 @@ package org.firstinspires.ftc.core.components.localizers;
 
 /* System includes */
 import java.util.Map;
+import java.util.Objects;
 
 /* JSON includes */
 import org.json.JSONException;
@@ -404,19 +405,19 @@ public class LocalizerThreeDeadWheelsImu extends LocalizerComponent {
             if(reader.has(sLeftHwMapKey)) {
                 mLeftHwMapName = reader.getString(sLeftHwMapKey);
                 if(mMotors.containsKey(mLeftHwMapName)) {
-                    mLeftEncoder = mMotors.get(mLeftHwMapName).getEncoder();
+                    mLeftEncoder = Objects.requireNonNull(mMotors.get(mLeftHwMapName)).getEncoder();
                 }
             }
             if(reader.has(sRightHwMapKey)) {
                 mRightHwMapName = reader.getString(sRightHwMapKey);
                 if(mMotors.containsKey(mRightHwMapName)) {
-                    mRightEncoder= mMotors.get(mRightHwMapName).getEncoder();
+                    mRightEncoder= Objects.requireNonNull(mMotors.get(mRightHwMapName)).getEncoder();
                 }
             }
             if(reader.has(sStrafeHwMapKey)) {
                 mStrafeHwMapName = reader.getString(sStrafeHwMapKey);
                 if(mMotors.containsKey(mStrafeHwMapName)) {
-                    mStrafeEncoder = mMotors.get(mStrafeHwMapName).getEncoder();
+                    mStrafeEncoder = Objects.requireNonNull(mMotors.get(mStrafeHwMapName)).getEncoder();
                 }
             }
             if(reader.has(sImuHwMapKey)) {

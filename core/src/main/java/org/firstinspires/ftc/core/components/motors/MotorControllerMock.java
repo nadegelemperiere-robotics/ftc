@@ -1,5 +1,5 @@
 /* -------------------------------------------------------
-   Copyright (c) [2025] FASNY
+   Copyright (c) [2025] Nadege LEMPERIERE
    All rights reserved
    -------------------------------------------------------
    Controller managing mock servos
@@ -9,7 +9,6 @@ package org.firstinspires.ftc.core.components.motors;
 
 /* Qualcomm includes */
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 /* Tools includes */

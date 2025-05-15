@@ -3,14 +3,26 @@
  * Copyright (c) 2025 Nadege LEMPERIERE
  * All rights reserved
  * -------------------------------------------------------
- * CameraDefault provides camera functions from a
- * standard webcam
+ * CameraDefault Class
+ * -------------------------------------------------------
+ * The CameraDefault class provides camera functionality
+ * using a standard webcam. It supports configuration
+ * through JSON input and integrates with the FTC Control
+ * Hub for video streaming and frame processing.
+ * -------------------------------------------------------
+ * Features:
+ * - Factory method to create and configure camera
+ *   components (e.g., standard webcams).
+ * - Provides methods for retrieving the current camera
+ *   frame as an OpenCV Mat object.
+ * - Manages configuration states and logs configuration
+ *   details in HTML or text format.
  * -------------------------------------------------------
  */
+
 package org.firstinspires.ftc.core.components.cameras;
 
 /* Android includes */
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
 /* JSON includes */
@@ -18,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /* Qualcomm includes */
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /* FTC controller includes */
@@ -27,17 +40,17 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
 
 /* OpenCV includes */
-import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
+import java.net.UnknownHostException;
+
 public class CameraDefault implements CameraComponent {
 
-    public static final String  sTypeKey    = "default";
+    public static final String  sTypeValue  = "default";
     static final String sHwMapKey           = "hwmap";
-
 
     final LogManager            mLogger;
 
@@ -79,14 +92,38 @@ public class CameraDefault implements CameraComponent {
      */
     public String                       name()    { return mName; }
 
+    /**
+     * Retrieves the last frame acquired by the camera
+     *
+     * @return The name of the component.
+     */
     public Mat                          current() { return mCurrentFrame; }
 
     /**
-     * Cache current camera value to enable multiple calls in a loop without
+     * Retrieves limelight camera for embedded vision processor access
+     *
+     * @return A mock limelight
+     *
+     */
+    public Limelight3A                  limelight() {
+
+        Limelight3A result = null;
+        try {
+            result = new LimelightMock(mLogger);
+        }
+        catch (UnknownHostException ignored) {}
+        return result;
+    }
+
+    /**
+     * Retrieve the last camera frame
      */
     public void                         update() {
         if (mConfigurationValid) {
-            mCurrentFrame = mProcessor.frame().clone();
+            Mat current = mProcessor.frame();
+            if(current != null) {
+                mCurrentFrame = current.clone();
+            }
         }
     }
 
@@ -139,7 +176,7 @@ public class CameraDefault implements CameraComponent {
 
         if(mConfigurationValid) {
             try {
-                writer.put(CameraComponent.sTypeKey, sTypeKey);
+                writer.put(sTypeKey, sTypeValue);
                 writer.put(sHwMapKey, mHwName);
             } catch (JSONException e) {
                 mLogger.error(e.getMessage());
@@ -182,7 +219,6 @@ public class CameraDefault implements CameraComponent {
                     .append("\n");
         }
         return result.toString();
-
     }
 }
 
@@ -191,22 +227,37 @@ class DisplayProcessor implements VisionProcessor {
     Mat         mCurrentFrame;
     LogManager  mLogger;
 
-    public DisplayProcessor(LogManager telemetry) {
-        mLogger = telemetry;
+    /**
+     * Creates a DisplayProcessor instance with a specified name and logger.
+     *
+     * @param logger The logging manager to handle system logs.
+     */
+    public DisplayProcessor(LogManager logger) {
+        mLogger = logger;
     }
+
+    /**
+     * Last frame getter
+     *
+     * @return The last frame acquired by the camera
+     */
+    public Mat                          frame() { return mCurrentFrame; }
+
+
+    /* ---------------- VisionProcessor overloading ---------------- */
 
     @Override
     public void                         init(int width, int height, CameraCalibration calibration) {}
 
     @Override
     public Mat                          processFrame(Mat frame, long timestamp) {
-        mCurrentFrame = frame.clone();
+        if(frame != null) {
+            mCurrentFrame = frame.clone();
+        }
         return frame;
     }
 
     @Override
     public void                         onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {}
-
-    public Mat                          frame() { return mCurrentFrame; }
 
 }

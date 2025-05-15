@@ -1,5 +1,5 @@
 /* -------------------------------------------------------
-   Copyright (c) [2025] FASNY
+   Copyright (c) [2025] Nadege LEMPERIERE
    All rights reserved
    -------------------------------------------------------
    ServoCoupled class supersedes the FTC servo class to manage
@@ -20,7 +20,6 @@ package org.firstinspires.ftc.core.components.servos;
 
 
 /* JSON includes */
-import org.firstinspires.ftc.core.components.motors.MotorControllerCoupled;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -288,7 +287,7 @@ public class ServoCoupled implements ServoComponent {
     }
 
     /**
-     * Returns a string suitable for display to the user as to the type of device.Note that this is a device-type-specific name; it has nothing to do with thename by which a user might have configured the device in a robot configuration.
+     * Returns a string suitable for display to the user as to the type of device.Note that this is a device-type-specific name; it has nothing to do with the name by which a user might have configured the device in a robot configuration.
      * @return the device name
      */
     @Override

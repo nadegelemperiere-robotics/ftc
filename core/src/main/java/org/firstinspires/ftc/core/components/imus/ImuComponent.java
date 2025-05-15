@@ -3,49 +3,23 @@
  * Copyright (c) 2025 Nadege LEMPERIERE
  * All rights reserved
  * -------------------------------------------------------
- * ImuComponent provides centralized initialization and
- * configuration management for the built-in IMU sensor
- * in FTC robots.
+ * ImuComponent Interface
  * -------------------------------------------------------
- * This class facilitates the initialization and handling
- * of the built-in IMU component within the FTC Control Hub,
- * allowing for easy configuration using JSON input. It
- * provides methods for reading sensor orientation,
- * managing configuration states, and logging system
- * parameters.
- * <p>
+ * The ImuComponent interface defines the contract for
+ * managing and configuring IMU (Inertial Measurement Unit)
+ * sensors in FTC robots. It provides methods for reading
+ * sensor orientation, managing configuration states, and
+ * logging system parameters.
+ * -------------------------------------------------------
  * Features:
- * - Initializes and configures an IMU from a JSON-based
- *   configuration file.
- * - Provides access to heading and heading velocity
- *   values in radians.
- * - Manages and applies heading offsets for calibration.
- * - Supports logging of configuration and status details.
- * <p>
- * Dependencies:
- * - Qualcomm Robotics SDK
- * - FTC SDK
- * - JSON Processing (org.json)
- * - Custom LogManager for logging
- * <p>
- * Usage:
- * 1. Create an instance of ImuComponent with the robot's
- *    hardware map and logger.
- * 2. Configure the IMU by reading a JSON configuration.
- * 3. Retrieve IMU orientation and angular velocity as
- *    needed.
- * <p>
- * Example:
- * {@code
- *      JSONObject config = new JSONObject();
- *      config.put("hwmap", "imu");
- *      config.put("logo-direction", "up");
- *      config.put("usb-direction", "right");
- * <p>
- *      ImuComponent imu = new ImuComponent("imu", hardwareMap, logger);
- *      imu.read(config);
- *      double heading = imu.heading();
- * }
+ * - Factory method to create and configure IMU components
+ *   (e.g., built-in IMU or mock IMU) from JSON input.
+ * - Provides access to heading and heading velocity values
+ *   in radians.
+ * - Supports resetting and calibrating the IMU heading.
+ * - Manages configuration states and logs configuration
+ *   details in HTML or text format.
+ * -------------------------------------------------------
  */
 
 package org.firstinspires.ftc.core.components.imus;

@@ -11,15 +11,13 @@ package org.firstinspires.ftc.intothedeep.v1.configuration;
 /* ACME robotics */
 import com.acmerobotics.dashboard.FtcDashboard;
 
-
-
 public class Configuration extends org.firstinspires.ftc.core.configuration.Configuration {
 
     static protected Configuration  sInstance = null;
 
     static {
         if(CONFIGURATION.isEmpty()) {
-            CONFIGURATION = "v0";
+            CONFIGURATION = "v1";
             FtcDashboard.getInstance().updateConfig();
         }
     }

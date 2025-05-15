@@ -21,13 +21,16 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
+/* Processors includes */
+import org.firstinspires.ftc.intothedeep.v1.processing.SamplesDetection;
+import org.firstinspires.ftc.intothedeep.v1.processing.Processor;
+
 /* Subsystem includes */
 import org.firstinspires.ftc.core.subsystems.MecanumDrive;
 import org.firstinspires.ftc.core.subsystems.DefaultSlides;
 import org.firstinspires.ftc.intothedeep.v1.subsystems.IntakeArm;
 import org.firstinspires.ftc.intothedeep.v1.subsystems.OuttakeArm;
 import org.firstinspires.ftc.intothedeep.v1.subsystems.Subsystem;
-
 
 public class Robot extends org.firstinspires.ftc.core.robot.Robot {
 
@@ -46,6 +49,7 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
     static final String sOuttakeArmKey      = "outtake-arm";
     static final String sOuttakeSlidesKey   = "outtake-slides";
     static final String sChassisKey         = "drive-train";
+    static final String sDetectionKey       = "sample-detection";
 
     final RobotState.SharedData  mData;
 
@@ -90,6 +94,7 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
      * Starts the robot in initial position
      */
     public void                         start(Mode mode, Alliance alliance) {
+
         if(mConfigurationValid) {
             super.start();
             mData.alliance = alliance;
@@ -114,6 +119,7 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
         mData.outtakeArm    = null;
         mData.intakeSlides  = null;
         mData.outtakeSlides = null;
+        mData.locator       = null;
 
         try {
             if(reader.has(sHardwareKey)) {
@@ -138,12 +144,36 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
                         mLogger.warning("Subsystem " + key + " not recognized by factory");
                         mConfigurationValid = false;
                     }
-                    if(!subsystem.isConfigured()) {
+                    else if(!subsystem.isConfigured()) {
                         mLogger.warning("Subsystem " + key + " configuration is invalid");
                         mConfigurationValid = false;
                     }
                     else {
                         mSubsystems.put(key, subsystem);
+                    }
+
+                }
+            }
+
+            if(reader.has(sProcessorsKey)) {
+                JSONObject processors = reader.getJSONObject(sProcessorsKey);
+
+                Iterator<String> keys = processors.keys();
+                while (keys.hasNext()) {
+
+                    String key = keys.next();
+
+                    org.firstinspires.ftc.core.processing.Processor processor = Processor.factory(key, processors.getJSONObject(key), mHardware, mLogger);
+                    if(processor == null) {
+                        mLogger.warning("Processor " + key + " not recognized by factory");
+                        mConfigurationValid = false;
+                    }
+                    else if(!processor.isConfigured()) {
+                        mLogger.warning("Processor " + key + " configuration is invalid");
+                        mConfigurationValid = false;
+                    }
+                    else {
+                        mProcessors.put(key, processor);
                     }
 
                 }
@@ -185,6 +215,14 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
                 }
             }
         }
+        for (Map.Entry<String, org.firstinspires.ftc.core.processing.Processor> processor : mProcessors.entrySet()) {
+            if (processor.getKey().equals(sDetectionKey)) {
+                org.firstinspires.ftc.core.processing.Processor detection = processor.getValue();
+                if (detection instanceof SamplesDetection) {
+                    mData.locator = (SamplesDetection) detection;
+                }
+            }
+        }
 
         if(mData.chassis == null) {
             mLogger.error("Chassis not found in subsystems");
@@ -204,6 +242,10 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
         }
         if(mData.outtakeSlides == null) {
             mLogger.error("Outtake slides not found in subsystems");
+            mConfigurationValid = false;
+        }
+        if(mData.locator == null) {
+            mLogger.error("Locator not found in processors");
             mConfigurationValid = false;
         }
     }

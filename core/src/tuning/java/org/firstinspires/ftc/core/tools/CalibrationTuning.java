@@ -17,6 +17,7 @@ import com.acmerobotics.dashboard.config.Config;
 
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.Calibration;
+import org.firstinspires.ftc.core.tools.LogManager;
 
 @Config
 @TeleOp(name = "CalibrationTuning", group = "V1")
@@ -25,7 +26,10 @@ public class CalibrationTuning extends LinearOpMode {
 
     static public double    X   = 0;
     static public double    Y   = 0;
-    Calibration mCalibration;
+
+    /* ---------------- Members ---------------- */
+    LogManager      mLogger;
+    Calibration     mCalibration;
     
     @Override
     public void runOpMode() {
@@ -34,6 +38,13 @@ public class CalibrationTuning extends LinearOpMode {
 
             mCalibration = new Calibration();
             mCalibration.initialize();
+
+            String description = "<p style=\"font-weight: bold; font-size: 14px\"> ------------------------- </p>" +
+                    "<p style=\"font-weight: bold; font-size: 14px\">Enter a pixel coordinate in upper left corner reference. </p>" +
+                    "<p style=\"font-weight: bold; font-size: 14px\">The tool will compute the ground distance in inches of the object seen on this pixel</p>" +
+                    "<p style=\"font-weight: bold; font-size: 14px\">The X axes is parallel to the camera, oriented right. </p>" +
+                    "<p style=\"font-weight: bold; font-size: 14px\">The Y axes is orthogonal to the camera, oriented away. </p>";
+            mLogger.info(LogManager.Target.DASHBOARD,description);
 
         }
         catch(Exception e){
@@ -46,8 +57,8 @@ public class CalibrationTuning extends LinearOpMode {
 
             float [] result = mCalibration.computeGroundPosition(X,Y);
 
-            FtcDashboard.getInstance().getTelemetry().addData("x",result[0]);
-            FtcDashboard.getInstance().getTelemetry().addData("y",result[1]);
+            FtcDashboard.getInstance().getTelemetry().addData("x (inches)",result[0]);
+            FtcDashboard.getInstance().getTelemetry().addData("y (inches)",result[1]);
 
             FtcDashboard.getInstance().getTelemetry().update();
         }

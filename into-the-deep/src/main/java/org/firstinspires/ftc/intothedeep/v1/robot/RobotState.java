@@ -10,6 +10,9 @@ package org.firstinspires.ftc.intothedeep.v1.robot;
 /* Tools includes */
 import org.firstinspires.ftc.core.tools.LogManager;
 
+/* Processing includes */
+import org.firstinspires.ftc.intothedeep.v1.processing.SamplesDetection;
+
 /* Subsystem includes */
 import org.firstinspires.ftc.core.subsystems.DefaultSlides;
 import org.firstinspires.ftc.core.subsystems.MecanumDrive;
@@ -24,13 +27,13 @@ public abstract class RobotState extends org.firstinspires.ftc.core.robot.RobotS
 
     public static class SharedData extends org.firstinspires.ftc.core.robot.RobotState.SharedData {
 
-        public Alliance        alliance;
-        public IntakeArm       intakeArm;
-        public DefaultSlides   intakeSlides;
-        public OuttakeArm      outtakeArm;
-        public DefaultSlides   outtakeSlides;
-        public MecanumDrive    chassis;
-
+        public Alliance         alliance;
+        public IntakeArm        intakeArm;
+        public DefaultSlides    intakeSlides;
+        public OuttakeArm       outtakeArm;
+        public DefaultSlides    outtakeSlides;
+        public MecanumDrive     chassis;
+        public SamplesDetection locator;
 
     }
 

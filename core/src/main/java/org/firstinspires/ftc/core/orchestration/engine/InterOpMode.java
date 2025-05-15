@@ -2,7 +2,7 @@
    Copyright (c) [2025] Nadege LEMPERIERE
    All rights reserved
    -------------------------------------------------------
-   Shared data for interopmodes exchange
+   Shared data for inter opmodes exchange
    ------------------------------------------------------- */
 
 package org.firstinspires.ftc.core.orchestration.engine;
@@ -38,7 +38,7 @@ public class InterOpMode {
     }
 
     /**
-     * Interopmodes data storage function
+     * Inter opmodes data storage function
      *
      * @param key Key to store data under
      * @param data Data to store
@@ -48,7 +48,7 @@ public class InterOpMode {
     }
 
     /**
-     * Interopmodes data retrieval function
+     * Inter opmodes data retrieval function
      *
      * @param key Key to store data under
      * @return Data stored under key
@@ -60,7 +60,7 @@ public class InterOpMode {
     }
 
     /**
-     * Interopmodes data logging function
+     * Inter opmodes data logging function
      *
      * @param logger Logger to use for mock data logging
      */

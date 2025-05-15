@@ -9,6 +9,7 @@ package org.firstinspires.ftc.core.components.localizers;
 
 /* System includes */
 import java.util.Map;
+import java.util.Objects;
 
 /* JSON includes */
 import org.json.JSONException;
@@ -386,13 +387,13 @@ public class LocalizerTwoDeadWheels extends LocalizerComponent {
             if(reader.has(sForwardHwMapKey)) {
                 mForwardHwName = reader.getString(sForwardHwMapKey);
                 if(mMotors.containsKey(mForwardHwName)) {
-                    mForwardEncoder = mMotors.get(mForwardHwName).getEncoder();
+                    mForwardEncoder = Objects.requireNonNull(mMotors.get(mForwardHwName)).getEncoder();
                 }
             }
             if(mMap != null && reader.has(sStrafeHwMapKey)) {
                 mStrafeHwName = reader.getString(sStrafeHwMapKey);
                 if(mMotors.containsKey(mStrafeHwName)) {
-                    mStrafeEncoder = mMotors.get(mStrafeHwName).getEncoder();
+                    mStrafeEncoder = Objects.requireNonNull(mMotors.get(mStrafeHwName)).getEncoder();
                 }
             }
             if(reader.has(sImuHwMapKey)) {

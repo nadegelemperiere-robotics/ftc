@@ -5,7 +5,7 @@
    Hardware manager
    ------------------------------------------------------- */
 
-package org.firstinspires.ftc.core.tuning;
+package org.firstinspires.ftc.intothedeep.v1.tuning;
 
 /* System includes */
 import java.util.Map;
@@ -28,8 +28,10 @@ import org.firstinspires.ftc.core.subsystems.Subsystem;
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;
 
+/* Tuning includes */
+import org.firstinspires.ftc.core.tuning.Tuning;
 
-public class Robot extends org.firstinspires.ftc.core.robot.Robot {
+public class Robot extends org.firstinspires.ftc.intothedeep.v1.robot.Robot {
 
     /**
      * Constructor
@@ -51,6 +53,11 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
         mConfigurationValid = mHardware.isConfigured();
         for (Map.Entry<String, Subsystem> subsystem : mSubsystems.entrySet()) {
             if (subsystem.getValue() == null || !subsystem.getValue().isConfigured()) {
+                mConfigurationValid = false;
+            }
+        }
+        for (Map.Entry<String, Processor> processor : mProcessors.entrySet()) {
+            if (processor.getValue() == null || !processor.getValue().isConfigured()) {
                 mConfigurationValid = false;
             }
         }

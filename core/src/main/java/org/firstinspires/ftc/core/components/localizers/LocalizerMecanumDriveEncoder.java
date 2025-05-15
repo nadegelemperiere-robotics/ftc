@@ -9,6 +9,7 @@ package org.firstinspires.ftc.core.components.localizers;
 
 /* System includes */
 import java.util.Map;
+import java.util.Objects;
 
 /* JSON includes */
 import org.json.JSONException;
@@ -399,25 +400,25 @@ public class LocalizerMecanumDriveEncoder extends LocalizerComponent {
             if(mMap != null && reader.has(sLeftBackHwMapKey)) {
                 mLeftBackHwName = reader.getString(sLeftBackHwMapKey);
                 if(mMotors.containsKey(mLeftBackHwName)) {
-                    mLeftBack = mMotors.get(mLeftBackHwName).getEncoder();
+                    mLeftBack = Objects.requireNonNull(mMotors.get(mLeftBackHwName)).getEncoder();
                 }
             }
             if(reader.has(sLeftFrontHwMapKey)) {
                 mLeftFrontHwName = reader.getString(sLeftFrontHwMapKey);
                 if(mMotors.containsKey(mLeftFrontHwName)) {
-                    mLeftFront = mMotors.get(mLeftFrontHwName).getEncoder();
+                    mLeftFront = Objects.requireNonNull(mMotors.get(mLeftFrontHwName)).getEncoder();
                 }
             }
             if(reader.has(sRightBackHwMapKey)) {
                 mRightBackHwName = reader.getString(sRightBackHwMapKey);
                 if(mMotors.containsKey(mRightBackHwName)) {
-                    mRightBack = mMotors.get(mRightBackHwName).getEncoder();
+                    mRightBack = Objects.requireNonNull(mMotors.get(mRightBackHwName)).getEncoder();
                 }
             }
             if(reader.has(sRightFrontHwMapKey)) {
                 mRightFrontHwName = reader.getString(sRightFrontHwMapKey);
                 if(mMotors.containsKey(mRightFrontHwName)) {
-                    mRightFront =mMotors.get(mRightFrontHwName).getEncoder();
+                    mRightFront = Objects.requireNonNull(mMotors.get(mRightFrontHwName)).getEncoder();
                 }
             }
             if(reader.has(sImuHwMapKey)) {
