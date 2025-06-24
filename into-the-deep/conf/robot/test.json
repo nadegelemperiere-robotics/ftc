@@ -66,13 +66,47 @@
                 "detection" : {
                     "type" : "limelight-nn-detection",
                     "camera" : "limelight",
-                    "pipeline" : 7
+                    "port" : 5807,
+                    "index" : 4,
+                    "pipeline" : {
+                        "black_level": 0,
+                        "crop_focus": 0.0,
+                        "crop_x_max": 1.0,
+                        "crop_x_min": -1.0,
+                        "crop_y_max": 1.0,
+                        "crop_y_min": -1.0,
+                        "desc": "sample-detection",
+                        "detector_conf": 0.5,
+                        "detector_idfilters": "",
+                        "detector_runtime": "cpu",
+                        "exposure": 3300.0,
+                        "image_flip": 0,
+                        "image_source": 0,
+                        "pipeline_res": 1,
+                        "pipeline_type": "pipe_neuraldetector",
+                        "send_corners": 1
+                    }
                 },
                 "orientation" : {
                     "type" : "limelight-snapscript",
                     "camera" : "limelight",
                     "port" : 5807,
-                    "pipeline" : 6
+                    "index" : 5,
+                    "pipeline" : {
+                        "black_level":0,
+                        "crop_focus":0.0,
+                        "crop_x_max":1.0,
+                        "crop_x_min":-1.0,
+                        "crop_y_max":1.0,
+                        "crop_y_min":-1.0,
+                        "desc":"sample-orientation",
+                        "exposure":3300.0,
+                        "image_flip":0,
+                        "image_source":0,
+                        "pipeline_res":1,
+                        "pipeline_type":"pipe_python",
+                        "python_snapscript_name":"orientation"
+                    }
                 }
             }
         },

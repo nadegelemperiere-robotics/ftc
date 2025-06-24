@@ -49,6 +49,10 @@ import org.firstinspires.ftc.intothedeep.v1.robot.Robot;
 @ExtendWith(MockitoExtension.class)
 public class RobotV1Test {
 
+    static {
+        System.load("/usr/local/share/java/opencv4/libopencv_java4110.dylib");
+    }
+
     private LogManager      mLogger;
     private Configuration   mConfiguration;
     private Robot           mRobot;

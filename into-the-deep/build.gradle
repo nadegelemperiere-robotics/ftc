@@ -22,14 +22,34 @@ tasks.register('fetchPipelines') {
         def orientationUrl = 'https://raw.githubusercontent.com/nadegelemperiere-robotics/limelight-pipelines/refs/heads/feat-first-version/pipelines/sample-orientation-pipeline.py'
         def outputFile = file('src/main/java/org/firstinspires/ftc/intothedeep/v1/configuration/LimelightPipelinesCode.java')
 
+        def detectionLabelsUrl = 'https://raw.githubusercontent.com/nadegelemperiere-robotics/limelight-pipelines/refs/heads/feat-first-version/models/samples-detection-labels.txt'
+        def detectionLabelsFile = file('src/main/resources/data/labels.txt');
+        def detectionModelUrl = 'https://raw.githubusercontent.com/nadegelemperiere-robotics/limelight-pipelines/refs/heads/feat-first-version/models/samples-detection-network.tflite'
+        def detectionModelFile = file('src/main/resources/data/model.tflite');
+
         def orientation = new URL(orientationUrl).text
         def orientation_escaped = groovy.json.StringEscapeUtils.escapeJava(orientation)
-        def classContent = """
-            package org.firstinspires.ftc.intothedeep.v1.configuration;
 
-            public class LimelightPipelinesCode {
-                public static final String sOrientationCode = "${orientation_escaped}";
-            }
+        println "📥 Downloading model..."
+        def conn = new URL(detectionModelUrl).openConnection()
+        def modelBytes = conn.inputStream.bytes
+        detectionModelFile.parentFile.mkdirs()
+        detectionModelFile.bytes = modelBytes
+
+        conn = new URL(detectionLabelsUrl).openConnection()
+        modelBytes = conn.inputStream.bytes
+        detectionLabelsFile.parentFile.mkdirs()
+        detectionLabelsFile.bytes = modelBytes
+
+        def classContent = """
+package org.firstinspires.ftc.intothedeep.v1.configuration;
+
+public class LimelightPipelinesCode {
+    public static final String sOrientationCode = "${orientation_escaped}";
+    public static final String sLabelsPath = "data/labels.txt";
+    public static final String sModelPath = "data/model.tflite";
+
+}
         """
         outputFile.text = classContent
     }

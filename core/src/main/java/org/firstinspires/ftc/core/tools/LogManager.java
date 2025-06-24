@@ -604,12 +604,17 @@ public class LogManager implements Configurable {
     }
 
     public void raw(Target target, String raw) {
-        if (target == Target.DRIVER_STATION && mDriverStation != null) {
-            Objects.requireNonNull(mInfos.get(target)).append(raw);
-        } else if (target == Target.DASHBOARD && mDashboard != null) {
-            Objects.requireNonNull(mInfos.get(target)).append(raw);
-        } else if (target == Target.FILE && mFile != null) {
-            mFileData.append(raw);
+
+        Integer infoPriority = sLevelToPriority.get(Severity.INFO);
+        Integer filterPriority = sLevelToPriority.get(mLevel);
+        if( filterPriority != null && infoPriority != null && filterPriority >= infoPriority) {
+            if (target == Target.DRIVER_STATION && mDriverStation != null) {
+                Objects.requireNonNull(mInfos.get(target)).append(raw);
+            } else if (target == Target.DASHBOARD && mDashboard != null) {
+                Objects.requireNonNull(mInfos.get(target)).append(raw);
+            } else if (target == Target.FILE && mFile != null) {
+                mFileData.append(raw);
+            }
         }
     }
 

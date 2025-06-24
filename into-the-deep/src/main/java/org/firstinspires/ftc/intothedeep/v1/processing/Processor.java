@@ -29,6 +29,10 @@ public interface Processor extends org.firstinspires.ftc.core.processing.Process
                             result = new SamplesDetection(name, hardware, logger);
                             result.read(reader);
                             break;
+                        case SamplesDetectionMock.sTypeValue :
+                            result = new SamplesDetectionMock(name, logger);
+                            result.read(reader);
+                            break;
                     }
                 }
             } catch (JSONException e) { logger.error(e.getMessage()); }

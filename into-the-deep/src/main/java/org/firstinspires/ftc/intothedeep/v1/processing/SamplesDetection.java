@@ -8,9 +8,16 @@
 package org.firstinspires.ftc.intothedeep.v1.processing;
 
 /* System includes */
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Comparator;
+import java.util.Objects;
 
 /* JSON includes */
 import org.json.JSONException;
@@ -50,15 +57,15 @@ public class SamplesDetection implements Processor {
         ORIENT
     }
 
-    final LogManager                                mLogger;
+    LogManager                                      mLogger;
 
     boolean                                         mConfigurationValid;
-    final String                                    mName;
+    String                                          mName;
 
-    final SampleFactory                             mFactory;
-    final LimelightNeuralNetworkDetection<Sample>   mDetection;
-    final LimelightPythonSnapscript<Sample,Sample>  mOrientation;
-    final Calibration                               mCalibration;
+    SampleFactory                                   mFactory;
+    LimelightNeuralNetworkDetection<Sample>         mDetection;
+    LimelightPythonSnapscript<Sample,Sample>        mOrientation;
+    Calibration                                     mCalibration;
 
     Mode                                            mMode;
     Sample.Color                                    mColor;
@@ -67,6 +74,8 @@ public class SamplesDetection implements Processor {
     List<Sample>                                    mOngoing;
     List<Sample>                                    mConsolidated;
     Sample                                          mSelected;
+
+    protected SamplesDetection() {}
 
     /**
      * Constructor
@@ -83,8 +92,10 @@ public class SamplesDetection implements Processor {
 
         mConfigurationValid = false;
 
+        byte[]  model       = this.readModel();
+        String  labels      = this.readLabels();
         mFactory            = new SampleFactory(mLogger);
-        mDetection          = new LimelightNeuralNetworkDetection<>(SampleFactory.sDetectionKey, mFactory, hardware, logger);
+        mDetection          = new LimelightNeuralNetworkDetection<>(SampleFactory.sDetectionKey,mFactory, model, labels, hardware, logger);
         mOrientation        = new LimelightPythonSnapscript<>(SampleFactory.sOrientationKey, mFactory,LimelightPipelinesCode.sOrientationCode, hardware, logger);
         mCalibration        = new Calibration();
 
@@ -164,7 +175,13 @@ public class SamplesDetection implements Processor {
                 mLogger.debug("Switching back to detection");
                 mConsolidated.clear();
                 mConsolidated.addAll(oriented);
-                mSelected = mConsolidated.get(0);
+                Sample candidate = mConsolidated.get(0);
+                if(candidate.color() == mColor || mColor == Sample.Color.UNKNOWN) {
+                    mSelected = candidate;
+                }
+                else {
+                    mSelected = null;
+                }
                 mDetection.start();
                 mMode = Mode.DETECT;
                 mOngoing.clear();
@@ -174,17 +191,17 @@ public class SamplesDetection implements Processor {
         mImageIndex++;
     }
 
-    private static double distanceRanking(Sample s, double x0, double y0) {
+    private static double               distanceRanking(Sample s, double x0, double y0) {
         double dx = s.x() - x0;
         double dy = s.y() - y0;
         return dx * dx + dy * dy;
     }
 
-    private static double confidenceRanking(Sample s) {
+    private static double               confidenceRanking(Sample s) {
         return s.confidence();
     }
 
-    private static double mergedRankingOnClaw(Sample s, Sample.Color color) {
+    private static double               mergedRankingOnClaw(Sample s, Sample.Color color) {
         double result = 10000;
         if(s.color() == color || color == Sample.Color.UNKNOWN) {
             result = s.distanceY();
@@ -192,7 +209,7 @@ public class SamplesDetection implements Processor {
         return result;
     }
 
-    private static double mergedRanking(Sample s, Sample.Color color) {
+    private static double               mergedRanking(Sample s, Sample.Color color) {
         double result = 10000;
         if(s.color() == color || color == Sample.Color.UNKNOWN) {
             result = Math.sqrt(s.distanceX()*s.distanceX()+s.distanceY()*s.distanceY());
@@ -245,7 +262,7 @@ public class SamplesDetection implements Processor {
                 Imgproc.line(result, cross1, cross2, color, 2);
                 Imgproc.line(result, cross3, cross4, color, 2);
                 Imgproc.rectangle(result, text1, text2, color, Core.FILLED);
-                if (sample.index() == mSelected.index()) {
+                if (mSelected != null && sample.index() == mSelected.index()) {
                     Imgproc.putText(result, text, new Point(sample.xMin(), sample.yMin()), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(255, 255, 255), 1);
                 } else {
                     Imgproc.putText(result, text, new Point(sample.xMin(), sample.yMin()), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 0), 1);
@@ -307,12 +324,14 @@ public class SamplesDetection implements Processor {
 
 
     /** Log sample detection results **/
-    public void                             log(String header)
+    public void                         log(String header)
     {
 
         StringBuilder result = new StringBuilder();
 
-        result.append("<p> Current mode is " + mMode + "</p>");
+        result.append("<p> Current mode is ")
+                .append(mMode)
+                .append("</p>");
 
         result.append("<details open style=\"margin-left:10px\">\n");
         result.append("<summary style=\"font-size: 12px; font-weight: 500\"> ONGOING </summary>\n");
@@ -363,7 +382,7 @@ public class SamplesDetection implements Processor {
     }
 
     /** Log consolidated samples to the dashboard **/
-    public String                             logConfigurationText(String header)
+    public String                       logConfigurationText(String header)
     {
 
         String result = header +
@@ -380,7 +399,7 @@ public class SamplesDetection implements Processor {
     }
 
     /** Log consolidated samples to the dashboard **/
-    public String                             logConfigurationHTML()
+    public String                       logConfigurationHTML()
     {
 
 
@@ -398,6 +417,54 @@ public class SamplesDetection implements Processor {
                 "</details>\n" +
                 "</ul>\n" +
                 "</details>\n";
+
+        return result;
+    }
+
+    byte[]                              readModel()
+    {
+        byte[] result = null;
+        try {
+            InputStream modelStream = Objects.requireNonNull(getClass().getClassLoader()).getResourceAsStream(LimelightPipelinesCode.sModelPath);
+
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] temp = new byte[4096];
+            int bytesRead = modelStream.read(temp);
+            while (bytesRead != -1) {
+                buffer.write(temp, 0, bytesRead);
+                bytesRead = modelStream.read(temp);
+            }
+            result =  buffer.toByteArray();
+        }
+        catch(IOException e) {
+            String filename = getClass().getClassLoader().getResource(LimelightPipelinesCode.sModelPath).getFile();
+            mLogger.error("Can't read model file " + filename + " : " + e);
+        }
+
+        return result;
+    }
+
+    String                              readLabels()
+    {
+        String result = "";
+        try {
+
+            StringBuilder content = new StringBuilder();
+            try (InputStream in = Objects.requireNonNull(getClass().getClassLoader()).getResourceAsStream(LimelightPipelinesCode.sLabelsPath);
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    content.append(line);
+                    content.append('\n');
+                }
+            }
+            result =  content.toString();
+        }
+        catch(IOException e) {
+            String filename = Objects.requireNonNull(getClass().getClassLoader()).getResource(LimelightPipelinesCode.sLabelsPath).getFile();
+            mLogger.error("Can't read model file " + filename + " : " + e);
+        }
 
         return result;
     }

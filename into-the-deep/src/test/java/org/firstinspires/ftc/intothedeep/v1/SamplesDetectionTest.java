@@ -43,9 +43,11 @@ import org.firstinspires.ftc.intothedeep.v1.tuning.Robot;
 @TeleOp(name = "SamplesDetectionTest", group = "Test")
 public class SamplesDetectionTest extends LinearOpMode  implements Tuning {
 
-    static public Sample.Color  COLOR       = Sample.Color.YELLOW;
-    public static String        DETECTOR    = "sample-detection";
-    public static String        CAMERA      = "limelight";
+    static public Sample.Color          COLOR       = Sample.Color.YELLOW;
+    public static String                DETECTOR    = "sample-detection";
+    public static String                CAMERA      = "limelight";
+
+    public static LogManager.Severity   LEVEL       = LogManager.Severity.INFO;
 
     /* ---------------- Members ---------------- */
     private LogManager          mLogger;
@@ -88,19 +90,21 @@ public class SamplesDetectionTest extends LinearOpMode  implements Tuning {
 
             while(opModeIsActive()) {
 
-                mDetection.color(COLOR);
+                mLogger.level(LEVEL);
+                if(mDetection != null) { mDetection.color(COLOR); }
                 mRobot.update();
-                mDetection.log("");
+                if(mDetection != null) { mDetection.log(""); }
 
-                Mat frame = mCamera.current();
-                if (frame != null) {
-                    Mat overlays = mDetection.draw(frame);
-                    Bitmap bitmap = Bitmap.createBitmap(overlays.cols(), overlays.rows(), Bitmap.Config.ARGB_8888);
-                    Utils.matToBitmap(overlays, bitmap);
-                    FtcDashboard.getInstance().sendImage(bitmap);
-                }
-                else {
-                    mLogger.warning("Received null frame");
+                if(mCamera != null) {
+                    Mat frame = mCamera.current();
+                    if (frame != null) {
+                        Mat overlays = mDetection.draw(frame);
+                        Bitmap bitmap = Bitmap.createBitmap(overlays.cols(), overlays.rows(), Bitmap.Config.ARGB_8888);
+                        Utils.matToBitmap(overlays, bitmap);
+                        FtcDashboard.getInstance().sendImage(bitmap);
+                    } else {
+                        mLogger.warning("Received null frame");
+                    }
                 }
 
                 // Log cameras state and updated configuration

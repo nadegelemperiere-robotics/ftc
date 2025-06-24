@@ -131,7 +131,7 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
                 }
             }
 
-            if(reader.has(sSubsystemsKey)) {
+            if(mConfigurationValid && reader.has(sSubsystemsKey)) {
                 JSONObject subsystems = reader.getJSONObject(sSubsystemsKey);
 
                 Iterator<String> keys = subsystems.keys();
@@ -155,7 +155,7 @@ public class Robot extends org.firstinspires.ftc.core.robot.Robot {
                 }
             }
 
-            if(reader.has(sProcessorsKey)) {
+            if(mConfigurationValid && reader.has(sProcessorsKey)) {
                 JSONObject processors = reader.getJSONObject(sProcessorsKey);
 
                 Iterator<String> keys = processors.keys();

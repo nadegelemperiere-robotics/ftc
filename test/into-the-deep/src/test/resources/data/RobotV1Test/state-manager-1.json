@@ -1,7 +1,7 @@
 {
     "robot"     : {
         "hardware" : {
-	    "voltage" : "mock",
+	        "voltage" : "mock",
             "motors": {
                 "front-left-wheel":    [ ],
                 "front-right-wheel":   [ ],
@@ -24,6 +24,14 @@
             },
             "imus": {
                 "mock": {  }
+            },
+            "cameras" : {
+                "mock": {  "type" :  "mock"}
+            }
+        },
+        "processors" : {
+            "sample-detection": {
+                "type": "sample-detection-mock"
             }
         },
         "subsystems" : {

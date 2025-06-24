@@ -7,6 +7,10 @@
 package org.firstinspires.ftc.core.processing.limelight;
 
 /* System includes */
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,11 +36,13 @@ import org.firstinspires.ftc.core.components.cameras.CameraComponent;
 /* Robot includes */
 import org.firstinspires.ftc.core.robot.Hardware;
 
-public class LimelightNeuralNetworkDetection<T extends LimelightObject> implements Configurable, LimelightPipeline {
+public class LimelightNeuralNetworkDetection<T extends LimelightObject> extends LimelightPipeline  {
 
     static  final public    String sTypeKey           = "limelight-nn-detection";
     static  final           String sPipelineKey       = "pipeline";
+    static  final           String sIndexKey          = "index";
     static  final public    String sCameraKey         = "camera";
+    static  final public    String sPortKey           = "port";
 
     final LogManager                    mLogger;
 
@@ -49,7 +55,13 @@ public class LimelightNeuralNetworkDetection<T extends LimelightObject> implemen
 
     protected Limelight3A               mWebcam;
     final LimelightObjectFactory<T,T>   mFactory;
-    int                                 mPipeline;
+    int                                 mIndex;
+    int                                 mPort;
+    String                              mLabels;
+    byte[]                              mModel;
+    JSONObject                          mPipeline;
+    String                              mRestApiUrl;
+
 
 
     /**
@@ -59,7 +71,7 @@ public class LimelightNeuralNetworkDetection<T extends LimelightObject> implemen
      * @param hardware The hardware to get camera from
      * @param logger The logger to use for traces
      */
-    public LimelightNeuralNetworkDetection(String name, LimelightObjectFactory<T,T> factory, Hardware hardware, LogManager logger) {
+    public LimelightNeuralNetworkDetection(String name, LimelightObjectFactory<T,T> factory, byte[] model, String labels, Hardware hardware, LogManager logger) {
 
         mLogger             = logger;
 
@@ -68,9 +80,15 @@ public class LimelightNeuralNetworkDetection<T extends LimelightObject> implemen
 
         mHardware           = hardware;
 
+        mIndex              = -1;
+        mPort               = -1;
+        mModel              = model;
+        mLabels             = labels;
+        mRestApiUrl         = "";
+        mPipeline           = new JSONObject();
+
         mWebcam             = null;
         mFactory            = factory;
-        mPipeline           = -1;
     }
 
     public String                           name() { return mName; }
@@ -83,7 +101,7 @@ public class LimelightNeuralNetworkDetection<T extends LimelightObject> implemen
         if(mConfigurationValid) {
 
             mLogger.info("starting neural network detection pipeline");
-            mWebcam.pipelineSwitch(mPipeline);
+            mWebcam.pipelineSwitch(mIndex);
             mWebcam.start();
         }
     }
@@ -137,7 +155,8 @@ public class LimelightNeuralNetworkDetection<T extends LimelightObject> implemen
         mConfigurationValid = true;
 
         mWebcam             = null;
-        mPipeline           = -1;
+        mIndex              = -1;
+        mPipeline           = new JSONObject();
 
         try {
 
@@ -149,8 +168,16 @@ public class LimelightNeuralNetworkDetection<T extends LimelightObject> implemen
                 if(component != null) { mWebcam = component.limelight();}
             }
 
-            if (reader.has(sPipelineKey)) {
-                mPipeline = reader.getInt(sPipelineKey);
+            if (reader.has(sIndexKey)) {
+                mIndex = reader.getInt(sIndexKey);
+            }
+
+            if(reader.has(sPipelineKey)) {
+                mPipeline = reader.getJSONObject(sPipelineKey);
+            }
+
+            if (reader.has(sPortKey)) {
+                mPort = reader.getInt(sPortKey);
             }
         }
         catch(JSONException e) { mLogger.error(e.getMessage()); }
@@ -159,9 +186,37 @@ public class LimelightNeuralNetworkDetection<T extends LimelightObject> implemen
             mLogger.error("No camera found or wrong parameter");
             mConfigurationValid = false;
         }
-        if ( mPipeline < 0 || mPipeline > 7) {
-            mLogger.error("Invalid pipeline identifier : " + mPipeline);
+        if ( mIndex < 0 || mIndex > 7) {
+            mLogger.error("Invalid pipeline identifier : " + mIndex);
             mConfigurationValid = false;
+        }
+        if( mPort == -1) {
+            mLogger.error("Invalid port : " + mPort);
+            mConfigurationValid = false;
+        }
+
+        if(mConfigurationValid) {
+            if(mModel == null) { mConfigurationValid = false; }
+            else {
+                String temp = mWebcam.getConnectionInfo();
+                mRestApiUrl = "http://" + temp.substring(temp.indexOf(':') + 1, temp.length()-1) + ":" + mPort;
+
+                boolean check = this.uploadPipeline(mPipeline, mRestApiUrl, mIndex, mLogger);
+                if (!check) {
+                    mLogger.error("Could not update pipeline : " + mName);
+                    mConfigurationValid = false;
+                }
+                check = this.uploadDetectorLabels(mLabels,mRestApiUrl,mIndex,mLogger);
+                if (!check) {
+                    mLogger.error("Could not update labels for pipeline : " + mName);
+                    mConfigurationValid = false;
+                }
+//                check = this.uploadModel();
+//                if (!check) {
+//                    mLogger.error("Could not update model for pipeline : " + mName);
+//                    mConfigurationValid = false;
+//                }
+            }
         }
 
     }
@@ -178,6 +233,7 @@ public class LimelightNeuralNetworkDetection<T extends LimelightObject> implemen
 
             try {
                 writer.put(sCameraKey,mHwName);
+                writer.put(sIndexKey,mIndex);
                 writer.put(sPipelineKey,mPipeline);
 
             } catch (JSONException e) { mLogger.error(e.getMessage()); }
@@ -201,7 +257,9 @@ public class LimelightNeuralNetworkDetection<T extends LimelightObject> implemen
                     .append(" - HW : ")
                     .append(mHwName)
                     .append(" PPL : ")
-                    .append(mPipeline)
+                    .append(mIndex)
+                    .append(" - STREAM : ")
+                    .append(mRestApiUrl)
                     .append("</li>");
 
         }
@@ -227,9 +285,14 @@ public class LimelightNeuralNetworkDetection<T extends LimelightObject> implemen
                     .append("> HW : ")
                     .append(mHwName)
                     .append(" PPL : ")
-                    .append(mPipeline);
+                    .append(mIndex)
+                    .append(" - STREAM : ")
+                    .append(mRestApiUrl);
         }
 
         return result.toString();
     }
+
+
+
 }
